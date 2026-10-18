@@ -3049,8 +3049,9 @@
   }
   // Post-decision art: drop chance/<id>-<choice>-wide.jpg in and it shows on the result screen; falls back to the card art if missing.
   const POST_ART = {
-    proposal:"abc", wedding:"abc", honeymoon:"abc", phish:"ab", courage:"a", islandInspection:"a",
-    protectIsland:"abc", citadelQuestion:"ab", anOffer:"ab", theQuestion:"a"
+    // citadelQuestion-a, islandInspection-a and protectIsland-a are held back (a Lena-like woman in the independence arc).
+    proposal:"abc", wedding:"abc", honeymoon:"abc", phish:"ab", courage:"a",
+    protectIsland:"bc", citadelQuestion:"b", anOffer:"ab", theQuestion:"a"
   };
   const POST_ART_MISS = new Set();
   function postArtHtml(id, opt) {
@@ -3059,7 +3060,7 @@
     if (!opt || !POST_ART[id] || POST_ART[id].indexOf(opt) < 0 || POST_ART_MISS.has(key) || base.indexOf("<img") !== 0) return base;
     const m = base.match(/ src="([^"]*)"/);
     if (!m) return base;
-    const src = "chance/" + key + "-wide.jpg?v=post1";
+    const src = "chance/" + key + "-wide.jpg?v=post2";
     return base.replace(/ onerror="[^"]*"/, "").replace(m[0], " src=\"" + src + "\" data-base=\"" + m[1] + "\"")
       .replace("<img ", "<img onerror=\"this.onerror=null;window.__choppyPostMiss&&window.__choppyPostMiss('" + key + "');this.src=this.dataset.base;\" ");
   }
@@ -3068,8 +3069,7 @@
   // Battle art variants: chance/battle-<bloc>-<n>-pre-wide.jpg (before a battle), battle-<bloc>-<n>-post-wide.jpg
   // (after a won battle), battle-<bloc>-win-wide.jpg (bloc defeated) and generic battle-gen-<n>-pre/post.
   // A run never shows the same variant twice; a missing file falls back to the card's own art and is skipped next time.
-  // battle-lattice-win / battle-trust-win are waiting on v2 art: skip them (no 404) and use the card art.
-  const BATTLE_ART_MISS = new Set(["battle-lattice-win", "battle-trust-win"]);
+  const BATTLE_ART_MISS = new Set();
   window.__choppyBattleMiss = (k) => BATTLE_ART_MISS.add(k);
   function battleArtPick(card) {
     const kind = card.id === "blocAssault" ? "pre" : card.id === "battleWon" ? "post" : card.id === "blocTriumph" ? "win" : "";
@@ -3103,7 +3103,7 @@
     const va = battleArtPick(card);
     if (va && base.indexOf("<img") === 0) {
       const m0 = base.match(/ src="([^"]*)"/);
-      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat2\" data-base=\"" + m0[1] + "\"")
+      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat3\" data-base=\"" + m0[1] + "\"")
         .replace("<img ", "<img onerror=\"this.onerror=null;window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');this.src=this.dataset.base;\" ");
     }
     const aid = blocArtId(card);
