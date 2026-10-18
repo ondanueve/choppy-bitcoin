@@ -2950,6 +2950,7 @@
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
   const WIDE_JPG_VER = { unclemike: "cin15" };
+  const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
 
@@ -2977,7 +2978,7 @@
     } else if (isWide) {
       src = "chance/" + (artId.endsWith("-wide") ? artId : artId + "-wide") + ".jpg?v=" + (WIDE_JPG_VER[artId] || "cin14");
     } else {
-      src = "chance/" + artId + ".jpg?v=mp86";
+      src = "chance/" + artId + ".jpg?v=" + (SQ_JPG_VER[artId] || "mp86");
     }
 
     return { id, artId, src, wide: isWide, isVideo: false };
@@ -3122,7 +3123,7 @@
     }
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
-    const fallback = meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=mp86" : "chance/hero.jpg";
+    const fallback = meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=" + (SQ_JPG_VER[meta.artId] || "mp86") : "chance/hero.jpg";
     return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
   }
 
