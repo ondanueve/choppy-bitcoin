@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Play Choppy Bitcoin | Bitcoinizate</title>
+  <meta name="description" content="Free bitcoin-themed games. Fly through candles. Score is play-money net worth in BTC.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://bitcoinizate.com/choppy-bitcoin/">
+  <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/choppy-bitcoin/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/choppy-bitcoin/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/choppy-bitcoin/favicon-192.png">
+  <link rel="icon" href="/choppy-bitcoin/favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" sizes="180x180" href="/choppy-bitcoin/apple-touch-icon.png">
+  <link rel="manifest" href="/choppy-bitcoin/site.webmanifest">
+  <meta name="theme-color" content="#0a0a0c">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Bitcoinizate">
+  <meta property="og:title" content="Play Choppy Bitcoin | Bitcoinizate">
+  <meta property="og:description" content="Fly through Japanese candles. Score is play-money net worth in BTC.">
+  <meta property="og:url" content="https://bitcoinizate.com/choppy-bitcoin/">
+  <meta property="og:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Play Choppy Bitcoin">
+  <meta name="twitter:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
+  <meta name="twitter:image:alt" content="Choppy Bitcoin hero">
+  <link rel="stylesheet" href="style.css?v=mp172">
+  <script src="nozoom.js?v=mp142"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="hud" class="hud-grid hud-4">
+      <div class="stat"><span data-i18n="cash">Cash</span><b id="h-cash">$0</b></div>
+      <div class="stat"><span data-i18n="btc">BTC</span><b id="h-btc">0</b></div>
+      <div class="stat"><span data-i18n="btcPx">BTC price</span><b id="h-price">$0</b></div>
+      <div class="stat" id="h-cold-wrap">
+        <span data-i18n="cold">Cold storage</span><b id="h-cold">0</b>
+        <span class="sub" data-i18n="msig">Multisig</span><b id="h-msig">0</b>
+      </div>
+      <div class="stat" id="h-laser-wrap">
+        <span data-i18n="lasers">Laser eyes</span><b id="h-laser">0</b>
+        <span class="sub" data-i18n="fibonacci">Fibonacci</span><b id="h-fib">1</b>
+      </div>
+      <div class="stat" id="h-halve-wrap">
+        <span data-i18n="halvings">Halvings</span><b id="h-halves">0/0</b>
+        <span class="sub" data-i18n="nextHalve">Next halving</span><b id="h-halve">210</b>
+      </div>
+      <div class="stat stat-user">
+        <button type="button" id="btn-show-auth" class="opt-btn" data-i18n="signIn">Sign in</button>
+        <span id="user-profile-tag" class="opt-btn hide"></span>
+      </div>
+      <div class="stat stat-juke locked" id="juke-hud">
+        <div class="juke-hud-top">
+          <span class="juke-hud-title" id="juke-hud-title"><span>Jukebox</span></span>
+          <b class="juke-hud-time hide" id="juke-hud-time"></b>
+        </div>
+        <div class="juke-hud-row">
+          <button type="button" id="juke-hud-play" class="juke-hud-btn" aria-label="Play/Pause">▶</button>
+          <input type="range" id="juke-hud-vol" min="0" max="100" value="80" step="1" aria-label="Volume">
+        </div>
+      </div>
+      <div class="stat stat-opt">
+        <button type="button" id="opt-btn" class="opt-btn" data-i18n="options">Options</button>
+      </div>
+    </div>
+    <div class="speed-bar" id="perk-bar">
+      <button type="button" id="dca-btn" class="dca-tog" aria-pressed="false" disabled>DCA OFF</button>
+      <button type="button" id="iabud-btn" class="dca-tog" aria-pressed="false" disabled>A.I. BUD OFF</button>
+      <button type="button" id="trend-btn" disabled>TREND OFF</button>
+      <button type="button" id="market-btn" class="dca-tog" disabled data-i18n="market">MARKET</button>
+    </div>
+    <div id="mp-hud-list" class="mp-hud-list hide"></div>
+    <div id="bc-bar" class="bc-bar hide" aria-label="Bitcoin Country">
+      <button type="button" id="bc-open" class="bc-open">BITCOIN COUNTRY</button>
+      <span id="bc-mini">NODES 0/100 · ARMY 0 · WORLD 20</span>
+      <button type="button" id="bc-army-bar" class="bc-open hide">TIER</button>
+    </div>
+    <div id="field" class="field">
+      <canvas id="c"></canvas>
+      <div id="flap-layer" aria-hidden="true"></div>
+      <div id="def-pad" class="def-pad hide" aria-hidden="true">
+        <button type="button" id="def-rev" class="def-rev" aria-label="Reverse">REV</button>
+        <div id="def-stick" class="def-stick">
+          <div class="def-stick-well"></div>
+          <div class="def-stick-cross"></div>
+          <div id="def-knob" class="def-knob"></div>
+        </div>
+        <div id="def-arc" class="def-arc hide" aria-label="Shot spread">
+          <span class="def-arc-lab">V</span>
+          <div class="def-arc-slot"></div>
+          <div id="def-arc-knob" class="def-arc-knob"></div>
+        </div>
+        <button type="button" id="def-aa" class="def-aa hide" aria-label="Fury strike">FURY</button>
+        <div id="def-fire" class="def-fire"></div>
+      </div>
+      <div id="now-playing" class="hide"></div>
+      <div id="mp-chip" class="mp-chip hide"></div>
+      <div id="clock-box">
+        <div id="clock">0:00</div>
+        <div id="h-candles">0</div>
+      </div>
+      <div id="voice-stack">
+        <p id="caption" class="caption hide"></p>
+        <p id="job-title" class="job-title hide"></p>
+      </div>
+      <p id="status" class="banner top hide"><span id="status-powers"></span></p>
+      <div id="lyric-stage" class="lyric-stage hide">
+        <p id="lyric-title" class="lyric-title"></p>
+        <p id="lyric-prev" class="lyric-side"></p>
+        <p id="lyric-now" class="lyric-now"></p>
+        <p id="lyric-next" class="lyric-side"></p>
+      </div>
+      <div id="trades" class="trades hide">
+        <div class="row">
+          <button id="buy-btc" class="buy" data-i18n="buyBtc">BUY BTC</button>
+          <button type="button" data-speed="2" id="spd-2" class="spd dock-spd" disabled>1x</button>
+          <button id="sell-btc" class="sell" data-i18n="sellBtc">SELL BTC</button>
+        </div>
+      </div>
+      <button id="pause-btn" class="pause hide" aria-label="Pause">||</button>
+      <div id="bc-panel" class="bc-panel hide">
+        <div class="bc-head"><b>BITCOIN COUNTRY</b><button type="button" id="bc-close">×</button></div>
+        <div class="bc-grid">
+          <div><span>LIBERTY NODES</span><b id="bc-nodes">0 / 100</b></div>
+          <div><span>ARMY</span><b id="bc-army">0 / 7</b></div>
+          <div><span>WORLD</span><b id="bc-world">20</b></div>
+          <div><span>CITADEL</span><b id="bc-citadel">NOT BUILT</b></div>
+          <div><span>MINE</span><b id="bc-mine">OFFLINE</b></div>
+          <div><span>STATUS</span><b id="bc-status">PROJECT</b></div>
+        </div>
+        <div class="bc-actions">
+          <button type="button" id="bc-form-army" class="hide">FORM DEFENSE FORCE · 2%</button>
+          <button type="button" id="bc-army10">TIER 1/7</button>
+          <button type="button" id="bc-declare" class="hide">DECLARE INDEPENDENCE</button>
+        </div>
+        <div id="bc-ups" class="bc-ups"></div>
+        <p id="bc-note" class="bc-note"></p>
+      </div>
+      <div id="overlay" class="overlay">
+        <h1>Choppy Bitcoin</h1>
+        <button type="button" class="cta" id="go" onclick="window.startChoppy&&window.startChoppy()">Ranked</button>
+      </div>
+    </div>
+  </div>
+  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-labelledby="modal-auth-title">
+    <div class="auth-card">
+      <h2 id="modal-auth-title">Sign in</h2>
+      <label class="hide" id="group-alias">Alias<input id="auth-username" autocomplete="username" maxlength="16"></label>
+      <label>Email or alias<input id="auth-email" type="text" autocomplete="username"></label>
+      <label>Password<input id="auth-password" type="password" autocomplete="current-password"></label>
+      <label class="hide" id="group-pass2">Confirm password<input id="auth-password2" type="password" autocomplete="new-password"></label>
+      <input id="arcade-honeypot" class="hp" tabindex="-1" autocomplete="off">
+      <p id="auth-msg" class="auth-msg"></p>
+      <button type="button" class="cta" id="btn-submit-auth">Sign in</button>
+      <button type="button" class="text-btn" id="btn-toggle-auth">Need an account?</button>
+      <button type="button" class="text-btn" id="btn-forgot">Forgot password?</button>
+      <button type="button" class="text-btn" id="btn-close-auth">Close</button>
+    </div>
+  </div>
+  <div id="profile-modal" class="auth-modal hide" role="dialog">
+    <div class="auth-card">
+      <h2>Profile</h2>
+      <p id="profile-score-info"></p>
+      <label>Alias<input id="profile-alias" maxlength="16" autocomplete="username"></label>
+      <p id="alias-hint" class="auth-msg"></p>
+      <button type="button" class="cta" id="btn-save-alias" data-i18n="saveAlias">Save alias</button>
+      <div id="profile-awards" class="awards"></div>
+      <label>BTC address<input id="profile-btc-addr" autocomplete="off"></label>
+      <label>Lightning<input id="profile-ln-addr" autocomplete="off"></label>
+      <button type="button" class="cta" id="btn-save-profile">Save</button>
+      <button type="button" class="text-btn" id="btn-logout">Sign out</button>
+      <button type="button" class="text-btn" id="btn-close-profile">Close</button>
+    </div>
+  </div>
+  <script src="/choppy-bitcoin/i18n.js?v=mp179"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js" integrity="sha384-QEx1pDqNtno80p4xYN5Cqm5JcAAtUDUCHqFLq0UBhWRFoFzzNHumh20zFGG/9XMi" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="supabase-lib.js"></script>
+  <script src="auth.js?v=mp66"></script>
+  <script src="run-stats.js"></script>
+  <script src="audio.js?v=mp172"></script>
+  <script src="mp.js?v=mp8"></script>
+  <script src="game.js?v=mp179"></script>
+</body>
+</html>

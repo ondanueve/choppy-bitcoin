@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Edit profile | Bitcoinizate</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
+  <link rel="icon" href="/choppy-bitcoin/favicon.ico" sizes="48x48">
+  <style>
+    body { margin: 16px; font: 14px/1.4 ui-sans-serif, system-ui, sans-serif; background: #111; color: #eee; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    label { display: block; margin: 12px 0 4px; font-size: 12px; color: #aaa; }
+    input[type=text] { width: min(360px, 100%); padding: 8px; background: #1a1a1a; color: #eee; border: 1px solid #444; }
+    input[type=file] { display: block; margin-top: 6px; }
+    img { width: 96px; height: 96px; object-fit: cover; border: 1px solid #444; background: #222; margin-top: 8px; }
+    button { margin-top: 16px; padding: 8px 14px; }
+    .msg { margin-top: 10px; min-height: 18px; color: #8f8; font-size: 13px; }
+    .msg.bad { color: #f88; }
+    .hide { display: none !important; }
+    a { color: #F2A900; }
+    .stats-mini {
+      display: inline-block; font: inherit; font-size: 11px; margin-left: 8px;
+      padding: 4px 10px; cursor: pointer; background: transparent; color: #eee; border: 1px solid #F2A900;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="/choppy-bitcoin/">Choppy Bitcoin</a> · <a href="/">Bitcoinizate</a></p>
+  <h1 id="title">Edit profile</h1>
+  <p id="dash-score" class="msg"></p>
+  <p id="need" class="msg hide"></p>
+  <form id="form" class="hide">
+    <label for="alias">Username</label>
+    <input id="alias" type="text" maxlength="16" autocomplete="username">
+    <label for="photo">Avatar</label>
+    <input id="photo" type="file" accept="image/*">
+    <img id="preview" alt="">
+    <div>
+      <button type="submit" id="save">Save changes</button>
+    </div>
+    <p class="msg" id="msg"></p>
+  </form>
+  <p><a id="public-link" href="/">Public profile</a></p>
+  <script src="/choppy-bitcoin/supabase-lib.js"></script>
+  <script src="/choppy-bitcoin/run-stats.js"></script>
+  <script>
+    (function () {
+      var es = (navigator.language || "").toLowerCase().indexOf("es") === 0;
+      document.getElementById("title").textContent = es ? "Editar perfil" : "Edit profile";
+      document.getElementById("save").textContent = es ? "Guardar cambios" : "Save changes";
+      var sb = window.supabase && window.supabase.createClient && window.supabase.createClient();
+      var form = document.getElementById("form");
+      var need = document.getElementById("need");
+      var msg = document.getElementById("msg");
+      var aliasEl = document.getElementById("alias");
+      var preview = document.getElementById("preview");
+      var photo = document.getElementById("photo");
+      var pendingAvatar = null;
+      var uid = null;
+      var profile = null;
+      function setMsg(t, bad) {
+        msg.textContent = t || "";
+        msg.className = "msg" + (bad ? " bad" : "");
+      }
+      function validAlias(s) { return /^[a-zA-Z0-9_]{3,16}$/.test(s); }
+      function shrink(file, cb) {
+        var img = new Image();
+        var url = URL.createObjectURL(file);
+        img.onload = function () {
+          var c = document.createElement("canvas");
+          c.width = 192; c.height = 192;
+          var x = c.getContext("2d");
+          var s = Math.min(img.width, img.height);
+          x.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 192, 192);
+          URL.revokeObjectURL(url);
+          cb(c.toDataURL("image/jpeg", 0.72));
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
+        img.src = url;
+      }
+      photo.onchange = function () {
+        var f = photo.files && photo.files[0];
+        if (!f) return;
+        if (f.size > 4 * 1024 * 1024) { setMsg(es ? "Imagen demasiado grande." : "Image too large.", true); return; }
+        shrink(f, function (data) {
+          if (!data) { setMsg(es ? "No se pudo leer la imagen." : "Could not read image.", true); return; }
+          pendingAvatar = data;
+          preview.src = data;
+        });
+      };
+      if (!sb) {
+        need.textContent = es ? "Inicia sesión desde el juego." : "Sign in from the game.";
+        need.classList.remove("hide");
+        return;
+      }
+      sb.auth.getSession().then(function (res) {
+        var sess = res && res.data && res.data.session;
+        var user = sess && sess.user;
+        uid = user && user.id;
+        if (!uid && sess && sess.access_token) {
+          try {
+            var payload = JSON.parse(atob(sess.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+            uid = payload.sub || payload.user_id || "";
+          } catch (err) {}
+        }
+        if (!uid) {
+          need.textContent = es ? "Tienes que iniciar sesión." : "You need to sign in.";
+          need.classList.remove("hide");
+          return;
+        }
+        return sb.from("profiles").select("id, username, highscore, run_stats, last_score_at, elo, elo_games").eq("id", uid).single();
+      }).then(function (res) {
+        if (!uid) return;
+        var guess = "";
+        try { guess = localStorage.getItem("choppy-alias") || ""; } catch (err) {}
+        function show(row) {
+          profile = row || { id: uid, username: guess || "trader", highscore: 0 };
+          aliasEl.value = profile.username || guess || "";
+          try {
+            var localAv = localStorage.getItem("choppy-avatar-" + uid);
+            if (localAv) preview.src = localAv;
+          } catch (err) {}
+          document.getElementById("public-link").href = "/choppy-bitcoin/u/?u=" + encodeURIComponent(aliasEl.value || "");
+          var sc = document.getElementById("dash-score");
+          var sats = profile.highscore || 0;
+          var btc = sats / 1e4;
+          var label = es ? "Mejor puntaje" : "High score";
+          sc.innerHTML = label + " " + btc.toFixed(4) + " BTC"
+            + (profile.elo != null ? " · ELO " + Math.round(Number(profile.elo) || 1000) : "")
+            + (profile.run_stats ? " <button type=\"button\" class=\"stats-mini\" id=\"dash-stats\">STATS</button>" : "");
+          var db = document.getElementById("dash-stats");
+          if (db && window.openSavedRunStats) db.onclick = function () { window.openSavedRunStats(profile.run_stats); };
+          form.classList.remove("hide");
+        }
+        if (res && res.data && res.data.id) {
+          show(res.data);
+          return;
+        }
+        return sb.from("profiles").insert([{
+          id: uid,
+          username: guess || "player",
+          highscore: 0
+        }]).then(function (ins) {
+          return sb.from("profiles").select("id, username, highscore").eq("id", uid).single().then(function (res2) {
+            if (res2 && res2.data && res2.data.id) show(res2.data);
+            else {
+              show({ id: uid, username: guess || "player", highscore: 0 });
+              if (ins && ins.error) setMsg((es ? "Perfil local. " : "Local profile. ") + (ins.error.message || ""), true);
+            }
+          });
+        });
+      });
+      form.onsubmit = function (e) {
+        e.preventDefault();
+        if (!uid) return;
+        var next = aliasEl.value.trim();
+        if (!validAlias(next)) {
+          setMsg(es ? "Alias: 3–16 letras, números o _." : "Alias: 3–16 letters, numbers or _.", true);
+          return;
+        }
+        var payload = { username: next };
+        if (pendingAvatar) payload.avatar = pendingAvatar;
+        setMsg(es ? "Guardando…" : "Saving…");
+        try { localStorage.setItem("choppy-alias", next); } catch (err) {}
+        sb.from("profiles").update(payload).eq("id", uid).then(function (res) {
+          if (res && res.error && payload.avatar) {
+            return sb.from("profiles").update({ username: next }).eq("id", uid).then(function (res2) {
+              try { localStorage.setItem("choppy-avatar-" + uid, pendingAvatar); } catch (err) {}
+              if (res2 && res2.error) setMsg((es ? "No se pudo guardar: " : "Could not save: ") + (res2.error.message || "error"), true);
+              else {
+                setMsg(es ? "Nombre guardado. El avatar quedó en este dispositivo." : "Name saved. Avatar stored on this device.");
+                document.getElementById("public-link").href = "/choppy-bitcoin/u/?u=" + encodeURIComponent(next);
+              }
+            });
+          }
+          if (res && res.error) {
+            setMsg((es ? "No se pudo guardar: " : "Could not save: ") + (res.error.message || "error"), true);
+            return;
+          }
+          setMsg(es ? "Cambios guardados." : "Changes saved.");
+          document.getElementById("public-link").href = "/choppy-bitcoin/u/?u=" + encodeURIComponent(next);
+        });
+      };
+    })();
+  </script>
+</body>
+</html>

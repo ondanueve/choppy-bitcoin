@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Run chart | Choppy Bitcoin</title>
+  <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
+  <link rel="icon" href="/choppy-bitcoin/favicon.ico" sizes="48x48">
+  <style>
+    html, body { margin: 0; background: #0a0a0c; color: #f3efe6; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+    header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid #2a2a2e; }
+    h1 { margin: 0; font-size: 16px; letter-spacing: 0.08em; }
+    .chart-opts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 12px; }
+    .chart-opt { display: flex; align-items: center; gap: 4px; color: #c8c4bc; }
+    .chart-opt input { accent-color: #c8960a; }
+    canvas { display: block; width: 100%; background: #0a0a0c; }
+    a { color: #c8960a; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CHART</h1>
+    <div class="chart-opts" id="opts"></div>
+  </header>
+  <canvas id="big-chart"></canvas>
+  <script src="run-stats.js"></script>
+  <script>
+    (function () {
+      var packed = {};
+      try { packed = JSON.parse(sessionStorage.getItem("choppy-chart") || "{}"); } catch (e) { packed = {}; }
+      var bag = packed.bag || {};
+      var opts = packed.opts || { trades: false, btc: false, usd: false, net: false };
+      var box = document.getElementById("opts");
+      box.innerHTML = window.chartOptsHtml(opts);
+      var largeBtn = box.querySelector("[data-chart-large]");
+      if (largeBtn) largeBtn.remove();
+      var canvas = document.getElementById("big-chart");
+      function size() {
+        var w = Math.max(320, window.innerWidth);
+        var h = Math.max(240, window.innerHeight - 56);
+        canvas.width = w;
+        canvas.height = h;
+        canvas.style.height = h + "px";
+        window.paintRunChart(canvas, bag, opts);
+      }
+      window.bindChartControls(box, bag, opts, canvas, function (next) {
+        opts = next;
+        try { sessionStorage.setItem("choppy-chart", JSON.stringify({ bag: bag, opts: opts })); } catch (e) {}
+      });
+      window.addEventListener("resize", size);
+      size();
+    })();
+  </script>
+</body>
+</html>
