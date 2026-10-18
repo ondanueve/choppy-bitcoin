@@ -2237,7 +2237,7 @@
     landfill: { en: "At 1:14 a.m., Nico wants a partner to dig up a USB that supposedly held 8,000 BTC: put in a little, go halves, or stay in bed.", es: "A la 1:14 a. m., Nico busca un socio para desenterrar una memoria USB que supuestamente contenía 8,000 BTC: poner poco, ir a medias o quedarte en la cama." },
     taxbill: { en: "The quarterly tax bill arrives: {gift}.", es: "Llega la factura trimestral de impuestos: {gift}." },
     nicoWedding: { en: "At Nico's 400-guest wedding, you recognize twelve people. Lena warns you about his schemes before you choose a gift.", es: "En la boda de Nico hay 400 invitados y solo reconoces a doce. Lena te advierte sobre sus planes antes de que elijas un regalo." },
-    mexico: { en: "Lena proposes five days in Tulum. You think three days are enough. Paco votes by eating a brochure.", es: "Lena propone pasar cinco días en Tulum. Para ti bastan tres días. Paco vota comiéndose un folleto." },
+    mexico: { en: "Lena wants five days in Tulum; you would settle for three. Paco has already voted.", es: "Lena quiere cinco días en Tulum; a ti te alcanzan tres. Paco ya votó." },
     flu: { en: "Lena wakes with the flu. You spend the day bringing her water, medicine, and soup; Paco quietly eats half the soup.", es: "Lena despierta con gripe. Pasas el día llevándole agua, medicinas y sopa; Paco se come la mitad de la sopa sin que ella lo note." },
     phish: { en: "Support emails you about a problem with your account. To verify your identity, it asks you to enter your seed phrase.", es: "Soporte te escribe por un problema con tu cuenta. Para verificar tu identidad, te pide ingresar tu frase semilla." },
     crash: { en: "A delivery rider bumps your car at a red light and cannot stop apologizing.", es: "Un repartidor en moto te choca el auto en un semáforo y no para de pedir perdón." },
@@ -2329,8 +2329,8 @@
       ] },
     { id: "mexico", kind: "choice", after: ["landfill"],
       title: "Five Days in Tulum", titleEs: "Cinco días en Tulum",
-      body: "Lena proposes five days in Tulum: warm water, white sand, small restaurants, and a hotel whose photos look pricier than the rooms probably are. It sounds like a good place to forget the ColdCard randomness incident. You compare flights while Paco watches from the floor. Three days seem enough to you; Lena wants five. Paco eats a brochure, which settles his vote.",
-      bodyEs: "Lena propone pasar cinco días en Tulum: agua tibia, arena blanca, restaurantes pequeños y un hotel cuyas fotos parecen más costosas de lo que en realidad son las habitaciones. Suena como un buen lugar para olvidar el incidente con la aleatoriedad de la ColdCard. Comparan vuelos mientras Paco observa desde el piso. Para ti, tres días serían suficientes; Lena quiere cinco. Paco se come un folleto y deja claro su voto.",
+      body: "Lena proposes five days in Tulum: warm water, white sand, tiny restaurants, and a hotel that probably looks better in its photos. After the ColdCard randomness incident, you could both use a beach. You compare flights and say three days is plenty. Lena wants five. Paco eats a brochure, which settles his vote.",
+      bodyEs: "Lena propone pasar cinco días en Tulum: agua tibia, arena blanca, restaurantes diminutos y un hotel que seguramente se ve mejor en las fotos. Después del incidente con la aleatoriedad de la ColdCard, a los dos les vendría bien una playa. Comparas vuelos y dices que tres días alcanzan. Lena quiere cinco. Paco se come un folleto y deja claro su voto.",
       opts: [
         { k: "a", label: "Book five days · 8%", labelEs: "Reservar cinco días · 8%" },
         { k: "b", label: "Stay home with Paco", labelEs: "Quedarse en casa con Paco" }
@@ -2563,7 +2563,7 @@
     { id:"blocAssault", kind:"report", when:()=>false, title:"Incoming Fire", titleEs:"Fuego enemigo", body:"A bloc opens fire while its prepared communiqué declares the attack unavoidable. Bitcoin Country must hold the island.", bodyEs:"Un bloque abre fuego mientras su comunicado preparado declara que el ataque era inevitable. Bitcoin Country debe defender la isla." },
     { id:"battleWon", kind:"report", when:()=>false, title:"The Beach Holds", titleEs:"La playa resiste", body:"The landing is repelled. Bitcoin Country holds the shore, but the campaign is not over.", bodyEs:"El desembarco es rechazado. Bitcoin Country conserva la costa, pero la campaña aún no ha terminado." },
     { id:"blocTriumph", kind:"report", when:()=>false, title:"Bloc Defeated", titleEs:"Bloque derrotado", body:"After its third failed assault, a bloc withdraws and recognizes Bitcoin Country as a nation.", bodyEs:"Tras su tercer ataque fallido, un bloque se retira y reconoce a Bitcoin Country como nación." },
-    { id:"fourthColor", kind:"report", after:["theAnswer"], when:()=>(S.bcBattlesWon||0)>=9, title:"A Fourth Color", titleEs:"Un cuarto color", body:"It is over. One bloc filed its final protest and lost the sea lane. Another ran out of ships it was willing to acknowledge. The third, which never apologizes, stopped answering the radio.\n\nThe island still stands. By morning, statements begin to arrive. Some governments call for negotiations; others carefully avoid the word country. San Arnaldo does not. Marek studies the map for a moment, then points to the new border. “You really did it.” At noon, the bakery reopens. The baker says three holidays are plenty for one country and asks the cabinet to please stop winning wars until the flour arrives.", bodyEs:"Se acabó. Un bloque presentó su última protesta y perdió la ruta marítima. Otro se quedó sin barcos que estuviera dispuesto a reconocer. El tercero, que nunca se disculpa, dejó de responder por radio.\n\nLa isla sigue en pie. Por la mañana comienzan a llegar comunicados. Algunos gobiernos piden negociaciones; otros evitan cuidadosamente la palabra país. San Arnaldo no. Marek estudia el mapa por un momento y señala la nueva frontera. «De verdad lo lograste». Al mediodía, la panadería vuelve a abrir. El panadero dice que tres feriados alcanzan para un país y le pide al gabinete que, por favor, no gane más guerras hasta que llegue la harina." },
+    { id:"fourthColor", kind:"report", after:["theAnswer"], when:()=>(S.bcBattlesWon||0)>=9, title:"A Fourth Color", titleEs:"Un cuarto color", body:"It is over. One bloc filed its final protest and lost the sea lane. Another ran out of ships it was willing to acknowledge. The third, which never apologizes, stopped answering the radio.\n\nThe island still stands. By morning, statements begin to arrive. Some governments call for negotiations; others carefully avoid the word country. San Arnaldo does not. Marek studies the map for a moment, then points to the new border. “You really did it.” At noon, the bakery reopens. The baker has amended the sign: national holidays, three a year at most.", bodyEs:"Se acabó. Un bloque presentó su última protesta y perdió la ruta marítima. Otro se quedó sin barcos que estuviera dispuesto a reconocer. El tercero, que nunca se disculpa, dejó de responder por radio.\n\nLa isla sigue en pie. Por la mañana comienzan a llegar comunicados. Algunos gobiernos piden negociaciones; otros evitan cuidadosamente la palabra país. San Arnaldo no. Marek estudia el mapa por un momento y señala la nueva frontera. «De verdad lo lograste». Al mediodía, la panadería vuelve a abrir. El panadero corrigió el cartel: feriados nacionales, tres por año como máximo." },
     { id:"notYet", kind:"report", after:["theAnswer"], when:()=>false, title:"Not Yet", titleEs:"Todavía no", body:"The defensive line breaks. The last defenders fall back from the shore as the fleet takes the port. By nightfall, the flag is down and the transmitters are silent.", bodyEs:"La línea defensiva se rompe. Los últimos defensores retroceden desde la costa mientras la flota toma el puerto. Al caer la noche, la bandera ha sido retirada y los transmisores están en silencio." },
     
   ];
@@ -2624,11 +2624,11 @@
         "Nico mira el sobre y luego te mira a ti. \"Es justo.\" −" + costLabel(paid) + ".");
     }
     if (card.id === "mexico") {
-      if (opt === "b") return say("You stay home. Paco celebrates by destroying a cushion.", "Se quedan en casa. Paco lo celebra destruyendo un cojín.");
+      if (opt === "b") return say("Lena puts the swimsuit back in the drawer. Paco celebrates by destroying a cushion.", "Lena vuelve a guardar el traje de baño en el cajón. Paco lo celebra destrozando un cojín.");
       const paid = cutPct(0.08);
       S.invuln = Math.max(S.invuln || 0, 4);
-      return say("You come back tanned. −" + costLabel(paid) + ". For four seconds, nothing can touch you.",
-        "Vuelven bronceados. −" + costLabel(paid) + ". Durante cuatro segundos, nada puede tocarte.");
+      return say("You come back tanned and so relaxed that, for the next four seconds, no candle can touch you. −" + costLabel(paid) + ".",
+        "Vuelven bronceados y tan relajados que, durante los próximos cuatro segundos, ninguna vela puede tocarte. −" + costLabel(paid) + ".");
     }
     if (card.id === "flu") {
       const paid = cutBill(120);
@@ -2802,9 +2802,9 @@
       if(opt==="b")return say("You refuse the payment. The fleets were never waiting for your answer.","Rechazas el pago. Las flotas nunca estuvieron esperando tu respuesta.");
       return say("All three statements have arrived. Their ships are already moving.","Ya llegaron los tres comunicados. Sus barcos ya están en movimiento.");
     }
-    if(card.id==="blocAssault"){S.bcDefensePending=true;return say("The defense begins as the first ships enter range.","La defensa comienza cuando los primeros barcos entran en alcance.");}
-    if(card.id==="battleWon"){return say("The island holds the line.","La isla mantiene la línea defensiva.");}
-    if(card.id==="blocTriumph"){return say("The defeated bloc withdraws and recognizes the nation.","El bloque derrotado se retira y reconoce a la nación.");}
+    if(card.id==="blocAssault"){S.bcDefensePending=true;return say("The first ships enter range.","Los primeros barcos entran en alcance.");}
+    if(card.id==="battleWon"){return say("Repairs start before the smoke clears.","Las reparaciones empiezan antes de que se disipe el humo.");}
+    if(card.id==="blocTriumph"){return say("One flag fewer on the horizon.","Una bandera menos en el horizonte.");}
     if(card.id==="fourthColor"){S.bcIndependent=true;S.bcVictory=true;try{noteIndependence();}catch(e){}try{grantAward("fourth");}catch(e){}return say(stampNation("THE FOURTH COLOR. Bitcoin Country is independent. KEEP PLAYING."),stampNation("EL CUARTO COLOR. Bitcoin Country es independiente. CONTINÚA JUGANDO."));}
     if(card.id==="notYet"){return say("Game over.","Fin de la partida.");}
     if (card.id === "honeymoon") {
@@ -3129,34 +3129,34 @@
 
   // Four enemy blocs exist; each run fights three of them, picked and ordered at random (S.bcBlocs).
   const ALL_BLOCS = [
-    { key:"pact", en:"Meridian Stability Pact", es:"Pacto de Estabilidad Meridiano", enThe:"the Meridian Pact", esThe:"el Pacto Meridiano", short:"PACT", shortEs:"PACTO",
+    { key:"pact", en:"Meridian Stability Pact", es:"Pacto de Estabilidad Meridiano", esFull:"el Pacto de Estabilidad Meridiano", enThe:"the Meridian Pact", esThe:"el Pacto Meridiano", short:"PACT", shortEs:"PACTO",
       leader:"Chancellor Ivo Voss", leaderEs:"el canciller Ivo Voss", paint:"#4a5340", mix:"heavy", art:"firstBloc",
       members:"Germany, France, Italy, Spain, the Netherlands, Belgium, and Austria", membersEs:"Alemania, Francia, Italia, España, los Países Bajos, Bélgica y Austria",
       verb:"files a form", verbEs:"presenta formularios",
       tag:"Its language is administrative; its restrictions are not optional.", tagEs:"Su lenguaje es administrativo, pero sus restricciones no son opcionales.",
       core:"Seven capitals announce the Meridian Stability Pact on the same morning. The treaty is brief. Its annexes are not.\n\nGermany, France, Italy, Spain, the Netherlands, Belgium, and Austria coordinate trade, energy, a shared payment network, and a defense clause nobody reads aloud.\n\nChancellor Ivo Voss chairs the first session. He never raises his voice. After thanking the cameras for their patience, he calls instability a form of violence and lists what now requires permission: large transfers, foreign accounts, unsanctioned ports, and newspapers that refuse to cooperate.\n\nThe Pact does not look like a boot. It looks like a form. The form is mandatory.",
       coreEs:"Siete capitales anuncian el Pacto de Estabilidad Meridiano la misma mañana. El tratado es breve. Sus anexos no.\n\nAlemania, Francia, Italia, España, los Países Bajos, Bélgica y Austria coordinan el comercio, la energía, una red de pagos compartida y una cláusula de defensa que nadie lee en voz alta.\n\nEl canciller Ivo Voss preside la primera sesión. Nunca alza la voz. Tras agradecer la paciencia de las cámaras, define la inestabilidad como una forma de violencia y enumera lo que ahora requiere autorización: grandes transferencias, cuentas en el extranjero, puertos no autorizados y periódicos que se nieguen a cooperar.\n\nEl Pacto no parece una bota. Parece un formulario. El formulario es obligatorio." },
-    { key:"ledger", en:"Red Ledger Compact", es:"Compacto del Libro Rojo", enThe:"the Red Ledger", esThe:"el Libro Rojo", short:"LEDGER", shortEs:"LIBRO",
+    { key:"ledger", en:"Red Ledger Compact", es:"Compacto del Libro Rojo", esFull:"el Compacto del Libro Rojo", enThe:"the Red Ledger", esThe:"el Libro Rojo", short:"LEDGER", shortEs:"LIBRO",
       leader:"Marshal Amina Kade", leaderEs:"la mariscal Amina Kade", paint:"#6a3834", mix:"fast", art:"rearmament",
       members:"Russia, Belarus, China, North Korea, and Cuba", membersEs:"Rusia, Bielorrusia, China, Corea del Norte y Cuba",
       verb:"prints a poster", verbEs:"imprime carteles",
       tag:"It speaks of purity, and its posters arrive before the bread.", tagEs:"Habla de pureza, y sus carteles llegan antes que el pan.",
       core:"Russia, Belarus, China, North Korea, and Cuba sign the Red Ledger Compact in a hall lit too brightly. Marshal Amina Kade reads the preamble herself. She was a dock officer, then a prosecutor, and now decides which shortages count as patriotic.\n\nThe Compact does not speak of stability. It speaks of purity. Hoarding is treason. Private mines are unfinished revolutions. Posters appear before bread does. Police notebooks grow thicker. The speeches are beautiful. The queues are not.",
       coreEs:"Rusia, Bielorrusia, China, Corea del Norte y Cuba firman el Compacto del Libro Rojo en un salón iluminado en exceso. La mariscal Amina Kade lee personalmente el preámbulo. Primero fue oficial de muelle, después fiscal y ahora decide qué escasez cuenta como patriótica.\n\nEl Compacto no habla de estabilidad, sino de pureza. Acaparar es traición. Las minas privadas son revoluciones inconclusas. Los carteles aparecen antes que el pan. Los cuadernos de la policía se vuelven más gruesos. Los discursos son hermosos. Las filas no." },
-    { key:"lattice", en:"Crown Lattice", es:"Celosía de la Corona", enThe:"the Crown Lattice", esThe:"la Celosía de la Corona", short:"LATTICE", shortEs:"CORONA",
+    { key:"lattice", en:"Crown Lattice", es:"Celosía de la Corona", esFull:"la Celosía de la Corona", enThe:"the Crown Lattice", esThe:"la Celosía de la Corona", short:"LATTICE", shortEs:"CORONA",
       leader:"High Warden Soren Pell", leaderEs:"el Alto Guardián Soren Pell", paint:"#5c4936", mix:"elite", art:"threeColors",
       members:"Saudi Arabia, Jordan, Morocco, Thailand, and Brunei", membersEs:"Arabia Saudita, Jordania, Marruecos, Tailandia y Brunéi",
       verb:"holds a parade and then imposes silence", verbEs:"organiza un desfile y después impone silencio",
       tag:"High Warden Soren Pell calls unclaimed territory an administrative error.", tagEs:"El Alto Guardián Soren Pell considera que un territorio sin dueño es un error administrativo.",
       core:"Saudi Arabia, Jordan, Morocco, Thailand, and Brunei form the Crown Lattice around dynastic authority, port agreements, and the belief that borders are inherited rather than negotiated. High Warden Soren Pell walks at the front of the procession and does not wave. To him, a people who will not kneel are an administrative error.\n\nDissent is not debated. It is omitted.",
       coreEs:"Arabia Saudita, Jordania, Marruecos, Tailandia y Brunéi forman la Celosía de la Corona en torno a la autoridad dinástica, los acuerdos portuarios y la idea de que las fronteras se heredan en lugar de negociarse. El Alto Guardián Soren Pell camina al frente del cortejo y no saluda. Para él, un pueblo que no se arrodilla es un error administrativo.\n\nLa disidencia no se debate: se omite." },
-    { key:"trust", en:"Open Hemisphere Trust", es:"Fideicomiso del Hemisferio Abierto", enThe:"the Hemisphere Trust", esThe:"el Fideicomiso del Hemisferio", short:"TRUST", shortEs:"FIDEICOMISO",
+    { key:"trust", en:"Open Hemisphere Trust", es:"Fideicomiso del Hemisferio Abierto", esFull:"el Fideicomiso del Hemisferio Abierto", enThe:"the Hemisphere Trust", esThe:"el Fideicomiso del Hemisferio", short:"TRUST", shortEs:"FIDEICOMISO",
       leader:"Chief Compliance Officer Dana Holt", leaderEs:"la directora de cumplimiento Dana Holt", paint:"#34485e", mix:"snipe", art:"blocTrust",
       members:"the United States, Canada, Mexico, Brazil, Chile, Argentina, Peru, Colombia, and Australia", membersEs:"Estados Unidos, Canadá, México, Brasil, Chile, Argentina, Perú, Colombia y Australia",
       verb:"updates its terms of service", verbEs:"actualiza sus términos de servicio",
       tag:"Membership is free; declining its terms is not an option.", tagEs:"La membresía es gratuita; rechazar sus términos no es una opción.",
       core:"The United States, Canada, Mexico, Brazil, Chile, Argentina, Peru, Colombia, and Australia launch the Open Hemisphere Trust from a stage with very good lighting. Membership is free. The terms of service run four hundred pages, and accepting them is the only way to keep a bank account.\n\nChief Compliance Officer Dana Holt presents it in sneakers. She smiles while explaining that every payment now carries a trust score, that low scores simply see fewer options, and that nobody is being banned, only deprioritized.\n\nThe Trust does not confiscate anything. It recommends. The recommendations cannot be declined.",
-      coreEs:"Estados Unidos, Canadá, México, Brasil, Chile, Argentina, Perú, Colombia y Australia lanzan el Fideicomiso del Hemisferio Abierto desde un escenario muy bien iluminado. La membresía es gratuita. Los términos de servicio tienen cuatrocientas páginas, y aceptarlos es la única forma de conservar una cuenta bancaria.\n\nLa directora de cumplimiento Dana Holt lo presenta en zapatillas. Sonríe mientras explica que cada pago llevará un puntaje de confianza, que los puntajes bajos simplemente verán menos opciones y que nadie está siendo prohibido: solo despriorizado.\n\nEl Fideicomiso no confisca nada. Recomienda. Las recomendaciones no se pueden rechazar." }
+      coreEs:"Estados Unidos, Canadá, México, Brasil, Chile, Argentina, Perú, Colombia y Australia lanzan el Fideicomiso del Hemisferio Abierto desde un escenario muy bien iluminado. La membresía es gratuita. Los términos de servicio tienen cuatrocientas páginas, y aceptarlos es la única forma de conservar una cuenta bancaria.\n\nLa directora de cumplimiento Dana Holt lo presenta en zapatillas. Sonríe mientras explica que cada pago llevará un puntaje de confianza, que los puntajes bajos simplemente verán menos opciones y que a nadie se le prohíbe nada: solo se lo desprioriza.\n\nEl Fideicomiso no confisca nada. Recomienda. Las recomendaciones no se pueden rechazar." }
   ];
   const BLOC_BY_KEY = {}; ALL_BLOCS.forEach((b) => { BLOC_BY_KEY[b.key] = b; });
   function rollBlocs(){ const k=ALL_BLOCS.map((b)=>b.key); for(let i=k.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;const t=k[i];k[i]=k[j];k[j]=t;} S.bcBlocs=k.slice(0,3); return S.bcBlocs; }
@@ -3187,12 +3187,12 @@
   function blocIntroTldr(id, es){
     const B=activeBlocs();
     const cap=(t)=>t.charAt(0).toUpperCase()+t.slice(1);
-    if(id==="firstBloc") return es ? cap(B[0].membersEs)+" forman el bloque "+B[0].es+". "+B[0].tagEs : cap(B[0].members)+" form the "+B[0].en+". "+B[0].tag;
+    if(id==="firstBloc") return es ? cap(B[0].membersEs)+" forman "+B[0].esFull+". "+B[0].tagEs : cap(B[0].members)+" form the "+B[0].en+". "+B[0].tag;
     if(id==="rearmament") return es
-      ? cap(B[0].esThe)+" anuncia un programa de fragatas y lo llama mantenimiento. "+cap(B[1].membersEs)+" responden con el bloque "+B[1].es+". Ambos bloques comienzan a construir buques de guerra."
+      ? cap(B[0].esThe)+" anuncia un programa de fragatas y lo llama mantenimiento. "+cap(B[1].membersEs)+" responden con "+B[1].esFull+". Ambos bloques comienzan a construir buques de guerra."
       : cap(B[0].enThe)+" announces a frigate program and calls it maintenance. "+cap(B[1].members)+" answer by forming the "+B[1].en+". Both blocs begin building warships.";
     if(id==="threeColors") return es
-      ? cap(B[2].membersEs)+" forman el bloque "+B[2].es+", el tercero que rodea a Bitcoin Country. "+B[2].tagEs
+      ? cap(B[2].membersEs)+" forman "+B[2].esFull+", el tercer bloque que rodea a Bitcoin Country. "+B[2].tagEs
       : cap(B[2].members)+" form the "+B[2].en+", the third bloc surrounding Bitcoin Country. "+B[2].tag;
     return "";
   }
@@ -3222,20 +3222,21 @@
     const r=S.bcReactions||{};
     return activeBlocKeys().every((k)=>r[k]!=="money");
   }
+  const capF=(t)=>t.charAt(0).toUpperCase()+t.slice(1);
   function reactionLine(bloc, kind, es){
-    const name=es?bloc.es:bloc.en, who=es?bloc.leaderEs:bloc.leader;
+    const name=capF(es?bloc.esThe:bloc.enThe), who=capF(es?bloc.leaderEs:bloc.leader);
     if(kind==="accept") return es
       ? name+" envía una nota fría de reconocimiento. "+who+" la llama una cortesía provisional. El agregado que la entrega no toma asiento."
       : name+" sends a cold note of recognition. "+who+" calls it a provisional courtesy. The attaché who delivers it does not sit down.";
     if(kind==="reject") return es
-      ? name+" rechaza la declaración en una sola oración. "+who+" añade otra sobre las consecuencias."
-      : name+" rejects the declaration in one sentence. "+who+" adds a second sentence about consequences.";
+      ? name+" rechaza la declaración en una sola oración. "+who+" agrega otra sobre las consecuencias."
+      : name+" rejects the declaration in one sentence. "+who+" adds a second one about consequences.";
     if(kind==="time") return es
-      ? name+" solicita tiempo para preparar un comunicado. "+who+" en realidad necesita tiempo para contar barcos."
-      : name+" asks for time to prepare a statement. "+who+" means time to count ships.";
+      ? name+" pide tiempo para preparar un comunicado. "+who+" lo usa para contar barcos."
+      : name+" asks for time to prepare a statement. "+who+" uses it to count ships.";
     return es
       ? name+" ofrece reconocimiento político a cambio de una contribución a la estabilidad regional. "+who+" fija una cifra y evita llamarla soborno."
-      : name+" offers political recognition in exchange for a contribution to regional stability. "+who+" names a figure and does not call it a bribe.";
+      : name+" offers political recognition in exchange for a contribution to regional stability. "+who+" names a figure and avoids calling it a bribe.";
   }
   function repliesText(){
     const es=chanceLang();
@@ -3243,73 +3244,146 @@
     const dflt=["reject","time","accept"];
     const lines=activeBlocs().map((b,i)=>reactionLine(b, r[b.key]||dflt[i], es));
     const tail=es
-      ? "Nada de eso cambia el final de la semana. Los reconocimientos quedan como notas al pie. Las demoras encubren calendarios de carga. El pago, si lo realizas, solo compra una carta más cordial. Los tres bloques continúan armando sus flotas."
-      : "None of it changes the end of the week. Recognition becomes a footnote. Delays conceal loading schedules. Payment, if you make it, only buys a warmer letter. All three blocs continue arming their fleets.";
+      ? "Nada de eso cambia el final de la semana. Los reconocimientos quedan como notas al pie. Las demoras encubren calendarios de carga. Un pago, si lo haces, solo compra una carta más cordial. Los tres bloques siguen armando sus flotas."
+      : "None of it changes the end of the week. Recognition becomes a footnote. Delays hide loading schedules. A payment, if you make one, only buys a warmer letter. All three blocs keep arming their fleets.";
     return lines.join("\n\n")+ "\n\n"+tail;
   }
-  function assaultText(){
-    const es=chanceLang();
+  // Pre-battle briefings: one per bloc and battle (slot 0, 1, 2), each in that bloc's voice.
+  const ASSAULT_TEXT={
+    pact:[
+      { en:"The Meridian Pact opens fire at nine sharp, when its offices open. Chancellor Ivo Voss's communiqué was stamped the day before and calls the attack an unavoidable administrative measure.\n\nThe ships are already visible from the dock.",
+        es:"El Pacto Meridiano abre fuego a las nueve en punto, cuando abren sus oficinas. El comunicado del canciller Ivo Voss se selló el día anterior y llama al ataque una medida administrativa inevitable.\n\nLos barcos ya se ven desde el muelle.",
+        tEn:"The Meridian Pact attacks right on schedule.", tEs:"El Pacto Meridiano ataca puntualmente." },
+      { en:"The Pact comes back through another cove with a second form, longer than the first. This one includes tanks.\n\nVoss does not raise his voice. The landing craft do it for him.",
+        es:"El Pacto vuelve por otra cala con un segundo formulario, más largo que el primero. Este incluye tanques.\n\nVoss no alza la voz. Las lanchas de desembarco lo hacen por él.",
+        tEn:"The Pact lands again, this time with tanks.", tEs:"El Pacto vuelve a desembarcar, esta vez con tanques." },
+      { en:"Final notice. The Pact sends everything it has left, in triplicate.\n\nVoss signs the order himself. His staff says that has never happened before.",
+        es:"Último aviso. El Pacto envía todo lo que le queda, por triplicado.\n\nVoss firma la orden en persona. Su equipo asegura que eso nunca había ocurrido.",
+        tEn:"The Pact sends everything it has left.", tEs:"El Pacto envía todo lo que le queda." }
+    ],
+    ledger:[
+      { en:"The Red Ledger announces the island's liberation over loudspeakers, then opens fire. Marshal Amina Kade's speech lasts longer than the first barrage.\n\nThe posters are already printed. They spell the island's name wrong.",
+        es:"El Libro Rojo anuncia por altavoces la liberación de la isla y después abre fuego. El discurso de la mariscal Amina Kade dura más que la primera andanada.\n\nLos carteles ya están impresos. Tienen mal escrito el nombre de la isla.",
+        tEn:"The Red Ledger attacks after a very long speech.", tEs:"El Libro Rojo ataca después de un discurso larguísimo." },
+      { en:"The Ledger returns with fewer troops, more loudspeakers, and reprinted posters. The island's name is spelled correctly now.\n\nKade blames the first defeat on a provocation by the waves.",
+        es:"El Libro vuelve con menos tropas, más altavoces y carteles reimpresos. Ahora el nombre de la isla está bien escrito.\n\nKade atribuye la primera derrota a una provocación de las olas.",
+        tEn:"The Ledger comes back, louder than before.", tEs:"El Libro vuelve, más ruidoso que antes." },
+      { en:"Kade declares the island an enemy of history and sends every hull the Compact can spare.\n\nThe speeches have stopped. That is how the island knows this is the last push.",
+        es:"Kade declara a la isla enemiga de la historia y envía todos los cascos que el Compacto puede reunir.\n\nLos discursos se terminaron. Así sabe la isla que es el último empuje.",
+        tEn:"The Ledger makes its last push.", tEs:"El Libro hace su último intento." }
+    ],
+    lattice:[
+      { en:"The Crown Lattice arrives in formation, banners first, as if the island had asked for a coronation.\n\nHigh Warden Soren Pell does not issue a statement. He issues an expectation: kneel by noon.",
+        es:"La Celosía de la Corona llega en formación, estandartes por delante, como si la isla hubiera pedido una coronación.\n\nEl Alto Guardián Soren Pell no emite un comunicado. Emite una expectativa: arrodillarse antes del mediodía.",
+        tEn:"The Crown Lattice demands that the island kneel, then attacks.", tEs:"La Celosía de la Corona exige que la isla se arrodille y ataca." },
+      { en:"Noon has passed. The Lattice changes its approach and lands below the eastern cliff.\n\nPell watches from the flagship. He still does not wave.",
+        es:"El mediodía ya pasó. La Celosía cambia de rumbo y desembarca bajo el acantilado oriental.\n\nPell observa desde la nave insignia. Sigue sin saludar.",
+        tEn:"The Lattice lands below the eastern cliff.", tEs:"La Celosía desembarca bajo el acantilado oriental." },
+      { en:"The Lattice sends its royal guard, the ships it was saving for parades.\n\nPell's herald reads a decree to the waves: the island does not exist. The island disagrees.",
+        es:"La Celosía envía su guardia real, los barcos que reservaba para los desfiles.\n\nEl heraldo de Pell lee un decreto ante las olas: la isla no existe. La isla no está de acuerdo.",
+        tEn:"The Lattice sends its royal guard.", tEs:"La Celosía envía su guardia real." }
+    ],
+    trust:[
+      { en:"The Open Hemisphere Trust notifies the island that its account has been suspended, then opens fire.\n\nChief Compliance Officer Dana Holt livestreams the landing and thanks everyone for their patience.",
+        es:"El Fideicomiso del Hemisferio Abierto notifica a la isla que su cuenta fue suspendida y después abre fuego.\n\nLa directora de cumplimiento Dana Holt transmite el desembarco en vivo y agradece la paciencia de todos.",
+        tEn:"The Hemisphere Trust suspends the island's account and attacks.", tEs:"El Fideicomiso del Hemisferio suspende la cuenta de la isla y ataca." },
+      { en:"The Trust pushes an update: Invasion 2.0, now with more drones.\n\nHolt promises a smoother experience and asks residents to rate it.",
+        es:"El Fideicomiso publica una actualización: Invasión 2.0, ahora con más drones.\n\nHolt promete una experiencia más fluida y pide a los residentes que la califiquen.",
+        tEn:"The Trust attacks again, with more drones.", tEs:"El Fideicomiso vuelve a atacar, con más drones." },
+      { en:"Holt escalates the ticket to top priority. Every drone, boat and lawyer the Trust has left is on its way.\n\nThe terms of service are now forty pages longer.",
+        es:"Holt escala el ticket a máxima prioridad. Todos los drones, botes y abogados que le quedan al Fideicomiso van en camino.\n\nLos términos de servicio ahora tienen cuarenta páginas más.",
+        tEn:"The Trust sends everything it has left.", tEs:"El Fideicomiso envía todo lo que le queda." }
+    ]
+  };
+  function assaultRow(){
     const n=(S.bcBattlesWon||0);
     const b=warBloc((n/3)|0);
-    const name=es?b.es:b.en, who=es?b.leaderEs:b.leader;
-    const slot=n%3;
-    const beat=es
-      ? (slot===0?"Los barcos ya se ven desde el muelle.":slot===1?"Vuelven por otra cala, y no avisan la hora.":"El mar se vuelve a llenar de cascos.")
-      : (slot===0?"The ships are already visible from the dock.":slot===1?"They come back through another cove, and they do not name the hour.":"The sea fills with hulls again.");
-    return es
-      ? name+" abre fuego antes de que terminen los canales diplomáticos. "+who+" publica un comunicado preparado de antemano y afirma que el ataque era inevitable.\n\n"+beat+"\n\nLa flota se acerca. La isla debe resistir."
-      : "The "+name+" opens fire before the diplomatic channels have closed. "+who+" releases a communiqué prepared in advance and calls the attack unavoidable.\n\n"+beat+"\n\nThe fleet is closing in. The island must hold.";
+    const rows=ASSAULT_TEXT[b.key]||ASSAULT_TEXT.pact;
+    return rows[Math.max(0,Math.min(2,n%3))];
+  }
+  function assaultText(){
+    const r=assaultRow();
+    return chanceLang()?r.es:r.en;
+  }
+  // Post-battle reports (battles 1 and 2 of each bloc; the 3rd is the triumph).
+  const REPORT_TEXT={
+    pact:[
+      { enT:"The Beach Holds", esT:"La playa resiste",
+        en:"The Pact's landing collapses on the beach. Its occupation order had already been stamped.\n\nPaco comes back carrying one of the seals and does not explain what happened to the clerk.",
+        es:"El desembarco del Pacto se derrumba en la playa. Su orden de ocupación ya estaba sellada.\n\nPaco vuelve con uno de los sellos en la boca y no explica qué pasó con el funcionario.",
+        tEn:"The Pact's landing collapses. Paco brings back one of its seals.", tEs:"El desembarco del Pacto se derrumba. Paco trae uno de sus sellos." },
+      { enT:"The Other Cove", esT:"La otra cala",
+        en:"The tanks reach the coast road but never clear the hill. Marek watches what the tide brings back and refuses to call it a victory.\n\nNico opens the bar anyway.",
+        es:"Los tanques llegan al camino de la costa, pero nunca superan la colina. Marek mira lo que devuelve la marea y se niega a llamarlo victoria.\n\nNico abre el bar de todos modos.",
+        tEn:"The tanks never clear the hill. Marek will not call it a victory; Nico opens the bar.", tEs:"Los tanques no superan la colina. Marek no lo llama victoria; Nico abre el bar." }
+    ],
+    ledger:[
+      { enT:"The Posters", esT:"Los carteles",
+        en:"The posters reach the water before the soldiers do. Marshal Kade is still speaking on the radio when the radio falls into the sea.\n\nSomeone on the dock starts laughing and cannot stop.",
+        es:"Los carteles llegan al agua antes que los soldados. La mariscal Kade todavía habla por radio cuando el aparato cae al mar.\n\nAlguien en el muelle empieza a reírse y no puede parar.",
+        tEn:"The Ledger's posters reach the water before its soldiers. Kade's radio ends up in the sea.", tEs:"Los carteles del Libro llegan al agua antes que sus soldados. La radio de Kade termina en el mar." },
+      { enT:"The Line Breaks", esT:"La línea cede",
+        en:"The assault line breaks against the wall. Paco sits on a disabled turret and chews on a poster.\n\nThe island does not celebrate. It exhales.",
+        es:"La línea de ataque se rompe contra el muro. Paco se sienta sobre una torreta inutilizada y mordisquea un cartel.\n\nLa isla no celebra. Respira.",
+        tEn:"The Ledger's line breaks against the wall. The island exhales.", tEs:"La línea del Libro se rompe contra el muro. La isla respira." }
+    ],
+    lattice:[
+      { enT:"The Parade Stops", esT:"El desfile se detiene",
+        en:"The procession breaks up on the reef. Its gray ships turn back when the island refuses to kneel.\n\nSoren Pell says nothing. For once, the silence belongs to the island.",
+        es:"La procesión se desarma contra el arrecife. Sus barcos grises dan la vuelta cuando la isla se niega a arrodillarse.\n\nSoren Pell no dice nada. Por una vez, el silencio es de la isla.",
+        tEn:"The Lattice's procession breaks up on the reef. The island does not kneel.", tEs:"La procesión de la Celosía se desarma en el arrecife. La isla no se arrodilla." },
+      { enT:"Ash on the Water", esT:"Ceniza en el agua",
+        en:"The Lattice's hulls burn in a low, even line below the cliff. By dusk, the cliff belongs to the island again.\n\nMarek watches the smoke without a word. On this island, that counts as a toast.",
+        es:"Los cascos de la Celosía arden en una línea baja y pareja bajo el acantilado. Al anochecer, el acantilado vuelve a ser de la isla.\n\nMarek mira el humo sin decir nada. En esta isla, eso cuenta como un brindis.",
+        tEn:"The Lattice burns below the cliff. By dusk the cliff is the island's again.", tEs:"La Celosía arde bajo el acantilado. Al anochecer, vuelve a ser de la isla." }
+    ],
+    trust:[
+      { enT:"Terms Rejected", esT:"Términos rechazados",
+        en:"The Trust lands drones first and lawyers second. Every soldier wears a camera, and every camera is live. The feed cuts out when the first boat turns back.\n\nDana Holt's statement calls the retreat a temporary service interruption.",
+        es:"El Fideicomiso desembarca primero drones y después abogados. Cada soldado lleva una cámara, y cada cámara transmite en vivo. La señal se corta cuando el primer bote da la vuelta.\n\nEl comunicado de Dana Holt llama a la retirada una interrupción temporal del servicio.",
+        tEn:"The Trust's feed cuts out when its first boat turns back.", tEs:"La transmisión del Fideicomiso se corta cuando su primer bote da la vuelta." },
+      { enT:"Deprioritized", esT:"Despriorizados",
+        en:"The new version gets the same result. The landing craft run aground on a reef the Trust had rated low risk. Nico collects three helmets with the price tags still on.\n\nThe island turns off the floodlights and goes to sleep.",
+        es:"La nueva versión obtiene el mismo resultado. Las lanchas encallan en un arrecife que el Fideicomiso había calificado de bajo riesgo. Nico junta tres cascos que todavía tienen la etiqueta del precio.\n\nLa isla apaga los reflectores y se va a dormir.",
+        tEn:"The Trust's boats run aground on a reef it had rated low risk.", tEs:"Los botes del Fideicomiso encallan en un arrecife que había calificado de bajo riesgo." }
+    ]
+  };
+  function reportRow(){
+    const won=S.bcBattlesWon||1;
+    const i=Math.max(0,won-1);
+    const b=warBloc((i/3)|0);
+    const rows=REPORT_TEXT[b.key]||REPORT_TEXT.pact;
+    return rows[(i%3)===1?1:0];
   }
   function battleReportText(){
-    const es=chanceLang();
-    const won=S.bcBattlesWon||0;
-    const bloc=((won-1)/3)|0;
-    const slot=(won-1)%3;
-    const packByKey={pact:0,ledger:1,lattice:2,trust:3};
-    const packs=[
-      [
-        { enT:"The Beach Holds", esT:"La playa resiste",
-          en:"The Pact's landing collapses on the beach. The occupation order had already been stamped. Paco returns with one of its seals and does not explain what happened to the clerk.\n\nAt the dock, the bakery puts out the morning bread twenty minutes late. The baker apologizes. An invasion is not a holiday.",
-          es:"El desembarco del Pacto fracasa en la playa. La orden de ocupación ya estaba sellada. Paco regresa con uno de sus sellos y no explica qué ocurrió con el funcionario.\n\nEn el muelle, la panadería saca el pan de la mañana con veinte minutos de retraso. El panadero pide disculpas. Una invasión no es un feriado." },
-        { enT:"The Other Cove", esT:"La otra cala",
-          en:"A second landing reaches another cove before noon. The tanks make it to the road but never clear the hill. Marek watches what the tide returns and refuses to call it a victory. Nico opens the bar anyway.",
-          es:"Un segundo desembarco alcanza otra cala antes del mediodía. Los tanques llegan al camino, pero no superan la colina. Marek observa lo que devuelve la marea y se niega a llamarlo victoria. Nico abre el bar de todos modos." }
-      ],
-      [
-        { enT:"The Posters", esT:"Los carteles",
-          en:"The Red Ledger attacks under its own slogans. The posters reach the water before the soldiers. Marshal Kade is still speaking over the radio when the radio falls into the sea.\n\nSomeone on the dock begins laughing and cannot stop.",
-          es:"El Libro Rojo ataca bajo sus propias consignas. Los carteles llegan al agua antes que los soldados. La mariscal Kade todavía habla por radio cuando el aparato cae al mar.\n\nAlguien en el muelle comienza a reír y no puede detenerse." },
-        { enT:"The Line Breaks", esT:"La línea cede",
-          en:"They return with fewer troops and more noise. The assault line breaks against the wall. Paco sits on a disabled turret and eats an orange.\n\nThe island does not celebrate. It exhales.",
-          es:"Regresan con menos tropas y más ruido. La línea de ataque se rompe contra el muro. Paco se sienta sobre una torreta inmóvil y come una naranja.\n\nLa isla no celebra. Respira aliviada." }
-      ],
-      [
-        { enT:"The Parade Stops", esT:"El desfile se detiene",
-          en:"The Crown Lattice arrives as if the invasion were a procession. It is not. Its gray ships turn when the citadel refuses to kneel.\n\nSoren Pell says nothing. For once, the silence belongs to the island.",
-          es:"La Celosía de la Corona llega como si la invasión fuera una procesión. No lo es. Sus barcos grises retroceden cuando la ciudadela se niega a arrodillarse.\n\nSoren Pell no dice nada. Por una vez, el silencio pertenece a la isla." },
-        { enT:"Ash on the Water", esT:"Ceniza en el agua",
-          en:"The Crown Lattice returns without music. Its hulls burn in a low, even line. By dusk, the eastern cliff belongs to the island again.\n\nMarek watches the smoke without speaking. On this island, that counts as a toast.",
-          es:"La Celosía de la Corona regresa sin música. Sus cascos arden en una línea baja y uniforme. Al anochecer, el acantilado oriental vuelve a pertenecer a la isla.\n\nMarek observa el humo en silencio. En esta isla, eso cuenta como un brindis." }
-      ],
-      [
-        { enT:"Terms Rejected", esT:"Términos rechazados",
-          en:"The Hemisphere Trust lands with drones first and lawyers second. Every soldier wears a camera. Every camera is streaming. The feed cuts out when the first boat turns back.\n\nDana Holt's statement calls the retreat a temporary service interruption.",
-          es:"El Fideicomiso del Hemisferio desembarca con drones primero y abogados después. Cada soldado lleva una cámara. Cada cámara transmite en vivo. La señal se corta cuando el primer bote da la vuelta.\n\nEl comunicado de Dana Holt llama a la retirada una interrupción temporal del servicio." },
-        { enT:"Deprioritized", esT:"Despriorizados",
-          en:"The second wave arrives with better branding and the same result. Their landing craft ground on the reef they had rated low risk. Nico collects three helmets with the price tags still on.\n\nThe island shuts off the floodlights and goes to sleep.",
-          es:"La segunda oleada llega con mejor imagen de marca y el mismo resultado. Sus lanchas encallan en el arrecife que habían calificado de bajo riesgo. Nico junta tres cascos que todavía tienen la etiqueta del precio.\n\nLa isla apaga los reflectores y se va a dormir." }
-      ]
-    ];
-    const bk=warBloc(bloc).key;
-    const row=packs[packByKey[bk]!=null?packByKey[bk]:0][slot===1?1:0];
+    const row=reportRow();
     S.chanceTitle={ en:row.enT, es:row.esT };
-    return es?row.es:row.en;
+    return chanceLang()?row.es:row.en;
   }
+  const TRIUMPH_OPEN={
+    pact:{ en:"The Meridian Pact is beaten. Its ships head home with their flags still up: lowering them requires a form nobody wants to sign.",
+           es:"El Pacto Meridiano está derrotado. Sus barcos vuelven a casa con las banderas izadas: bajarlas exige un formulario que nadie quiere firmar." },
+    ledger:{ en:"The Red Ledger is beaten. Its ships sail home in silence. For the first time in weeks, nobody on board is giving a speech.",
+             es:"El Libro Rojo está derrotado. Sus barcos regresan en silencio. Por primera vez en semanas, nadie a bordo da un discurso." },
+    lattice:{ en:"The Crown Lattice is beaten. Its fleet withdraws in perfect formation, the one thing it has left.",
+              es:"La Celosía de la Corona está derrotada. Su flota se retira en formación perfecta, lo único que le queda." },
+    trust:{ en:"The Hemisphere Trust is beaten. Its fleet logs off one ship at a time.",
+            es:"El Fideicomiso del Hemisferio está derrotado. Su flota se desconecta barco por barco." }
+  };
+  const TRIUMPH_RECOG={
+    pact:{ en:"Voss sends a one-line note. It uses the word recognition. It avoids the word surrender. Bitcoin Country appears in the typeface they reserve for countries they dislike.",
+           es:"Voss envía una nota de una línea. Usa la palabra reconocimiento y evita la palabra rendición. Bitcoin Country aparece con la tipografía que reservan para los países que no les agradan." },
+    ledger:{ en:"Kade signs a paper that calls the island a nation and the campaign a miscalculation. Back home, the posters will have to be reprinted.",
+             es:"Kade firma un documento que llama nación a la isla y error de cálculo a la campaña. En su país tendrán que reimprimir los carteles." },
+    lattice:{ en:"Pell does not apologize. He sends a herald to a harbor the Lattice no longer holds to say one word, recognition, in the tone of someone correcting a clerical error.",
+              es:"Pell no se disculpa. Envía a un heraldo a un puerto que la Celosía ya no controla para pronunciar una sola palabra, reconocimiento, con el tono de quien corrige un error administrativo." },
+    trust:{ en:"Holt pushes a terms-of-service update: Bitcoin Country is now listed as a sovereign nation, on page 412, in very small print.",
+            es:"Holt publica una actualización de los términos de servicio: Bitcoin Country figura ahora como nación soberana, en la página 412, en letra muy pequeña." }
+  };
   function triumphText(){
     const es=chanceLang();
     const won=S.bcBattlesWon||0;
     const b=warBloc(((won-1)/3)|0);
-    const name=es?b.es:b.en, who=es?b.leaderEs:b.leader;
     const titles={
       pact:{en:"The Pact Falls Back",es:"El Pacto retrocede"},
       ledger:{en:"The Ledger Breaks",es:"El Libro se rompe"},
@@ -3317,40 +3391,23 @@
       trust:{en:"The Trust Logs Off",es:"El Fideicomiso se desconecta"}
     };
     S.chanceTitle=titles[b.key]||titles.pact;
-    const recog=es
-      ? (b.key==="ledger"
-        ? "La firma de "+who+" aparece en un documento que llama nación a la isla y error de cálculo a la campaña. En su país deberán volver a imprimir los carteles."
-        : b.key==="trust"
-        ? who+" publica una actualización de los términos: Bitcoin Country figura ahora como nación soberana, en la página 412, en letra muy pequeña."
-        : b.key==="lattice"
-        ? who+" no ofrece disculpas. Un heraldo pronuncia una sola palabra en un puerto que la Celosía ya no controla: reconocimiento. La presenta como si fuera una corrección administrativa."
-        : who+" envía una nota de una línea. Incluye la palabra reconocimiento y evita la palabra rendición. Bitcoin Country aparece como país, con la tipografía reservada para los países que no les agradan.")
-      : (b.key==="ledger"
-        ? who+" signs a paper that calls the island a nation and the campaign a miscalculation. The posters at home will have to be reprinted."
-        : b.key==="trust"
-        ? who+" pushes a terms-of-service update: Bitcoin Country is now listed as a sovereign nation, on page 412, in very small print."
-        : b.key==="lattice"
-        ? who+" does not apologize. A herald does it once, in a harbor the Lattice no longer holds. The word is recognition. He makes it sound like a clerical correction."
-        : who+" sends a one-line note. It uses the word recognition. It does not use the word surrender. Bitcoin Country is set in the type they use for countries they dislike.");
+    const L=(o)=>es?o.es:o.en;
+    const open=L(TRIUMPH_OPEN[b.key]||TRIUMPH_OPEN.pact);
+    const recog=L(TRIUMPH_RECOG[b.key]||TRIUMPH_RECOG.pact);
+    // The bakery only closes on national holidays (set up in "This Is Apparently a Place Now"): each bloc defeat gives it one.
     const holiday=won>=9
-      ? (es
-        ? "La panadería cierra al mediodía por tercera vez. El panadero ya ni se molesta en dar vuelta el cartel. Toda la isla se amontona en el muelle, el altavoz suena hasta que se le agota la batería y nadie consulta el calendario."
-        : "The bakery closes at noon for the third time. The baker no longer bothers turning the sign around. The whole island crowds the dock, the speaker plays until its battery dies, and nobody consults the calendar.")
+      ? (es?"Tercer feriado nacional, y la panadería cierra otra vez. Nadie organiza nada: toda la isla termina en el muelle y se queda ahí hasta que oscurece."
+           :"A third national holiday, and the bakery closes again. Nobody organizes anything: the whole island simply ends up on the dock and stays until dark.")
       : won>=6
-      ? (es
-        ? "La panadería vuelve a cerrar al mediodía. El panadero empezó a anotar los feriados nacionales al dorso del cartel: ya van dos y queda lugar. El altavoz vuelve a su caja junto al muelle, y las banderas de los niños siguen sin coincidir."
-        : "The bakery closes at noon again. The baker has started listing national holidays on the back of the sign: two so far, with room for more. The speaker returns to its crate by the dock, and the children's flags still do not match.")
-      : (es
-        ? "Al mediodía, por primera vez, la panadería cierra. El cartel de la puerta estaba esperando este día. Alguien coloca un altavoz sobre una caja junto al muelle y los niños recorren la playa con banderas que no coinciden. Es feriado nacional, y nadie espera a que el calendario esté de acuerdo."
-        : "At noon, for the first time, the bakery closes. The sign on the door was waiting for this day. Someone sets a speaker on a crate by the dock, and children run the beach with flags that do not match. It is a national holiday, and nobody waits for the calendar to agree.");
+      ? (es?"Segundo feriado nacional. La panadería cierra otra vez, el altavoz regresa a su cajón junto al muelle y esta vez la isla ya se sabe las canciones."
+           :"A second national holiday. The bakery closes again, the speaker goes back on its crate by the dock, and this time the island knows the songs.")
+      : (es?"Por primera vez desde que abrió, la panadería cierra: su cartel decía «solo feriados nacionales», y la isla por fin tiene uno. Alguien pone un altavoz sobre un cajón junto al muelle y los niños corren por la playa con banderas que no combinan."
+           :"For the first time since it opened, the bakery closes: its sign said national holidays only, and the island finally has one. Someone sets a speaker on a crate by the dock, and children run along the beach with flags that do not match.");
     const tail=won>=9
       ? (es?"La radio queda en silencio. Por una vez, nadie se apura a encenderla.":"The radio goes quiet. For once, nobody hurries to turn it back on.")
       : won>=6
-      ? (es?((s0)=>s0.charAt(0).toUpperCase()+s0.slice(1))(warBloc(2).esThe)+" aún puede decidir que esta derrota no le concierne. Si ataca, lo hará dentro de 210 velas.":((s0)=>s0.charAt(0).toUpperCase()+s0.slice(1))(warBloc(2).enThe)+" may still decide this defeat belonged to someone else. If they come, it will be within 210 candles.")
-      : (es?"La guerra en el mar aún no termina. Otro bloque puede considerar que esta derrota no le concierne. Si ataca, lo hará dentro de 210 velas.":"The sea is not finished with you. Another bloc may still decide this defeat belonged to someone else. If they come, it will be within 210 candles.");
-    const open=es
-      ? name+" ha sido derrotado. Sus barcos regresan con las banderas aún izadas, porque bajarlas exigiría un formulario que nadie quiere firmar."
-      : "The "+name+" is beaten. The ships turn for home with the flags still up, because taking them down would require a form nobody wants to sign.";
+      ? (es?"Queda "+warBloc(2).esThe+". Si ataca, lo hará dentro de 210 velas.":"Only "+warBloc(2).enThe+" remains. If it attacks, it will be within 210 candles.")
+      : (es?"Quedan dos bloques. Si el próximo ataca, lo hará dentro de 210 velas.":"Two blocs remain. If the next one attacks, it will be within 210 candles.");
     return open+"\n\n"+recog+"\n\n"+holiday+"\n\n"+rebuildNote()+"\n\n"+tail;
   }
   function warTldr(id){
@@ -3359,46 +3416,16 @@
     if(id==="blocReplies") return es
       ? "Los tres bloques responden de forma distinta: reconocimiento, rechazo, demora o una exigencia de pago. Al final de la semana, los tres están movilizando sus flotas."
       : "The three blocs answer differently: recognition, rejection, delay, or a demand for payment. By the end of the week, all three are mobilizing their fleets.";
-    if(id==="blocAssault") return es
-      ? "Un bloque abre fuego y publica un comunicado preparado de antemano. La flota se acerca; la isla debe resistir."
-      : "A bloc opens fire and releases a communiqué prepared in advance. The fleet is closing in; the island must hold.";
-    if(id==="battleWon"){
-      const i=Math.max(0,(S.bcBattlesWon||1)-1);
-      const en=[
-        "The Pact's landing collapses on the beach. Paco returns with a stamp from the occupation order.",
-        "A second landing reaches another cove, but its tanks never clear the hill.",
-        "",
-        "The Red Ledger attacks under its own slogans. Its posters reach the water before its soldiers.",
-        "The assault line breaks against the wall. The island does not celebrate; it exhales.",
-        "",
-        "The Crown Lattice arrives like a procession. Its gray ships turn when the citadel refuses to kneel.",
-        "The Crown Lattice returns without music. By dusk, the eastern cliff belongs to the island again."
-      ];
-      const sp=[
-        "El desembarco del Pacto fracasa en la playa. Paco regresa con un sello de la orden de ocupación.",
-        "Un segundo desembarco alcanza otra cala, pero sus tanques no superan la colina.",
-        "",
-        "El Libro Rojo ataca bajo sus propias consignas. Sus carteles llegan al agua antes que sus soldados.",
-        "La línea de ataque se rompe contra el muro. La isla no celebra; respira aliviada.",
-        "",
-        "La Celosía de la Corona llega como una procesión. Sus barcos grises retroceden cuando la ciudadela se niega a arrodillarse.",
-        "La Celosía de la Corona regresa sin música. Al anochecer, el acantilado oriental vuelve a pertenecer a la isla."
-      ];
-      const tEn={pact:[en[0],en[1]],ledger:[en[3],en[4]],lattice:[en[6],en[7]],trust:["The Hemisphere Trust lands with drones and lawyers. The feed cuts out when the first boat turns back.","The second wave grounds on a reef the Trust had rated low risk."]};
-      const tEs={pact:[sp[0],sp[1]],ledger:[sp[3],sp[4]],lattice:[sp[6],sp[7]],trust:["El Fideicomiso del Hemisferio desembarca con drones y abogados. La señal se corta cuando el primer bote da la vuelta.","La segunda oleada encalla en un arrecife que el Fideicomiso había calificado de bajo riesgo."]};
-      const bk=warBloc((i/3)|0).key, sl=i%3;
-      return ((es?tEs:tEn)[bk]||(es?tEs:tEn).pact)[sl===1?1:0];
-    }
+    if(id==="blocAssault"){ const r=assaultRow(); return es?r.tEs:r.tEn; }
+    if(id==="battleWon"){ const r=reportRow(); return es?r.tEs:r.tEn; }
     if(id==="blocTriumph"){
       const won=n;
       const b=warBloc(((won-1)/3)|0);
-      const name=es?b.es:b.en;
-      if(won>=9) return es
-        ? name+" reconoce a la nación. La panadería cierra por tercer feriado nacional.\n\n"+rebuildNote()
-        : "The "+name+" recognizes the nation. The bakery closes for a third national holiday.\n\n"+rebuildNote();
-      return es
-        ? name+" reconoce a la nación. La panadería cierra: es feriado nacional. Si otro bloque ataca, lo hará dentro de 210 velas.\n\n"+rebuildNote()
-        : "The "+name+" recognizes the nation. The bakery closes: it is a national holiday. If another bloc comes, it will be within 210 candles.\n\n"+rebuildNote();
+      const name=capF(es?b.esThe:b.enThe);
+      const head=es?name+" reconoce a la nación.":name+" recognizes the nation.";
+      if(won>=9) return head+" "+rebuildShort();
+      const mid=won<6?(es?" La panadería cierra por primera vez: es feriado nacional.":" The bakery closes for the first time: it is a national holiday."):"";
+      return head+mid+" "+rebuildShort()+(es?" Si el próximo bloque ataca, lo hará dentro de 210 velas.":" If the next bloc attacks, it will be within 210 candles.");
     }
     return "";
   }
@@ -7233,6 +7260,13 @@
     S.bcRuinTiles=0;
     S.bcRuinGone=0;
   }
+  function rebuildShort(){
+    const b=S.bcRebuild;
+    const es=chanceLang();
+    if(!b)return "";
+    if((b.pct|0)<=0)return es?"Sin daños que reconstruir.":"No damage to rebuild.";
+    return (es?"Reconstrucción: ":"Rebuilding: ")+costLabel(b.usd||0)+".";
+  }
   function rebuildNote(){
     const b=S.bcRebuild;
     const es=chanceLang();
@@ -7240,13 +7274,13 @@
     const pct=b.pct|0;
     if(pct<=0){
       return es
-        ? "En los tres mapas, las casas y el faro siguen en pie. La reconstrucción sale cero."
-        : "Across the three maps, the houses and the lighthouse are still standing. Reconstruction costs nothing.";
+        ? "Después de las tres batallas, las casas y el faro siguen en pie. No hay nada que reconstruir."
+        : "After all three battles, the houses and the lighthouse are still standing. There is nothing to rebuild.";
     }
     const label=costLabel(b.usd||0);
     return es
-      ? "En los tres mapas, el "+pct+"% de las casas y del faro quedó destruido. La reconstrucción se cobra al mismo porcentaje del patrimonio (máximo 50%): "+label+". Ya salió de las cuentas."
-      : "Across the three maps, "+pct+"% of the house and lighthouse tiles are destroyed. Reconstruction is billed at the same share of net worth (capped at 50%): "+label+". It is already off the books.";
+      ? "Las tres batallas destruyeron el "+pct+"% de las casas y el faro. Reconstruir cuesta ese mismo porcentaje del patrimonio (máximo 50%): "+label+", ya descontado."
+      : "The three battles destroyed "+pct+"% of the houses and the lighthouse. Rebuilding costs the same share of your net worth (capped at 50%): "+label+", already paid.";
   }
   function groundUnder(d,i){
     if(d.bedSet&&d.bedSet[i])return d.bed[i]===0?0:6;
