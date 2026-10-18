@@ -3049,9 +3049,8 @@
   }
   // Post-decision art: drop chance/<id>-<choice>-wide.jpg in and it shows on the result screen; falls back to the card art if missing.
   const POST_ART = {
-    // citadelQuestion-a, islandInspection-a and protectIsland-a are held back (a Lena-like woman in the independence arc).
-    proposal:"abc", wedding:"abc", honeymoon:"abc", phish:"ab", courage:"a",
-    protectIsland:"bc", citadelQuestion:"b", anOffer:"ab", theQuestion:"a"
+    proposal:"abc", wedding:"abc", honeymoon:"abc", phish:"ab", courage:"a", islandInspection:"a",
+    protectIsland:"abc", citadelQuestion:"ab", anOffer:"ab", theQuestion:"a"
   };
   const POST_ART_MISS = new Set();
   function postArtHtml(id, opt) {
@@ -3060,7 +3059,7 @@
     if (!opt || !POST_ART[id] || POST_ART[id].indexOf(opt) < 0 || POST_ART_MISS.has(key) || base.indexOf("<img") !== 0) return base;
     const m = base.match(/ src="([^"]*)"/);
     if (!m) return base;
-    const src = "chance/" + key + "-wide.jpg?v=post2";
+    const src = "chance/" + key + "-wide.jpg?v=post3";
     return base.replace(/ onerror="[^"]*"/, "").replace(m[0], " src=\"" + src + "\" data-base=\"" + m[1] + "\"")
       .replace("<img ", "<img onerror=\"this.onerror=null;window.__choppyPostMiss&&window.__choppyPostMiss('" + key + "');this.src=this.dataset.base;\" ");
   }
