@@ -2948,6 +2948,8 @@
     chess: "board1"
   };
 
+  // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
+  const WIDE_JPG_VER = { unclemike: "cin15" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
 
@@ -2973,7 +2975,7 @@
       const v = ARC_ART_VERSIONS[artId] || "gpt4";
       src = "chance/" + artId + "-wide.png?v=" + v;
     } else if (isWide) {
-      src = "chance/" + (artId.endsWith("-wide") ? artId : artId + "-wide") + ".jpg?v=cin14";
+      src = "chance/" + (artId.endsWith("-wide") ? artId : artId + "-wide") + ".jpg?v=" + (WIDE_JPG_VER[artId] || "cin14");
     } else {
       src = "chance/" + artId + ".jpg?v=mp86";
     }
