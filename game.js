@@ -1355,7 +1355,7 @@
       S.perkResume = null; S.perkFib = 0;
       S.jukeList = []; S.jukeUnlock = []; S.jukeTrack = 0; S.jukeOn = false; S.jukeShuffle = false; S.jukeRepeat = "off"; S.jukeOff = {};
       S.aibudOn = false; S.aibudLit = {}; S.aibudLitAt = {}; S.iaLog = []; S.iaProfit = 0; S.aibudSpeechUntil = 0; S.aiAcc = 0; S.aiTimingStart = null; S.aiTimingLast = 0; S.aiTradeAt = -999;
-      S.jobName = ""; S.jobTrack = null; S.jobOffer = null; S.chanceAt = []; S.chanceUntil = 0; S.chanceUsed = {}; S.chanceCard = null; S.chanceNote = ""; S.chanceReadyNote = ""; S.chanceSettled = false; S.chanceMet = {}; S.chanceLead = ""; S.arcHold = false; S.arcTldr = ""; S.arcPending = null; S.hasRing=false; S.engaged=false; S.familyClosed=false; S.familyPath=false; S.arcSeen=[]; S.arcBias=""; S.bcBook=false; S.bcBookOffer=false; S.bcIslandOffer=0; S.bcIsland=false; S.bcOg=false; S.bcNodes=0; S.bcNodeTick=0; S.bcSettlement=false; S.bcPower=false; S.bcMine=false; S.bcCitadel=false; S.bcArmyUnlocked=false; S.bcArmy=0; S.bcArmyTier=0; S.bcWorld=20; S.bcIndependent=false; S.bcVictory=false; S.bcArcClosed=false; S.bcDefense=null; S.bcDefensePending=false; S.bcArmySpend=0; S.bcBattlesWon=0; S.bcPerks={}; S.bcAidUsed=0; S.bcAssaultAt=0; S.bcMapPlan=null; S.bcMapSeed=0; S.bcReactions=null; S.bcPeacePct=0; S.bcArtPick={}; rollBlocs(); S.bcRepliesDone=false; S.indepNoted=false; S.indepAt=0; S.bcCountryName=""; S.bcNameAsk=false; S.bcShotTier=0; S.bcShotSpread=0; S.bcRuinTiles=0; S.bcRuinGone=0; S.bcRebuild=null;
+      S.jobName = ""; S.jobTrack = null; S.jobOffer = null; S.chanceAt = []; S.chanceUntil = 0; S.chanceUsed = {}; S.chessPick = -1; S.winKind = ""; S.indepEnded = false; S.bcFourthDone = false; S.chanceCard = null; S.chanceNote = ""; S.chanceReadyNote = ""; S.chanceSettled = false; S.chanceMet = {}; S.chanceLead = ""; S.arcHold = false; S.arcTldr = ""; S.arcPending = null; S.hasRing=false; S.engaged=false; S.familyClosed=false; S.familyPath=false; S.arcSeen=[]; S.arcBias=""; S.bcBook=false; S.bcBookOffer=false; S.bcIslandOffer=0; S.bcIsland=false; S.bcOg=false; S.bcNodes=0; S.bcNodeTick=0; S.bcSettlement=false; S.bcPower=false; S.bcMine=false; S.bcCitadel=false; S.bcArmyUnlocked=false; S.bcArmy=0; S.bcArmyTier=0; S.bcWorld=20; S.bcIndependent=false; S.bcVictory=false; S.bcArcClosed=false; S.bcDefense=null; S.bcDefensePending=false; S.bcArmySpend=0; S.bcBattlesWon=0; S.bcPerks={}; S.bcAidUsed=0; S.bcAssaultAt=0; S.bcMapPlan=null; S.bcMapSeed=0; S.bcReactions=null; S.bcPeacePct=0; S.bcArtPick={}; rollBlocs(); S.bcRepliesDone=false; S.indepNoted=false; S.indepAt=0; S.bcCountryName=""; S.bcNameAsk=false; S.bcShotTier=0; S.bcShotSpread=0; S.bcRuinTiles=0; S.bcRuinGone=0; S.bcRebuild=null;
       if (A && A.jukeStop) A.jukeStop();
     }
     S.halveLeft = HALVE_GAP; S.halveBull = false; S.halveFloor = 0; S.spawnedPipes = 0; S.halveSide = "up";
@@ -2264,7 +2264,7 @@
     potluck: { en: "Lena signs you and Paco up for the neighborhood potluck. He eats half of what you brought before you arrive.", es: "Lena los anota a ti y a Paco en la comida comunitaria del vecindario. Paco se come la mitad de lo que prepararon antes de llegar." },
     usedcar: { en: "Nico has found a 2009 Honda Fit. He looks under the hood, sees Sharpie, and calls it basically new.", es: "Nico encontró un Honda Fit 2009. Mira debajo del capó, ve una marca de Sharpie y lo considera básicamente nuevo." },
     tetris: { en: "Marek takes you to a bar with a Tetris cabinet nobody uses. He plays, then says it is your turn.", es: "Marek te lleva a un bar con una máquina de Tetris que nadie usa. Juega un rato y luego te cede el turno." },
-    chess: { en: "Marek sets up Morphy's Opera Game (Paris, 1858) and offers 1 BTC if you type White's first move in a mate in three. A miss costs nothing.", es: "Marek arma la partida de la ópera de Morphy (París, 1858) y te ofrece 1 BTC si escribes la primera jugada de las blancas en un mate en tres. Fallar no cuesta nada." },
+    chess: { en: "Marek sets up a famous historical chess position and offers a bitcoin if you find the winning move. A miss costs nothing.", es: "Marek arma una posición histórica famosa y te ofrece un bitcoin si encuentras la jugada ganadora. Fallar no cuesta nada." },
     unclemike: { en: "Dinner with Uncle Mike is excellent until the check. He will not tip, because he thinks the restaurant should pay its staff. The waiter is still standing there.", es: "La cena con el tío Mike es excelente hasta que llega la cuenta. Se niega a dejar propina porque cree que el restaurante debería pagarle sueldos dignos a los empleados. El mesero sigue esperando de pie." },
 
   };
@@ -2272,6 +2272,7 @@
     if (!card) return "";
     if (card.id === "blocReplies" || card.id === "blocAssault" || card.id === "blocTriumph" || card.id === "battleWon") return stampNation(warTldr(card.id));
     if (card.id === "firstBloc" || card.id === "rearmament" || card.id === "threeColors") return stampNation(blocIntroTldr(card.id, chanceLang()));
+    if (card.id === "chess") { const cp = chessProblem(); return chanceLang() ? cp.tldrEs : cp.tldr; }
     const row = card.tldr || CHANCE_TLDR[card.id];
     if (!row) return "";
     let line = chanceLang() ? (row.es || row.en) : row.en;
@@ -2517,9 +2518,9 @@
         { k: "b", label: "Watch Marek play", labelEs: "Mirar a Marek jugar" }
       ] },
     { id: "chess", kind: "choice", after: ["tetris", "poker"], input: "move",
-      title: "The Opera Game", titleEs: "La partida de la ópera",
-      body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy would rather be watching the opera, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move and mate in three. Type the first move. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
-      bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy preferiría estar mirando la ópera, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas y dan mate en tres. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\"." },
+      title: "Marek's Chess Problem", titleEs: "El problema de ajedrez de Marek",
+      body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
+      bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\"." },
     { id: "unclemike", kind: "choice",
       title: "Fancy Dinner with Uncle Mike", titleEs: "Cena elegante con el tío Mike",
       body: "Uncle Mike is in town, so you meet him at a fancy restaurant. The food is excellent and the wine is excellent, right up until the check arrives: $180 before tip. He studies it, looks at the tip line, and puts the pen down. Why, he wants to know, is he paying their salary? You tell him the tip is expected. That, he says, is the problem, and he goes on about restaurants that should pay their people instead of leaving it to the customers. You agree with him. You also want to go home. The waiter is still standing there, and you look at the tip line again.",
@@ -2563,16 +2564,174 @@
     { id:"blocAssault", kind:"report", when:()=>false, title:"Incoming Fire", titleEs:"Fuego enemigo", body:"A bloc opens fire while its prepared communiqué declares the attack unavoidable. Bitcoin Country must hold the island.", bodyEs:"Un bloque abre fuego mientras su comunicado preparado declara que el ataque era inevitable. Bitcoin Country debe defender la isla." },
     { id:"battleWon", kind:"report", when:()=>false, title:"The Beach Holds", titleEs:"La playa resiste", body:"The landing is repelled. Bitcoin Country holds the shore, but the campaign is not over.", bodyEs:"El desembarco es rechazado. Bitcoin Country conserva la costa, pero la campaña aún no ha terminado." },
     { id:"blocTriumph", kind:"report", when:()=>false, title:"Bloc Defeated", titleEs:"Bloque derrotado", body:"After its third failed assault, a bloc withdraws and recognizes Bitcoin Country as a nation.", bodyEs:"Tras su tercer ataque fallido, un bloque se retira y reconoce a Bitcoin Country como nación." },
-    { id:"fourthColor", kind:"report", after:["theAnswer"], when:()=>(S.bcBattlesWon||0)>=9, title:"A Fourth Color", titleEs:"Un cuarto color", body:"It is over. One bloc filed its final protest and lost the sea lane. Another ran out of ships it was willing to acknowledge. The third, which never apologizes, stopped answering the radio.\n\nThe island still stands. By morning, statements begin to arrive. Some governments call for negotiations; others carefully avoid the word country. San Arnaldo does not. Marek studies the map for a moment, then points to the new border. “You really did it.” At noon, the bakery reopens. The baker has amended the sign: national holidays, three a year at most.", bodyEs:"Se acabó. Un bloque presentó su última protesta y perdió la ruta marítima. Otro se quedó sin barcos que estuviera dispuesto a reconocer. El tercero, que nunca se disculpa, dejó de responder por radio.\n\nLa isla sigue en pie. Por la mañana comienzan a llegar comunicados. Algunos gobiernos piden negociaciones; otros evitan cuidadosamente la palabra país. San Arnaldo no. Marek estudia el mapa por un momento y señala la nueva frontera. «De verdad lo lograste». Al mediodía, la panadería vuelve a abrir. El panadero corrigió el cartel: feriados nacionales, tres por año como máximo." },
+    { id:"fourthColor", kind:"report", after:["theAnswer"], when:()=>(S.bcBattlesWon||0)>=9, opts:[{k:"keep",label:"Keep playing",labelEs:"Seguir jugando",hideCost:true},{k:"end",label:"End the game",labelEs:"Terminar la partida",hideCost:true}], title:"A Fourth Color", titleEs:"Un cuarto color", body:"It is over. One bloc filed its final protest and lost the sea lane. Another ran out of ships it was willing to acknowledge. The third, which never apologizes, stopped answering the radio.\n\nThe island still stands. By morning, statements begin to arrive. Some governments call for negotiations; others carefully avoid the word country. San Arnaldo does not. Marek studies the map for a moment, then points to the new border. “You really did it.” At noon, the bakery reopens. The baker has amended the sign: national holidays, three a year at most.", bodyEs:"Se acabó. Un bloque presentó su última protesta y perdió la ruta marítima. Otro se quedó sin barcos que estuviera dispuesto a reconocer. El tercero, que nunca se disculpa, dejó de responder por radio.\n\nLa isla sigue en pie. Por la mañana comienzan a llegar comunicados. Algunos gobiernos piden negociaciones; otros evitan cuidadosamente la palabra país. San Arnaldo no. Marek estudia el mapa por un momento y señala la nueva frontera. «De verdad lo lograste». Al mediodía, la panadería vuelve a abrir. El panadero corrigió el cartel: feriados nacionales, tres por año como máximo." },
     { id:"notYet", kind:"report", after:["theAnswer"], when:()=>false, title:"Not Yet", titleEs:"Todavía no", body:"The defensive line breaks. The last defenders fall back from the shore as the fleet takes the port. By nightfall, the flag is down and the transmitters are silent.", bodyEs:"La línea defensiva se rompe. Los últimos defensores retroceden desde la costa mientras la flota toma el puerto. Al caer la noche, la bandera ha sido retirada y los transmisores están en silencio." },
     
   ];
   CHANCE_CARDS.push(...JOB_ARC_CARDS);
-  // Opera Game (Morphy, Paris 1858), position after 14...Qe6: the only accepted answer is 15. Bxd7+ (bishop b5 to d7).
-  // Accepts SAN in English or Spanish (B/A), with or without x/×/+/#/!, long algebraic (b5d7, Bb5xd7), and a "15." prefix.
-  function chessMoveOk(raw) {
-    const v = String(raw || "").toLowerCase().replace(/^\s*15\s*\.*\s*/, "").replace(/[\s+#!?×x:\-]/g, "");
-    return ["bd7", "ad7", "b5d7", "bb5d7", "ab5d7"].indexOf(v) >= 0;
+  // Marek's chess card: a pool of seven historical positions (all verified with python-chess + Stockfish 17.1).
+  // One is picked per appearance; the pick lives in S.chessPick and the last four picks (across runs) are
+  // kept in localStorage so the same problem never comes back too soon.
+  const CHESS_POOL = [
+    { slug: "opera", side: "w", n: 15, key: "Bxd7+", uci: "b5d7",
+      title: "The Opera Game", titleEs: "La partida de la ópera",
+      tldr: "Marek sets up Morphy's Opera Game (Paris, 1858) and offers a bitcoin if you type White's first move of the finish. A miss costs nothing.",
+      tldrEs: "Marek arma la partida de la ópera de Morphy (París, 1858) y te ofrece un bitcoin si escribes la primera jugada blanca del final. Fallar no cuesta nada.",
+      body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
+      bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\".",
+      line: "15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#", lineEs: "15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#",
+      win: "\"The bishop first, then the queen, then the rook. Morphy saw it from a box seat.\"",
+      winEs: "\"Primero el alfil, después la dama, después la torre. Morphy lo vio desde un palco\".",
+      miss: "\"The bishop opens the file, the queen gives herself up, the rook mates. You can pay me in wine.\"",
+      missEs: "\"El alfil abre la columna, la dama se entrega y la torre da mate. Págame con vino\".",
+      tWin: "Marek plays it out: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. He slides the bitcoin across the table.",
+      tWinEs: "Marek lo juega por ti: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. Te pasa el bitcoin por la mesa.",
+      tMiss: "Marek shows you Morphy's line: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. “You can pay me in wine.”",
+      tMissEs: "Marek te muestra la línea de Morphy: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. “Págame con vino”." },
+    { slug: "immortal", side: "w", n: 21, key: "Nxg7+", uci: "f5g7",
+      title: "The Immortal Game", titleEs: "La partida inmortal",
+      tldr: "Marek sets up Anderssen's Immortal Game (London, 1851) and offers a bitcoin for White's first move of a mate in three. A miss costs nothing.",
+      tldrEs: "Marek arma la partida inmortal de Anderssen (Londres, 1851) y te ofrece un bitcoin por la primera jugada blanca de un mate en tres. Fallar no cuesta nada.",
+      body: "Marek pours the last of the wine and sets up the pieces with unusual care.\n\n\"London, 1851. The first international tournament is on, but this is only a casual game at Simpson's Divan, a smoky coffee house on the Strand. Adolf Anderssen, a mathematics teacher from Breslau, against Lionel Kieseritzky, who earns his living in Paris giving lessons by the hour. Anderssen has already given away a bishop and both rooks, and Black's queen is gobbling up his back rank. Kieseritzky thinks he is winning.\"\n\nHe places the last piece: the position after 20...Na6.\n\n\"White to move and mate in three. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
+      bodyEs: "Marek sirve lo que queda del vino y acomoda las piezas con un cuidado poco habitual.\n\n\"Londres, 1851. Se juega el primer torneo internacional, pero esta es apenas una partida amistosa en el Simpson's Divan, un café lleno de humo en el Strand. Adolf Anderssen, profesor de matemáticas de Breslau, contra Lionel Kieseritzky, que en París se gana la vida dando clases por hora. Anderssen ya regaló un alfil y las dos torres, y la dama negra se está comiendo su primera fila. Kieseritzky cree que va ganando\".\n\nColoca la última pieza: la posición después de 20...Ca6.\n\n\"Juegan las blancas y dan mate en tres. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
+      line: "21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#", lineEs: "21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#",
+      win: "\"Two rooks, a bishop, then the queen. Three minor pieces finish the job. Kieseritzky was so impressed he sent the moves to his club in Paris himself.\"",
+      winEs: "\"Dos torres, un alfil y después la dama. Tres piezas menores terminan el trabajo. A Kieseritzky le impresionó tanto que él mismo envió las jugadas a su club de París\".",
+      miss: "\"The knight checks, the queen is offered, the bishop mates. Anderssen gave away almost everything and kept exactly enough.\"",
+      missEs: "\"El caballo da jaque, la dama se ofrece y el alfil da mate. Anderssen regaló casi todo y se quedó con lo justo\".",
+      tWin: "Marek plays it out: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. Three minor pieces finish the job. The bitcoin is yours.",
+      tWinEs: "Marek lo juega por ti: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. Tres piezas menores terminan el trabajo. El bitcoin es tuyo.",
+      tMiss: "Marek shows you Anderssen's line: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. “He gave away almost everything and kept exactly enough.”",
+      tMissEs: "Marek te muestra la línea de Anderssen: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. “Regaló casi todo y se quedó con lo justo”." },
+    { slug: "evergreen", side: "w", n: 21, key: "Qxd7+", uci: "a4d7",
+      title: "The Evergreen Game", titleEs: "La siempreviva",
+      tldr: "Marek sets up Anderssen's Evergreen Game (Berlin, 1852) and offers a bitcoin for White's first move of a mate in four. A miss costs nothing.",
+      tldrEs: "Marek arma la siempreviva de Anderssen (Berlín, 1852) y te ofrece un bitcoin por la primera jugada blanca de un mate en cuatro. Fallar no cuesta nada.",
+      body: "Marek turns the board so the white pieces face you.\n\n\"Berlin, 1852. Another friendly game, another Anderssen sacrifice. His opponent, Jean Dufresne, wrote one of the most popular chess handbooks in Germany. Black's queen has just taken the knight on f3 and aims at g2, one move from mate. Years later Steinitz called this game an evergreen in Anderssen's laurel wreath, and the name stuck.\"\n\nHe places the last piece: the position after 20...Nxe7.\n\n\"White to move and mate in four, before that queen gets her turn. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
+      bodyEs: "Marek gira el tablero para que las blancas queden de tu lado.\n\n\"Berlín, 1852. Otra partida amistosa, otro sacrificio de Anderssen. Su rival, Jean Dufresne, escribió uno de los manuales de ajedrez más populares de Alemania. La dama negra acaba de tomar el caballo de f3 y apunta a g2, a una jugada del mate. Años después, Steinitz llamó a esta partida la siempreviva de la corona de laureles de Anderssen, y el nombre quedó\".\n\nColoca la última pieza: la posición después de 20...Cxe7.\n\n\"Juegan las blancas y dan mate en cuatro, antes de que esa dama tenga su turno. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
+      line: "21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#", lineEs: "21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#",
+      win: "\"A queen for a pawn, then two bishops on a wide-open board. Dufresne never got to play Qxg2.\"",
+      winEs: "\"Una dama por un peón y después dos alfiles en un tablero abierto. Dufresne nunca llegó a jugar Dxg2\".",
+      miss: "\"Every move has to be check, or her queen mates you on g2. Anderssen started with the biggest one.\"",
+      missEs: "\"Cada jugada tiene que ser jaque, o su dama te da mate en g2. Anderssen empezó por el más grande\".",
+      tWin: "Marek plays it out: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Dufresne never got to play Qxg2.”",
+      tWinEs: "Marek lo juega por ti: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Dufresne nunca llegó a jugar Dxg2”.",
+      tMiss: "Marek shows you Anderssen's line: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Every move has to be check.”",
+      tMissEs: "Marek te muestra la línea de Anderssen: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Cada jugada tiene que ser jaque”." },
+    { slug: "saavedra", side: "w", n: 6, key: "c8=R", uci: "c7c8r",
+      title: "The Saavedra Position", titleEs: "La posición de Saavedra",
+      tldr: "Marek sets up an 1895 endgame from Glasgow, a pawn against a rook, and offers a bitcoin for the move that wins. A miss costs nothing.",
+      tldrEs: "Marek arma un final de Glasgow de 1895, un peón contra una torre, y te ofrece un bitcoin por la jugada que gana. Fallar no cuesta nada.",
+      body: "Marek sweeps almost every piece off the board. Two kings, one white pawn, one black rook.\n\n\"Glasgow, 1895. A newspaper chess column prints this ending, taken from an old game, and declares it a draw. A Spanish priest living in the city, Father Fernando Saavedra, reads it and writes in to say the column is wrong. His name is now on the most famous endgame study ever made.\"\n\nHe places the last piece: the position after 5...Rd4.\n\n\"White to move and win. One warning: the obvious move only draws. Type the move that wins. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
+      bodyEs: "Marek retira casi todas las piezas del tablero. Dos reyes, un peón blanco y una torre negra.\n\n\"Glasgow, 1895. La columna de ajedrez de un periódico publica este final, sacado de una partida vieja, y lo declara tablas. Un sacerdote español que vive en la ciudad, el padre Fernando Saavedra, lo lee y escribe para decir que la columna se equivoca. Hoy su nombre está en el estudio de finales más famoso de la historia\".\n\nColoca la última pieza: la posición después de 5...Td4.\n\n\"Juegan las blancas y ganan. Una advertencia: la jugada obvia solo empata. Escribe la jugada que gana. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
+      line: "6. c8=R!! Ra4 7. Kb3", lineEs: "6. c8=T!! Ta4 7. Rb3",
+      win: "\"A queen walks into 6...Rc4+ 7. Qxc4, stalemate. A rook threatens Rc1# and Kxa4 at the same time. Saavedra wanted less, and won.\"",
+      winEs: "\"Con dama llega 6...Tc4+ 7. Dxc4, ahogado. Con torre amenazas Tc1# y Rxa4 a la vez. Saavedra pidió menos y ganó\".",
+      miss: "\"Crown a queen and Black plays 6...Rc4+, and taking the rook is stalemate. A rook threatens Rc1# and Kxa4 at once.\"",
+      missEs: "\"Si coronas dama, las negras juegan 6...Tc4+, y tomar la torre es ahogado. Con torre amenazas Tc1# y Rxa4 a la vez\".",
+      tWin: "Marek plays it out: 6. c8=R!! Ra4 7. Kb3, threatening Rc1# and Kxa4. “Saavedra wanted less, and won.” The bitcoin is yours.",
+      tWinEs: "Marek lo juega por ti: 6. c8=T!! Ta4 7. Rb3, con amenaza de Tc1# y Rxa4. “Saavedra pidió menos y ganó”. El bitcoin es tuyo.",
+      tMiss: "Marek shows you Saavedra's move: 6. c8=R!! A queen allows 6...Rc4+ and stalemate. A rook threatens Rc1# and Kxa4.",
+      tMissEs: "Marek te muestra la jugada de Saavedra: 6. c8=T!! Con dama llega 6...Tc4+ y el ahogado. Con torre amenazas Tc1# y Rxa4." },
+    { slug: "kinghunt", side: "w", n: 11, key: "Qxh7+", uci: "h5h7",
+      title: "The King Hunt", titleEs: "La cacería del rey",
+      tldr: "Marek sets up a casual London game from 1912 and offers a bitcoin for White's first move of a forced mate. A miss costs nothing.",
+      tldrEs: "Marek arma una partida amistosa de Londres de 1912 y te ofrece un bitcoin por la primera jugada blanca de un mate forzado. Fallar no cuesta nada.",
+      body: "Marek sets up the board quickly, as if he has done it many times.\n\n\"London, 1912. Edward Lasker, a young German engineer, plays a casual game against George Thomas, who will later be British chess champion and is already one of the best badminton players in England. Black has castled and feels safe behind his pawns. What comes next is the most famous king hunt ever played: the black king will walk from one side of the board to the other, and it will not walk back.\"\n\nHe places the last piece: the position after 10...Qe7.\n\n\"White to move and force mate. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
+      bodyEs: "Marek arma el tablero rápido, como si lo hubiera hecho muchas veces.\n\n\"Londres, 1912. Edward Lasker, un joven ingeniero alemán, juega una partida amistosa contra George Thomas, que después será campeón británico de ajedrez y ya es uno de los mejores jugadores de bádminton de Inglaterra. Las negras enrocaron y se sienten seguras detrás de sus peones. Lo que sigue es la cacería de rey más famosa de la historia: el rey negro cruzará el tablero de un lado al otro, y no va a volver\".\n\nColoca la última pieza: la posición después de 10...De7.\n\n\"Juegan las blancas y fuerzan el mate. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
+      line: "11. Qxh7+!! Kxh7 12. Nxf6+ Kh6 13. Neg4+ Kg5 14. h4+ Kf4 15. g3+ Kf3 16. Be2+ Kg2 17. Rh2+ Kg1 18. Kd2#",
+      lineEs: "11. Dxh7+!! Rxh7 12. Cxf6+ Rh6 13. Ceg4+ Rg5 14. h4+ Rf4 15. g3+ Rf3 16. Ae2+ Rg2 17. Th2+ Rg1 18. Rd2#",
+      win: "\"From g8 to g1, and Lasker mates him with a king move. Thomas went on to win the British championship twice.\"",
+      winEs: "\"De g8 a g1, y Lasker le da mate con una jugada de rey. Thomas igual ganó dos veces el campeonato británico\".",
+      miss: "\"The queen goes first, and then the king never gets a quiet move again.\"",
+      missEs: "\"Primero se entrega la dama, y después el rey no vuelve a tener una jugada tranquila\".",
+      tWin: "Marek plays it out: the queen sacrifice 11. Qxh7+!! drives the black king from g8 to g1, where 18. Kd2# ends it. The bitcoin is yours.",
+      tWinEs: "Marek lo juega por ti: el sacrificio 11. Dxh7+!! lleva al rey negro de g8 a g1, donde 18. Rd2# termina todo. El bitcoin es tuyo.",
+      tMiss: "Marek shows you Lasker's hunt: 11. Qxh7+!! drags the black king all the way to g1, and 18. Kd2# ends it.",
+      tMissEs: "Marek te muestra la cacería de Lasker: 11. Dxh7+!! arrastra al rey negro hasta g1, y 18. Rd2# termina todo." },
+    { slug: "goldcoins", side: "b", n: 23, key: "Qg3", uci: "c3g3",
+      title: "The Gold Coins Game", titleEs: "La partida de las monedas de oro",
+      tldr: "Marek sets up Marshall's most famous game (Breslau, 1912) and offers a bitcoin if you find Black's move. A miss costs nothing.",
+      tldrEs: "Marek arma la partida más famosa de Marshall (Breslavia, 1912) y te ofrece un bitcoin si encuentras la jugada de las negras. Fallar no cuesta nada.",
+      body: "Marek turns the board around. This time you have the black pieces.\n\n\"Breslau, 1912. Frank Marshall, the American champion, has Black against Stepan Levitsky of Russia. Levitsky's rook has just attacked Marshall's queen. Marshall later wrote that, after his reply, the spectators showered the board with gold coins. Historians doubt the coins. Nobody doubts the move.\"\n\nHe places the last piece: the position after 23. Rc5.\n\n\"Black to move. Marshall put his queen on a square where three white pieces could take her, and every capture lost. Type his move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
+      bodyEs: "Marek gira el tablero. Esta vez llevas las negras.\n\n\"Breslavia, 1912. Frank Marshall, campeón de Estados Unidos, juega con negras contra el ruso Stepan Levitsky. La torre de Levitsky acaba de atacar la dama de Marshall. Marshall escribió después que, tras su respuesta, el público llenó el tablero de monedas de oro. Los historiadores dudan de las monedas. Nadie duda de la jugada\".\n\nColoca la última pieza: la posición después de 23. Tc5.\n\n\"Juegan las negras. Marshall puso la dama en una casilla donde tres piezas blancas podían tomarla, y cualquier captura perdía. Escribe su jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
+      line: "23... Qg3!!", lineEs: "23... Dg3!!",
+      win: "\"24. hxg3 Ne2#. 24. fxg3 Ne2+ 25. Kh1 Rxf1#. 24. Qxg3 Ne2+ 25. Kh1 Nxg3+ and Black stays a piece up. Levitsky resigned on the spot.\"",
+      winEs: "\"24. hxg3 Ce2#. 24. fxg3 Ce2+ 25. Rh1 Txf1#. 24. Dxg3 Ce2+ 25. Rh1 Cxg3+ y las negras quedan con una pieza de más. Levitsky abandonó en el acto\".",
+      miss: "\"Take it with the h-pawn and Ne2 is mate. Take it with the f-pawn and the rook mates on f1. Levitsky resigned.\"",
+      missEs: "\"Si la toma el peón h, Ce2 es mate. Si la toma el peón f, la torre da mate en f1. Levitsky abandonó\".",
+      tWin: "Marek plays it out: 23... Qg3!! Every capture loses, and Levitsky resigned on the spot. The bitcoin is yours.",
+      tWinEs: "Marek lo juega por ti: 23... Dg3!! Cualquier captura pierde, y Levitsky abandonó en el acto. El bitcoin es tuyo.",
+      tMiss: "Marek shows you Marshall's move: 23... Qg3!! Three white pieces can take the queen, and every capture loses. Levitsky resigned.",
+      tMissEs: "Marek te muestra la jugada de Marshall: 23... Dg3!! Tres piezas blancas pueden tomar la dama, y cualquier captura pierde. Levitsky abandonó." },
+    { slug: "century", side: "b", n: 17, key: "Be6", uci: "g4e6",
+      title: "The Game of the Century", titleEs: "La partida del siglo",
+      tldr: "Marek sets up Byrne–Fischer (New York, 1956) and offers a bitcoin if you find the move a thirteen-year-old played. A miss costs nothing.",
+      tldrEs: "Marek arma Byrne–Fischer (Nueva York, 1956) y te ofrece un bitcoin si encuentras la jugada de un chico de trece años. Fallar no cuesta nada.",
+      body: "Marek sets up the board with the black pieces on your side.\n\n\"New York, October 1956. The Rosenwald tournament at the Marshall Chess Club. Donald Byrne is one of the strongest players in the country. Across the board sits Bobby Fischer, thirteen years old. Byrne's bishop has just attacked Fischer's queen, and any sensible player would move her. Hans Kmoch, the editor who annotated it for Chess Review, called it the Game of the Century.\"\n\nHe places the last piece: the position after 17. Kf1.\n\n\"Black to move. Fischer did not save his queen. Type his move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
+      bodyEs: "Marek arma el tablero con las negras de tu lado.\n\n\"Nueva York, octubre de 1956. El torneo Rosenwald, en el Marshall Chess Club. Donald Byrne es uno de los mejores jugadores del país. Frente a él se sienta Bobby Fischer, de trece años. El alfil de Byrne acaba de atacar la dama de Fischer, y cualquier jugador sensato la movería. Hans Kmoch, el editor que la comentó para Chess Review, la llamó la partida del siglo\".\n\nColoca la última pieza: la posición después de 17. Rf1.\n\n\"Juegan las negras. Fischer no salvó su dama. Escribe su jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
+      line: "17... Be6!! 18. Bxb6 Bxc4+ 19. Kg1 Ne2+ 20. Kf1 Nxd4+ 21. Kg1 Ne2+ 22. Kf1 Nc3+ 23. Kg1 axb6",
+      lineEs: "17... Ae6!! 18. Axb6 Axc4+ 19. Rg1 Ce2+ 20. Rf1 Cxd4+ 21. Rg1 Ce2+ 22. Rf1 Cc3+ 23. Rg1 axb6",
+      win: "\"The windmill. For the queen he takes a rook, two bishops and a pawn, and he mates Byrne on move 41.\"",
+      winEs: "\"El molino. Por la dama se lleva una torre, dos alfiles y un peón, y le da mate a Byrne en la jugada 41\".",
+      miss: "\"He lets the queen go and the knight starts spinning. Byrne played on until Fischer mated him on move 41.\"",
+      missEs: "\"Deja ir la dama y el caballo empieza a girar. Byrne siguió jugando hasta que Fischer le dio mate en la jugada 41\".",
+      tWin: "Marek plays it out: 17... Be6!! gives up the queen for a rook, two bishops and a pawn. Fischer mates on move 41. The bitcoin is yours.",
+      tWinEs: "Marek lo juega por ti: 17... Ae6!! entrega la dama por una torre, dos alfiles y un peón. Fischer da mate en la jugada 41. El bitcoin es tuyo.",
+      tMiss: "Marek shows you Fischer's move: 17... Be6!! He lets the queen go and mates Byrne on move 41.",
+      tMissEs: "Marek te muestra la jugada de Fischer: 17... Ae6!! Deja ir la dama y le da mate a Byrne en la jugada 41." }
+  ];
+  const CHESS_ART_READY = new Set([]);  // add a slug once chance/chess-<slug>-wide.jpg (1920x800) is in place
+  const CHESS_HIST_KEY = "choppy-chess-hist";
+  const CHESS_GAP = 4;  // never repeat any of the last four problems
+  let chessHistMem = [];
+  function chessHistory() {
+    let h = chessHistMem;
+    try { const raw = JSON.parse(localStorage.getItem(CHESS_HIST_KEY) || "[]"); if (Array.isArray(raw)) h = raw; } catch (e) {}
+    return h.filter((s) => CHESS_POOL.some((p) => p.slug === s));
+  }
+  function pickChessProblem() {
+    if (S.chessPick != null && S.chessPick >= 0 && S.chessPick < CHESS_POOL.length) return S.chessPick;
+    const hist = chessHistory();
+    const recent = hist.slice(-CHESS_GAP);
+    let free = CHESS_POOL.map((p, i) => i).filter((i) => recent.indexOf(CHESS_POOL[i].slug) < 0);
+    if (!free.length) free = CHESS_POOL.map((p, i) => i);
+    const i = free[(Math.random() * free.length) | 0];
+    S.chessPick = i;
+    const next = hist.concat([CHESS_POOL[i].slug]).slice(-(CHESS_POOL.length - 1));
+    chessHistMem = next;
+    try { localStorage.setItem(CHESS_HIST_KEY, JSON.stringify(next)); } catch (e) {}
+    return i;
+  }
+  function chessProblem() {
+    const i = S.chessPick;
+    return CHESS_POOL[(i != null && i >= 0 && i < CHESS_POOL.length) ? i : 0];
+  }
+  // Normalizes a typed move: lowercase, no move number, no x/×/:/-/=/+/#/!/? or spaces.
+  function chessNorm(raw) {
+    return String(raw || "").toLowerCase().replace(/^\s*\d*\s*\.+\s*/, "").replace(/[\s+#!?×x:\-=()]/g, "");
+  }
+  // Every reasonable way to write the key move: SAN in English or Spanish letters, long algebraic, coordinates.
+  function chessAnswers(p) {
+    const es = { k: "r", q: "d", r: "t", b: "a", n: "c" };
+    const san = String(p.key).replace(/[+#!?x=]/g, "");
+    const from = p.uci.slice(0, 2), to = p.uci.slice(2, 4), promo = p.uci.slice(4);
+    const out = new Set();
+    const m = san.match(/^([KQRBN])/);
+    if (m) {
+      const pc = m[1].toLowerCase();
+      [pc, es[pc]].forEach((l) => { out.add(l + san.slice(1).toLowerCase()); out.add(l + from + to); });
+      out.add(from + to);
+    } else if (promo) {
+      [promo, es[promo]].forEach((l) => { out.add(to + l); out.add(from + to + l); });
+    } else {
+      out.add(san.toLowerCase()); out.add(from + to);
+    }
+    return out;
+  }
+  function chessMoveOk(raw, prob) {
+    const p = prob || chessProblem();
+    return chessAnswers(p).has(chessNorm(raw));
   }
   function resolveChance(card, opt) {
     const es = chanceLang();
@@ -2802,7 +2961,7 @@
     if(card.id==="blocAssault"){S.bcDefensePending=true;return say("The first ships enter range.","Los primeros barcos entran en alcance.");}
     if(card.id==="battleWon"){return say("Repairs start before the smoke clears.","Las reparaciones empiezan antes de que se disipe el humo.");}
     if(card.id==="blocTriumph"){return say("One flag fewer on the horizon.","Una bandera menos en el horizonte.");}
-    if(card.id==="fourthColor"){S.bcIndependent=true;S.bcVictory=true;try{noteIndependence();}catch(e){}try{grantAward("fourth");}catch(e){}return say(stampNation("THE FOURTH COLOR. Bitcoin Country is independent. KEEP PLAYING."),stampNation("EL CUARTO COLOR. Bitcoin Country es independiente. CONTINÚA JUGANDO."));}
+    if(card.id==="fourthColor"){S.bcIndependent=true;S.bcVictory=true;if(!S.bcFourthDone){S.bcFourthDone=true;try{noteIndependence();}catch(e){}try{grantAward("fourth");}catch(e){}}return say(stampNation("THE FOURTH COLOR. Independence is won. You can end the game here or keep trading as a free nation."),stampNation("EL CUARTO COLOR. La independencia está ganada. Puedes terminar la partida aquí o seguir operando como nación libre."));}
     if(card.id==="notYet"){return say("Game over.","Fin de la partida.");}
     if (card.id === "honeymoon") {
       const map = { a: 0.1, b: 0.06, c: 0.04 };
@@ -2877,16 +3036,17 @@
       return say("A long bar would have saved you. −" + costLabel(stake) + ".", "Una pieza larga te habría salvado. −" + costLabel(stake) + ".");
     }
     if (card.id === "chess") {
-      const line = es ? "15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#" : "15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#";
+      const cp = chessProblem();
+      const line = es ? cp.lineEs : cp.line;
       const typed = String(opt || "").replace(/^move:/, "").trim().slice(0, 16).replace(/[<>&"]/g, "");
-      if (chessMoveOk(typed)) {
+      if (chessMoveOk(typed, cp)) {
         const out = creditBtc(1);
-        return say("Marek looks at the board for a long moment, then plays it out for you: " + line + " \"The bishop first, then the queen, then the rook. Morphy saw it from a box seat.\" He slides the bitcoin across the table. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " and +" + money(out.cash) : "") + ".",
-          "Marek mira el tablero un largo rato y luego lo juega por ti: " + line + " \"Primero el alfil, después la dama, después la torre. Morphy lo vio desde un palco\". Te pasa el bitcoin por la mesa. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " y +" + money(out.cash) : "") + ".");
+        return say("Marek looks at the board for a long moment, then plays it out for you: " + line + " " + cp.win + " He slides the bitcoin across the table. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " and +" + money(out.cash) : "") + ".",
+          "Marek mira el tablero un largo rato y luego lo juega por ti: " + line + " " + cp.winEs + " Te pasa el bitcoin por la mesa. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " y +" + money(out.cash) : "") + ".");
       }
       // a wrong move costs nothing: Marek shows the line and waves off the bet
-      return say((typed ? "\"" + typed + "?\" Marek shakes his head" : "Marek waits, then shrugs") + " and shows you Morphy's line: " + line + " \"The sacrifice comes first. Then the queen. You can pay me in wine.\"",
-        (typed ? "\"¿" + typed + "?\" Marek niega con la cabeza" : "Marek espera y luego se encoge de hombros") + " y te muestra la línea de Morphy: " + line + " \"Primero el sacrificio. Después la dama. Págame con vino\".");
+      return say((typed ? "Marek shakes his head at " + typed : "Marek waits, then shrugs") + " and shows you the line: " + line + " " + cp.miss,
+        (typed ? "Marek niega con la cabeza ante " + typed : "Marek espera y luego se encoge de hombros") + " y te muestra la línea: " + line + " " + cp.missEs);
     }
     if (card.id === "unclemike") {
       const bill = opt === "a" ? 216 : opt === "c" ? 198 : 180;
@@ -2961,6 +3121,10 @@
       return { id, artId, src: card.art, wide: isWide, isVideo: false };
     }
 
+    if (id === "chess" && typeof S !== "undefined" && S && S.chessPick != null && S.chessPick >= 0) {
+      const cp = CHESS_POOL[S.chessPick];
+      if (cp && CHESS_ART_READY.has(cp.slug)) return { id, artId: "chess-" + cp.slug, src: "chance/chess-" + cp.slug + "-wide.jpg?v=chs1", wide: true, isVideo: false };
+    }
     if (ARC_VID[id]) {
       const poster = "chance/" + artId + ".jpg?v=mp86";
       return { id, artId, src: "chance/" + id + ".mp4", poster, wide: false, isVideo: true };
@@ -3609,6 +3773,7 @@
     if (card.id === S.arcBias) S.arcBias = "";
     noteArcSeen(card.id);
     S.chanceCard = card; S.chanceOpt = null;
+    if (card.id === "chess") pickChessProblem();
     try { preloadSingleArt(getChanceArtMeta(card).src, true); } catch (e) {}
     S.chanceNote = "";
     S.chanceReadyNote = "";
@@ -3621,6 +3786,11 @@
     const es0 = chanceLang();
     const warBody = applyWarCard(card);
     let body = warBody != null ? warBody : weaveCast(es0 ? (card.bodyEs || card.body) : card.body);
+    if (card.id === "chess") {
+      const cp = CHESS_POOL[pickChessProblem()];
+      body = weaveCast(es0 ? cp.bodyEs : cp.body);
+      S.chanceTitle = { en: cp.title, es: cp.titleEs };
+    }
     if (card.job) body = fillJob(body, card.jobTier);
     if (card.kind === "report") {
       const before = bagSnap();
@@ -3731,7 +3901,7 @@
       .replace(/\b([ap])\.\s?m\./gi, (m) => m.replace(/\./g, "\u0000"))
       .replace(/\b(Mr|Mrs|Ms|Dr|Sr|Sra)\.(?=\s)/g, "$1\u0000")
       .replace(/\b(\d+)\.(\.\.)?(?=\s*(?:[KQRBNDTAC]?[a-h]?[1-8]?x?[a-h][1-8]|O-O))/g, (m) => m.replace(/\./g, "\u0000"))
-      .replace(/([a-h][1-8][+#]?)([!?]{1,2})(?=\s)/g, (m, a, b) => a + b.replace(/!/g, "\u0001").replace(/\?/g, "\u0002"));
+      .replace(/([a-h][1-8](?:=[QRBNDTAC])?[+#]?)([!?]{1,2})(?=\s)/g, (m, a, b) => a + b.replace(/!/g, "\u0001").replace(/\?/g, "\u0002"));
     const parts = prot.split(/(?<=[.!?…]["”'»]?)\s+(?=["“'«¿¡]?[A-ZÁÉÍÓÚÑ0-9$+\-−])/)
       .map((p) => p.replace(/\u0000/g, ".").replace(/\u0001/g, "!").replace(/\u0002/g, "?").trim())
       .filter(Boolean);
@@ -3751,11 +3921,7 @@
   // Hand-written TL;DR outcomes for long scenes that no single sentence can carry.
   const OUTCOME_TLDR = {
     "wedding:c": { en: "You tell Lena. “I'll miss you, Fartface.” You leave. Paco comes with you.",
-      es: "Se lo dices a Lena. “Te voy a extrañar, Cara de Pedo”. Te vas. Paco se va contigo." },
-    "chess:win": { en: "Marek plays it out: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. He slides the bitcoin across the table.",
-      es: "Marek lo juega por ti: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. Te pasa el bitcoin por la mesa." },
-    "chess:miss": { en: "Marek shows you Morphy's line: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. “You can pay me in wine.”",
-      es: "Marek te muestra la línea de Morphy: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. “Págame con vino”." }
+      es: "Se lo dices a Lena. “Te voy a extrañar, Cara de Pedo”. Te vas. Paco se va contigo." }
   };
   function withArcDelta(text) {
     const d = String(S.arcTldr || "").trim();
@@ -3782,8 +3948,12 @@
     if (ARC_TLDR) {
       const peeled = stripOutcomeMoney(raw);
       const cid = S.chanceCard ? S.chanceCard.id : "";
-      const okey = cid === "chess" ? (chessMoveOk(String(S.chanceOpt || "").replace(/^move:/, "")) ? "win" : "miss") : S.chanceOpt;
-      const fixed = cid && okey ? OUTCOME_TLDR[cid + ":" + okey] : null;
+      let fixed = cid && S.chanceOpt ? OUTCOME_TLDR[cid + ":" + S.chanceOpt] : null;
+      if (cid === "chess") {
+        const cp = chessProblem();
+        const won = chessMoveOk(String(S.chanceOpt || "").replace(/^move:/, ""), cp);
+        fixed = won ? { en: cp.tWin, es: cp.tWinEs } : { en: cp.tMiss, es: cp.tMissEs };
+      }
       const punch = fixed ? (chanceLang() ? fixed.es : fixed.en) : (punchline(peeled) || peeled);
       const tldr = S.chanceCard ? cardTldr(S.chanceCard) : "";
       text = punch || tldr;
@@ -3889,6 +4059,11 @@
       S.battleTutOpen=false;
       S.bcDefensePending=true;
       closeArc(card);
+      return;
+    }
+    if (card.id==="fourthColor") {
+      closeArc(card);
+      if (opt==="end") endIndependence();
       return;
     }
     if (card.id==="theQuestion" && opt==="a" && !S.bcVictory) {
@@ -9596,9 +9771,24 @@
   }
 
   function keepPlaying() {
-    S.hitCap = true;
+    if (S.winKind !== "indep") S.hitCap = true;
+    S.winKind = "";
     S.runTab = null;
+    S.arcHold = false;
     setPhase("play");
+  }
+  // Independence ending: freeze the run as a victory (best score saved, stats snapshot) with the
+  // same Keep playing / Stats / Play again / Share screen as the 21M cap.
+  function endIndependence() {
+    if (S.mp || !S.bcVictory || S.dead || S.phase === "over" || S.phase === "win") return;
+    if (S.phase === "defense" || S.chanceCard) return;
+    S.winKind = "indep";
+    S.indepEnded = true;
+    try { const p = $("bc-panel"); if (p) p.classList.add("hide"); } catch (e) {}
+    S.optPanel = null;
+    snapshotRun();
+    try { S.best = saveBest(scoreSats()); } catch (e) {}
+    setPhase("win");
   }
 
   function retryLostBattle(){
@@ -11481,7 +11671,8 @@
         ups.innerHTML="<p class=\"bc-up-now\">"+now+"</p><ul class=\"bc-up-list\">"+list+"</ul><p class=\"bc-note\">"+hint+"</p>";
       }
     }
-    setTxt("bc-note",S.bcVictory?(es?"Independiente. Sigue jugando.":"Independent. Keep playing."):S.bcArmyUnlocked?(es?"Las compras de ejército son permanentes. La fuerza mundial puede seguir subiendo.":"Army purchases are permanent. World strength can keep rising."):(es?"El ejército se entrena aquí. Forma una fuerza de defensa (2%) si la omitiste.":"Army is trained here. Form a defense force (2%) if you skipped it."));
+    {const endB=$("bc-end");if(endB){endB.classList.toggle("hide",!S.bcVictory||!!S.mp);endB.textContent=es?"TERMINAR LA PARTIDA":"END THE GAME";}}
+    setTxt("bc-note",S.bcVictory?(es?"Independiente. Puedes seguir jugando o terminar la partida cuando quieras.":"Independent. Keep playing, or end the game whenever you like."):S.bcArmyUnlocked?(es?"Las compras de ejército son permanentes. La fuerza mundial puede seguir subiendo.":"Army purchases are permanent. World strength can keep rising."):(es?"El ejército se entrena aquí. Forma una fuerza de defensa (2%) si la omitiste.":"Army is trained here. Form a defense force (2%) if you skipped it."));
   }
   let armyAlarmAt=0;
   function tickArmyAlarm(canBuy){
@@ -12088,7 +12279,11 @@
     who = who.replace(/^@/, "");
     const tag = who ? "@" + who + " " : "";
     const es = window.BZ && BZ.lang && BZ.lang() === "es";
-    const text = kind === "win"
+    const text = kind === "indep"
+      ? (es
+        ? tag + "ganó la independencia de " + stampNation("Bitcoin Country") + " en Choppy Bitcoin. Bag " + btc + (names ? " Premios: " + names : "")
+        : tag + "won independence for " + stampNation("Bitcoin Country") + " on Choppy Bitcoin. Bag " + btc + (names ? " Awards: " + names : ""))
+      : kind === "win"
       ? (es
         ? tag + "juntó 21M en Choppy Bitcoin. Bag " + btc + (names ? " Premios: " + names : "")
         : tag + "stacked 21M on Choppy Bitcoin. Bag " + btc + (names ? " Awards: " + names : ""))
@@ -13534,9 +13729,10 @@
       } else {
         if (card.input === "move") {
           const esM = chanceLang();
+          const cpM = chessProblem(), wM = cpM.side === "w";
           btns = "<form id=\"arc-move-form\" class=\"nation-ask arc-move\" autocomplete=\"off\">"
-            + "<label for=\"arc-move-in\" class=\"arc-move-label\">" + (esM ? "Tu jugada (blancas, jugada 15)" : "Your move (White, move 15)") + "</label>"
-            + "<input id=\"arc-move-in\" maxlength=\"16\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"none\" spellcheck=\"false\" enterkeyhint=\"done\" inputmode=\"text\" placeholder=\"" + (esM ? "p. ej. Cf3" : "e.g. Nf3") + "\">"
+            + "<label for=\"arc-move-in\" class=\"arc-move-label\">" + (esM ? "Tu jugada (" + (wM ? "blancas" : "negras") + ", jugada " + cpM.n + ")" : "Your move (" + (wM ? "White" : "Black") + ", move " + cpM.n + ")") + "</label>"
+            + "<input id=\"arc-move-in\" maxlength=\"16\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"none\" spellcheck=\"false\" enterkeyhint=\"done\" inputmode=\"text\" placeholder=\"" + (esM ? (wM ? "p. ej. Cf3" : "p. ej. Cf6") : (wM ? "e.g. Nf3" : "e.g. Nf6")) + "\">"
             + "<button type=\"submit\" class=\"cta\">" + (esM ? "Jugar" : "Play") + "</button>"
             + "</form>";
         } else
@@ -13658,13 +13854,18 @@
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
       } else {
-        overlay.innerHTML = "<p class=\"k\">TWENTY ONE MILLION</p><h1>" + t("congrats") + "</h1>"
-          + "<p>" + t("stacked") + "</p>"
+        const indep = S.winKind === "indep", esW = chanceLang();
+        const nation = indep ? stampNation("Bitcoin Country") : "";
+        overlay.innerHTML = (indep
+          ? "<p class=\"k\">" + (esW ? "EL CUARTO COLOR" : "THE FOURTH COLOR") + "</p><h1>" + (esW ? nation + " es libre" : nation + " is free") + "</h1>"
+            + "<p>" + (esW ? "Tu partida queda registrada como una victoria. Puedes seguir operando como nación libre o empezar de nuevo." : "Your run is recorded as a victory. Keep trading as a free nation, or start over.") + "</p>"
+          : "<p class=\"k\">TWENTY ONE MILLION</p><h1>" + t("congrats") + "</h1>"
+            + "<p>" + t("stacked") + "</p>")
           + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("keepPlaying") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"go-again\">" + t("playAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>";
         if ($("go")) $("go").onclick = keepPlaying;
         if ($("run-stats")) $("run-stats").onclick = (e) => { e.stopPropagation(); S.runTab = "stats"; renderOverlay(); };
         if ($("go-again")) $("go-again").onclick = replay;
-        if ($("share-run")) $("share-run").onclick = () => shareRun("win");
+        if ($("share-run")) $("share-run").onclick = () => shareRun(indep ? "indep" : "win");
       }
     }
   }
@@ -14152,6 +14353,8 @@
   if(bcArmy10)bcArmy10.addEventListener("click",onBuyArmy);
   if(bcArmyBar)bcArmyBar.addEventListener("click",onBuyArmy);
   if(bcForm)bcForm.addEventListener("click",()=>{formArmy();renderBitcoinCountry();renderHud();});
+  const bcEnd=$("bc-end");
+  if(bcEnd)bcEnd.addEventListener("click",(e)=>{e.preventDefault();e.stopPropagation();endIndependence();});
   if(bcDeclare)bcDeclare.addEventListener("click",(e)=>{
     e.preventDefault();
     e.stopPropagation();
