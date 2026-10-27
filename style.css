@@ -1485,3 +1485,14 @@ body.kb-sheet-on #overlay{visibility:hidden}
 .bc-post .bp-perk span{font-size:12px;opacity:.85}
 .bc-post .bp-go{margin-top:12px;width:100%}
 @media (hover:none){.bc-post .bp-perk kbd{display:none}}
+
+/* Award toasts (mp190): small corner notice, never blocks input. */
+.award-toasts { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); right: calc(env(safe-area-inset-right, 0px) + 10px); z-index: 10050; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: none; max-width: min(280px, calc(100vw - 20px)); }
+.award-toast { pointer-events: none; display: flex; flex-direction: column; gap: 2px; padding: 7px 11px; background: rgba(14, 14, 16, 0.92); border: 1px solid var(--gold, #f2a900); border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); color: var(--fg, #f7f7f8); font-family: "IBM Plex Mono", monospace; text-align: left; opacity: 0; transform: translateY(-6px); animation: award-toast-life 3s ease forwards; will-change: opacity, transform; }
+.award-toast-k { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold, #f2a900); }
+.award-toast-n { font-size: 13px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+@keyframes award-toast-life { 0% { opacity: 0; transform: translateY(-6px); } 8% { opacity: 1; transform: none; } 85% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-4px); } }
+@media (max-width: 520px) { .award-toasts { top: calc(env(safe-area-inset-top, 0px) + 6px); right: calc(env(safe-area-inset-right, 0px) + 6px); } .award-toast { padding: 6px 9px; } .award-toast-n { font-size: 12px; } }
+@media (prefers-reduced-motion: reduce) { .award-toast { animation-name: award-toast-fade; } @keyframes award-toast-fade { 0%, 100% { opacity: 0; } 8%, 85% { opacity: 1; } } }
+.aw-all summary { cursor: pointer; color: var(--gold); list-style-position: inside; margin-bottom: 6px; }
+.awards .aw-cat { margin: 10px 0 4px; color: var(--gold); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }

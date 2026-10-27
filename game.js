@@ -1355,7 +1355,7 @@
       S.perkResume = null; S.perkFib = 0;
       S.jukeList = []; S.jukeUnlock = []; S.jukeTrack = 0; S.jukeOn = false; S.jukeShuffle = false; S.jukeRepeat = "off"; S.jukeOff = {};
       S.aibudOn = false; S.aibudLit = {}; S.aibudLitAt = {}; S.iaLog = []; S.iaProfit = 0; S.aibudSpeechUntil = 0; S.aiAcc = 0; S.aiTimingStart = null; S.aiTimingLast = 0; S.aiTradeAt = -999;
-      S.jobName = ""; S.jobTrack = null; S.jobOffer = null; S.chanceAt = []; S.chanceUntil = 0; S.chanceUsed = {}; S.chessPick = -1; S.winKind = ""; S.indepEnded = false; S.bcFourthDone = false; S.chanceCard = null; S.chanceNote = ""; S.chanceReadyNote = ""; S.chanceSettled = false; S.chanceMet = {}; S.chanceLead = ""; S.arcHold = false; S.arcTldr = ""; S.arcPending = null; S.hasRing=false; S.engaged=false; S.familyClosed=false; S.familyPath=false; S.arcSeen=[]; S.arcBias=""; S.bcBook=false; S.bcBookOffer=false; S.bcIslandOffer=0; S.bcIsland=false; S.bcOg=false; S.bcNodes=0; S.bcNodeTick=0; S.bcSettlement=false; S.bcPower=false; S.bcMine=false; S.bcCitadel=false; S.bcArmyUnlocked=false; S.bcArmy=0; S.bcArmyTier=0; S.bcWorld=20; S.bcIndependent=false; S.bcVictory=false; S.bcArcClosed=false; S.bcDefense=null; S.bcDefensePending=false; S.bcArmySpend=0; S.bcBattlesWon=0; S.bcPerks={}; S.bcAidUsed=0; S.bcAssaultAt=0; S.bcMapPlan=null; S.bcMapSeed=0; S.bcReactions=null; S.bcPeacePct=0; S.bcArtPick={}; rollBlocs(); S.bcRepliesDone=false; S.indepNoted=false; S.indepAt=0; S.bcCountryName=""; S.bcNameAsk=false; S.bcShotTier=0; S.bcShotSpread=0; S.bcRuinTiles=0; S.bcRuinGone=0; S.bcRebuild=null;
+      S.jobName = ""; S.jobTrack = null; S.jobOffer = null; S.chanceAt = []; S.chanceUntil = 0; S.chanceUsed = {}; S.chessPick = -1; S.winKind = ""; S.indepEnded = false; S.bcFourthDone = false; S.chanceCard = null; S.chanceNote = ""; S.chanceReadyNote = ""; S.chanceSettled = false; S.chanceMet = {}; S.chanceLead = ""; S.arcHold = false; S.arcTldr = ""; S.arcPending = null; S.hasRing=false; S.engaged=false; S.familyClosed=false; S.familyPath=false; S.arcSeen=[]; S.arcBias=""; S.bcBook=false; S.bcBookOffer=false; S.bcIslandOffer=0; S.bcIsland=false; S.bcOg=false; S.bcNodes=0; S.bcNodeTick=0; S.bcSettlement=false; S.bcPower=false; S.bcMine=false; S.bcCitadel=false; S.bcArmyUnlocked=false; S.bcArmy=0; S.bcArmyTier=0; S.bcWorld=20; S.bcIndependent=false; S.bcVictory=false; S.bcArcClosed=false; S.bcDefense=null; S.bcDefensePending=false; S.bcArmySpend=0; S.bcBattlesWon=0; S.bcPerks={}; S.bcAidUsed=0; S.bcAssaultAt=0; S.bcMapPlan=null; S.bcMapSeed=0; S.bcReactions=null; S.bcPeacePct=0; S.bcArtPick={}; rollBlocs(); S.bcRepliesDone=false; S.indepNoted=false; S.indepAt=0; S.bcCountryName=""; S.bcNameAsk=false; S.bcShotTier=0; S.bcShotSpread=0; S.bcRuinTiles=0; S.bcRuinGone=0; S.bcRebuild=null; S.awRunCounted=false;
       if (A && A.jukeStop) A.jukeStop();
     }
     S.halveLeft = HALVE_GAP; S.halveBull = false; S.halveFloor = 0; S.spawnedPipes = 0; S.halveSide = "up";
@@ -2872,6 +2872,7 @@
       const stake = cutPct(opt === "b" ? 0.3 : 0.1);
       if (Math.random() < 0.46) {
         arcPay(stake * 2);
+        if (opt === "b") { try { grantAward("highRoller"); } catch (e) {} }
         return say("The number hits. +" + money(stake * 2) + " on " + costLabel(stake) + ".",
           "Sale el número. +" + money(stake * 2) + " sobre " + costLabel(stake) + ".");
       }
@@ -2882,7 +2883,7 @@
         "Marek se levanta de la mesa diez minutos después. \"Probablemente fue mejor así.\" Lo dice sin mirarte.");
       const stake = cutPct(opt === "b" ? 0.25 : 0.08);
       const r = Math.random();
-      if (r < 0.06) { arcPay(stake * 8); return say("You scoop the table. +" + money(stake * 8) + ".", "Te llevas toda la mesa. +" + money(stake * 8) + "."); }
+      if (r < 0.06) { arcPay(stake * 8); try { grantAward("scoop"); } catch (e) {} return say("You scoop the table. +" + money(stake * 8) + ".", "Te llevas toda la mesa. +" + money(stake * 8) + "."); }
       if (r < 0.28) { arcPay(stake * 3); return say("+" + money(stake * 3) + " on a " + costLabel(stake) + " buy-in.", "+" + money(stake * 3) + " con una entrada de " + costLabel(stake) + "."); }
       if (r < 0.52) { arcPay(stake * 1.4); return say("Min-cash. +" + money(stake * 1.4) + ".", "Cobras un premio menor. +" + money(stake * 1.4) + "."); }
       return say("Busted. −" + costLabel(stake) + ".", "Eliminado. −" + costLabel(stake) + ".");
@@ -2917,6 +2918,7 @@
       const paid = cutPct(0.2);
       if (Math.random() < 0.28) {
         arcPay(paid * 4);
+        try { grantAward("unicorn"); } catch (e) {}
         return say("They actually ship. 4× on " + costLabel(paid) + ".", "De verdad lanzan la app. 4× sobre " + costLabel(paid) + ".");
       }
       return say("The domain expired. " + costLabel(paid) + " is a case study.", "El dominio venció. " + costLabel(paid) + " ahora es un caso de estudio.");
@@ -3014,7 +3016,7 @@
     if(card.id==="blocAssault"){S.bcDefensePending=true;return say("The first ships enter range.","Los primeros barcos entran en alcance.");}
     if(card.id==="battleWon"){return say("Repairs start before the smoke clears.","Las reparaciones empiezan antes de que se disipe el humo.");}
     if(card.id==="blocTriumph"){return say("One flag fewer on the horizon.","Una bandera menos en el horizonte.");}
-    if(card.id==="fourthColor"){S.bcIndependent=true;S.bcVictory=true;if(!S.bcFourthDone){S.bcFourthDone=true;try{noteIndependence();}catch(e){}try{grantAward("fourth");}catch(e){}}return say(stampNation("THE FOURTH COLOR. Independence is won. You can end the game here or keep trading as a free nation."),stampNation("EL CUARTO COLOR. La independencia está ganada. Puedes terminar la partida aquí o seguir operando como nación libre."));}
+    if(card.id==="fourthColor"){S.bcIndependent=true;S.bcVictory=true;if(!S.bcFourthDone){S.bcFourthDone=true;try{noteIndependence();}catch(e){}try{grantAward("fourth");if(!(S.bcAidUsed|0))grantAward("noAid");}catch(e){}}return say(stampNation("THE FOURTH COLOR. Independence is won. You can end the game here or keep trading as a free nation."),stampNation("EL CUARTO COLOR. La independencia está ganada. Puedes terminar la partida aquí o seguir operando como nación libre."));}
     if(card.id==="notYet"){return say("Game over.","Fin de la partida.");}
     if (card.id === "honeymoon") {
       const map = { a: 0.1, b: 0.06, c: 0.04 };
@@ -3048,6 +3050,7 @@
       const paid = cutPct(0.4);
       if (Math.random() < 0.5) {
         arcPay(paid * 2.2);
+        try { grantAward("soldPump"); } catch (e) {}
         return say("$FRY really does pump. You sell on Thursday: 2.2× on " + costLabel(paid) + ".", "$FRY sube de verdad. Vendes el jueves: 2.2× sobre " + costLabel(paid) + ".");
       }
       return say("The developers pull the liquidity and vanish. Your $FRY can no longer be sold. −" + costLabel(paid) + ".", "Los desarrolladores retiran la liquidez y desaparecen. Tus $FRY ya no se pueden vender. −" + costLabel(paid) + ".");
@@ -3094,6 +3097,7 @@
       const typed = String(opt || "").replace(/^move:/, "").trim().slice(0, 16).replace(/[<>&"]/g, "");
       if (chessMoveOk(typed, cp)) {
         const out = creditBtc(1);
+        try { noteChessSolved(S.chessPick); } catch (e) {}
         return say("Marek looks at the board for a long moment, then plays it out for you: " + line + " " + cp.win + " He slides the bitcoin across the table. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " and +" + money(out.cash) : "") + ".",
           "Marek mira el tablero un largo rato y luego lo juega por ti: " + line + " " + cp.winEs + " Te pasa el bitcoin por la mesa. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " y +" + money(out.cash) : "") + ".");
       }
@@ -4145,6 +4149,7 @@
     }
     if (card.id==="fourthColor") {
       closeArc(card);
+      if (opt==="keep") { try { grantAward("freeNation"); } catch (e) {} }
       if (opt==="end") endIndependence();
       return;
     }
@@ -4160,6 +4165,7 @@
       const before = bagSnap();
       let note = "";
       try { note = stampNation(resolveChance(card, opt) || ""); } catch (err) { note = ""; }
+      try { cardAwards(card, opt); } catch (e) {}
       if (!note) note = chanceLang() ? "Listo." : "Done.";
       S.chanceNote = note;
       S.chanceOpt = opt;
@@ -9978,6 +9984,7 @@
       if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (Math.random() - 0.45) * S.vtPrice * 0.01 * dt + S.vtPrice * 0.0012 * dt);
     }
     S.lifeT += dt; S.sampleAcc += dt;
+    try { awardTick(dt); } catch (e) {}
     tickAi(dt);
     while (S.sampleAcc >= 0.12) {
       S.tape.push(S.price);
@@ -12091,7 +12098,9 @@
       halvings: S.halvings || 0, halveMiss: S.halveMiss || 0,
       endCash: S.cash, endBtc: S.btc, endPrice: S.price, net: net(),
       haveSum: Object.keys(S.have).reduce((n, k) => n + (S.have[k] || 0), 0),
-      iabud: S.have.iabud || 0
+      iabud: S.have.iabud || 0,
+      iaProfit: S.iaProfit || 0, job: S.have.job || 0, hitCap: !!S.hitCap,
+      perkMaxed: Object.keys(PERK_MAX).some((k) => PERK_MAX[k] >= 5 && k !== "job" && (S.have[k] || 0) >= PERK_MAX[k])
     };
   }
   function snapshotRun() {
@@ -12278,20 +12287,145 @@
     paintHaloText(ctx, "▲ B buy", 10, H - 12, PAL.labelUp || GREEN);
     paintHaloText(ctx, "▼ S sell", 96, H - 12, PAL.labelDn || RED);
   }
-  const AWARD_CATALOG = [
-    { id: "maxi", name: "Maxi Soul", nameEs: "Alma maxi", why: "Never sold BTC — not by hand, not by A.I. bud.", whyEs: "Nunca vendió BTC, ni a mano ni por A.I. bud." },
-    { id: "halver", name: "Halving Catcher", nameEs: "Atrapa halvings", why: "Every halving that spawned was eaten.", whyEs: "Comió todos los halvings que salieron." },
-    { id: "nocoiner", name: "Nocoiner", nameEs: "Nocoiner", why: "Never bought BTC in that run.", whyEs: "Nunca compró BTC en esa partida." },
-    { id: "greedy", name: "Greedy Miner", nameEs: "Minero greedy", why: "Ate 0 halvings.", whyEs: "Comió 0 halvings." },
-    { id: "opsec", name: "Opsec Warrior", nameEs: "Guerrero opsec", why: "Lost 0 cold storage.", whyEs: "No perdió cold storage." },
-    { id: "paper", name: "Paper Hands", nameEs: "Manos de papel", why: "Sold BTC in a bear market.", whyEs: "Vendió BTC en un bear market." },
-    { id: "fourth", name: "The Fourth Color", nameEs: "El cuarto color", why: "Bitcoin Country survived the attack.", whyEs: "Bitcoin Country sobrevivió el ataque." }
+  const AWARD_CATS = [
+    { id: "trading", en: "Trading", es: "Trading" },
+    { id: "survival", en: "Survival", es: "Supervivencia" },
+    { id: "perks", en: "Perks", es: "Perks" },
+    { id: "family", en: "Family", es: "Familia" },
+    { id: "country", en: "Bitcoin Country", es: "Bitcoin Country" },
+    { id: "challenge", en: "Challenges", es: "Desafíos" },
+    { id: "meta", en: "Career", es: "Trayectoria" }
   ];
-  function grantAward(id) {
-    if (!id) return;
+  // secret: locked awards show as "???" so the list never spoils a story beat.
+  const AWARD_CATALOG = [
+    { id: "maxi", cat: "trading", name: "Maxi Soul", nameEs: "Alma maxi", why: "Never sold BTC — not by hand, not by A.I. bud.", whyEs: "Nunca vendió BTC, ni a mano ni por A.I. bud." },
+    { id: "nocoiner", cat: "trading", name: "Nocoiner", nameEs: "Nocoiner", why: "Never bought BTC in that run.", whyEs: "Nunca compró BTC en esa partida." },
+    { id: "paper", cat: "trading", name: "Paper Hands", nameEs: "Manos de papel", why: "Sold BTC in a bear market.", whyEs: "Vendió BTC en un bear market." },
+    { id: "doubler", cat: "trading", name: "Double Stack", nameEs: "Stack doble", why: "Finished a run with at least 2× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos el doble del patrimonio inicial en BTC." },
+    { id: "tenx", cat: "trading", name: "Ten Bagger", nameEs: "Diez veces", why: "Finished a run with at least 10× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos 10 veces el patrimonio inicial en BTC." },
+    { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Day trader", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
+    { id: "cap21", cat: "trading", name: "Twenty One Million", nameEs: "Veintiún millones", why: "Stacked 21M BTC.", whyEs: "Juntó 21M BTC." },
+    { id: "halver", cat: "survival", name: "Halving Catcher", nameEs: "Atrapa halvings", why: "Every halving that spawned was eaten.", whyEs: "Comió todos los halvings que salieron." },
+    { id: "greedy", cat: "survival", name: "Greedy Miner", nameEs: "Minero greedy", why: "Ate 0 halvings.", whyEs: "Comió 0 halvings." },
+    { id: "opsec", cat: "survival", name: "Opsec Warrior", nameEs: "Guerrero opsec", why: "Lost 0 cold storage.", whyEs: "No perdió cold storage." },
+    { id: "longHaul", cat: "survival", name: "Long Haul", nameEs: "Larga distancia", why: "Survived 1,000 candles in one run.", whyEs: "Sobrevivió 1.000 velas en una partida." },
+    { id: "marathon", cat: "survival", name: "Marathon", nameEs: "Maratón", why: "Survived 2,100 candles in one run.", whyEs: "Sobrevivió 2.100 velas en una partida." },
+    { id: "swanHunter", cat: "survival", name: "Swan Hunter", nameEs: "Cazador de cisnes", why: "Vaporized 3 black swans in one run.", whyEs: "Vaporizó 3 cisnes negros en una partida." },
+    { id: "laserEyes", cat: "survival", name: "Laser Eyes", nameEs: "Ojos láser", why: "Grabbed laser eyes 5 times in one run.", whyEs: "Agarró ojos láser 5 veces en una partida." },
+    { id: "maxedPerk", cat: "perks", name: "Maxed Out", nameEs: "Al máximo", why: "Took a perk to its top tier.", whyEs: "Llevó una perk a su nivel máximo." },
+    { id: "perkHoarder", cat: "perks", name: "Perk Hoarder", nameEs: "Coleccionista de perks", why: "Took 15 perk tiers in one run.", whyEs: "Tomó 15 niveles de perks en una partida." },
+    { id: "goodBud", cat: "perks", name: "Good Bud", nameEs: "Buen compañero", why: "A.I. bud finished a run in profit.", whyEs: "El A.I. bud terminó una partida con ganancia." },
+    { id: "career", cat: "perks", name: "Career Ladder", nameEs: "Escalera profesional", why: "Reached the top of the job ladder.", whyEs: "Llegó a lo más alto de su carrera." },
+    { id: "engaged", cat: "family", secret: true, name: "Yes, Fartface", nameEs: "Sí, Cara de Pedo", why: "Lena said yes.", whyEs: "Lena dijo que sí." },
+    { id: "married", cat: "family", secret: true, name: "Just Married", nameEs: "Recién casados", why: "Married Lena.", whyEs: "Se casó con Lena." },
+    { id: "runaway", cat: "family", secret: true, name: "Something Else", nameEs: "Otra cosa", why: "Walked away from the wedding to build something else.", whyEs: "Dejó la boda para construir otra cosa." },
+    { id: "babyBoard", cat: "family", secret: true, name: "A Brand New Day", nameEs: "Un nuevo amanecer", why: "Welcomed the baby.", whyEs: "Le dio la bienvenida al bebé." },
+    { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Family office", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
+    { id: "classicFartface", cat: "family", secret: true, name: "Classic Fartface", nameEs: "Típico de Cara de Pedo", why: "Sent Lena a PDF of financial advice.", whyEs: "Le envió a Lena un PDF con consejos financieros." },
+    { id: "landowner", cat: "country", secret: true, name: "Landowner", nameEs: "Terrateniente", why: "Bought the island.", whyEs: "Compró la isla." },
+    { id: "notForSale", cat: "country", secret: true, name: "Not for Sale", nameEs: "No está en venta", why: "Turned down the consortium's offer.", whyEs: "Rechazó la oferta del consorcio." },
+    { id: "sellout", cat: "country", secret: true, name: "Exit Liquidity", nameEs: "Liquidez de salida", why: "Sold the island to the consortium.", whyEs: "Le vendió la isla al consorcio." },
+    { id: "miner", cat: "country", secret: true, name: "Island Miner", nameEs: "Minero isleño", why: "Put a Bitcoin mine online.", whyEs: "Puso en línea una mina de bitcoin." },
+    { id: "citadel", cat: "country", secret: true, name: "Citadel", nameEs: "Ciudadela", why: "Built the citadel.", whyEs: "Construyó la ciudadela." },
+    { id: "nodes100", cat: "country", secret: true, name: "Hundred Nodes", nameEs: "Cien nodos", why: "Reached 100 Liberty Nodes.", whyEs: "Llegó a 100 Nodos de Libertad." },
+    { id: "declared", cat: "country", secret: true, name: "Declaration", nameEs: "Declaración", why: "Declared independence.", whyEs: "Declaró la independencia." },
+    { id: "beachHolds", cat: "country", secret: true, name: "The Beach Holds", nameEs: "La playa resiste", why: "Repelled a landing.", whyEs: "Rechazó un desembarco." },
+    { id: "fourth", cat: "country", secret: true, name: "The Fourth Color", nameEs: "El cuarto color", why: "Bitcoin Country survived the attack.", whyEs: "Bitcoin Country sobrevivió el ataque." },
+    { id: "noAid", cat: "country", secret: true, name: "On Our Own", nameEs: "Por cuenta propia", why: "Won independence without paying for military aid.", whyEs: "Ganó la independencia sin pagar ayuda militar." },
+    { id: "freeNation", cat: "country", secret: true, name: "Free Nation", nameEs: "Nación libre", why: "Kept trading after independence.", whyEs: "Siguió operando después de la independencia." },
+    { id: "chessWin", cat: "challenge", secret: true, name: "Over the Board", nameEs: "Sobre el tablero", why: "Found the winning move in a chess problem.", whyEs: "Encontró la jugada ganadora de un problema de ajedrez." },
+    { id: "chess3", cat: "challenge", secret: true, name: "Chess Scholar", nameEs: "Erudito del ajedrez", why: "Solved 3 different historical chess problems.", whyEs: "Resolvió 3 problemas de ajedrez históricos distintos." },
+    { id: "chess7", cat: "challenge", secret: true, name: "Hall of Fame", nameEs: "Salón de la fama", why: "Solved all 7 historical chess problems.", whyEs: "Resolvió los 7 problemas de ajedrez históricos." },
+    { id: "scoop", cat: "challenge", secret: true, name: "Scoop", nameEs: "Toda la mesa", why: "Won the whole poker table.", whyEs: "Se llevó toda la mesa de póker." },
+    { id: "unicorn", cat: "challenge", secret: true, name: "Unicorn", nameEs: "Unicornio", why: "Backed a startup that actually shipped.", whyEs: "Invirtió en una startup que de verdad lanzó." },
+    { id: "highRoller", cat: "challenge", secret: true, name: "High Roller", nameEs: "Apostador fuerte", why: "Hit the number on the big casino bet.", whyEs: "Acertó el número con la apuesta fuerte del casino." },
+    { id: "soldPump", cat: "challenge", secret: true, name: "Sold the Pump", nameEs: "Vendió en la subida", why: "Got out of $FRY with a profit.", whyEs: "Salió de $FRY con ganancia." },
+    { id: "regular", cat: "meta", name: "Regular", nameEs: "Habitual", why: "Finished 10 ranked runs of 420+ candles.", whyEs: "Terminó 10 partidas ranked de 420 velas o más." },
+    { id: "veteran", cat: "meta", name: "Veteran", nameEs: "Veterano", why: "Finished 50 ranked runs of 420+ candles.", whyEs: "Terminó 50 partidas ranked de 420 velas o más." },
+    { id: "collector", cat: "meta", name: "Collector", nameEs: "Coleccionista", why: "Earned 10 awards.", whyEs: "Ganó 10 premios." },
+    { id: "curator", cat: "meta", name: "Curator", nameEs: "Curador", why: "Earned 25 awards.", whyEs: "Ganó 25 premios." }
+  ];
+  function awardById(id) { return AWARD_CATALOG.find((a) => a.id === id) || null; }
+  // Awards belong to real accounts only: auth.js sets choppySignedIn + choppyUid once a
+  // Supabase session with a profile is loaded, and clears both on sign-out. Guests get nothing.
+  function isRegistered() {
+    return !!(window.choppySignedIn === true && window.choppyUid && window.choppyUserId && window.choppyUid === window.choppyUserId);
+  }
+  function awardsLive() {
+    return isRegistered() && !!S.ranked && !S.testCheat && !S.mp;
+  }
+  const AWARD_TOAST_MS = 3000;
+  const awardToastQ = [];
+  let awardToastOn = 0;
+  function awardToastBox() {
+    let box = document.getElementById("award-toasts");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "award-toasts";
+      box.className = "award-toasts";
+      box.setAttribute("aria-live", "polite");
+      box.setAttribute("role", "status");
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+  function pumpAwardToasts() {
+    while (awardToastOn < 3 && awardToastQ.length) {
+      const a = awardToastQ.shift();
+      const es = window.BZ && BZ.lang && BZ.lang() === "es";
+      const el = document.createElement("div");
+      el.className = "award-toast";
+      const k = document.createElement("span");
+      k.className = "award-toast-k";
+      k.textContent = es ? "Premio desbloqueado" : "Award unlocked";
+      const n = document.createElement("b");
+      n.className = "award-toast-n";
+      n.textContent = "🏆 " + awardName(a);
+      el.appendChild(k);
+      el.appendChild(n);
+      awardToastBox().appendChild(el);
+      awardToastOn += 1;
+      setTimeout(() => {
+        try { el.remove(); } catch (e) {}
+        awardToastOn = Math.max(0, awardToastOn - 1);
+        pumpAwardToasts();
+      }, AWARD_TOAST_MS);
+    }
+  }
+  function showAwardToast(award) {
+    const a = typeof award === "string" ? awardById(award) : award;
+    if (!a || !isRegistered()) return;
+    if (awardToastQ.length >= 12) return;
+    awardToastQ.push(a);
+    try { pumpAwardToasts(); } catch (e) {}
+  }
+  function metaAwardIds(map) {
+    const out = [];
+    const n = AWARD_CATALOG.filter((a) => map[a.id]).length;
+    if (n >= 10) out.push("collector");
+    if (n >= 25) out.push("curator");
+    return out;
+  }
+  // Adds ids to the signed-in user's set; toasts only the ones that are new.
+  function addAwards(ids) {
     const map = loadAwards();
-    map[id] = true;
+    const fresh = [];
+    (ids || []).forEach((id) => {
+      if (!id || map[id] || !awardById(id)) return;
+      map[id] = true;
+      fresh.push(id);
+    });
+    if (!fresh.length) return map;
+    for (let i = 0; i < 2; i++) metaAwardIds(map).forEach((id) => { if (!map[id]) { map[id] = true; fresh.push(id); } });
     saveAwards(map);
+    fresh.forEach((id) => showAwardToast(id));
+    return map;
+  }
+  function grantAward(id) {
+    if (!id || !awardsLive()) return false;
+    const before = loadAwards()[id];
+    addAwards([id]);
+    return !before;
   }
   function awardName(a) {
     return (window.BZ && BZ.lang && BZ.lang() === "es") ? (a.nameEs || a.name) : a.name;
@@ -12316,11 +12450,80 @@
     if (typeof window.persistAwards === "function") window.persistAwards(Object.keys(map).filter((k) => map[k]));
   }
   function mergeAwards(ids) {
-    if (!S.ranked) return loadAwards();
+    if (!S.ranked || !isRegistered() || S.testCheat) return loadAwards();
+    return addAwards(ids);
+  }
+  // Server copy (profiles.awards) loaded by auth.js: merged silently, no toasts.
+  function syncAwards(ids) {
+    if (!window.choppyUserId || !Array.isArray(ids)) return loadAwards();
     const map = loadAwards();
-    (ids || []).forEach((id) => { map[id] = true; });
-    saveAwards(map);
+    let changed = false;
+    ids.forEach((id) => { if (id && !map[id]) { map[id] = true; changed = true; } });
+    if (changed) {
+      const bag = awardStore();
+      bag[awardOwner()] = map;
+      try { localStorage.setItem("choppy-awards", JSON.stringify(bag)); } catch (e) {}
+    }
     return map;
+  }
+  function awardCounter(key) {
+    try {
+      const bag = JSON.parse(localStorage.getItem(key) || "{}");
+      return bag && typeof bag === "object" ? bag : {};
+    } catch (e) { return {}; }
+  }
+  function noteChessSolved(idx) {
+    if (!awardsLive() || !(idx >= 0)) return;
+    const bag = awardCounter("choppy-chess-solved");
+    const mine = Array.isArray(bag[awardOwner()]) ? bag[awardOwner()] : [];
+    if (mine.indexOf(idx) < 0) mine.push(idx);
+    bag[awardOwner()] = mine;
+    try { localStorage.setItem("choppy-chess-solved", JSON.stringify(bag)); } catch (e) {}
+    const ids = ["chessWin"];
+    if (mine.length >= 3) ids.push("chess3");
+    if (mine.length >= CHESS_POOL.length) ids.push("chess7");
+    addAwards(ids);
+  }
+  // Story choices that earn an award (called once, right after the choice resolves).
+  function cardAwards(card, opt) {
+    if (!card || !awardsLive()) return;
+    const id = card.id;
+    if (id === "proposal" && S.engaged) grantAward("engaged");
+    else if (id === "wedding") grantAward(opt === "c" ? "runaway" : "married");
+    else if (id === "baby") addAwards(opt === "a" ? ["babyBoard", "familyOffice"] : opt === "c" ? ["babyBoard", "classicFartface"] : ["babyBoard"]);
+    else if (id === "anOffer") grantAward(opt === "a" ? "sellout" : "notForSale");
+  }
+  function perkMaxed(skipJob) {
+    return Object.keys(PERK_MAX).some((k) => PERK_MAX[k] >= 5 && !(skipJob && k === "job") && (S.have[k] || 0) >= PERK_MAX[k]);
+  }
+  // Live checks on run state, throttled from step(): awards land the moment they are earned.
+  let awardTickAcc = 0;
+  function awardTick(dt) {
+    awardTickAcc += dt || 0;
+    if (awardTickAcc < 1.5) return;
+    awardTickAcc = 0;
+    if (!awardsLive() || S.dead) return;
+    const ids = [];
+    const c = S.candles || 0;
+    if (c >= 1000) ids.push("longHaul");
+    if (c >= 2100) ids.push("marathon");
+    if ((S.swans || 0) >= 3) ids.push("swanHunter");
+    if ((S.lasers || 0) >= 5) ids.push("laserEyes");
+    if (S.have) {
+      if (perkMaxed(true)) ids.push("maxedPerk");
+      if ((S.have.job || 0) >= PERK_MAX.job) ids.push("career");
+      if (Object.keys(S.have).reduce((n, k) => n + (S.have[k] || 0), 0) >= 15) ids.push("perkHoarder");
+    }
+    if ((S.btc || 0) >= BTC_CAP) ids.push("cap21");
+    if (S.bcIsland) ids.push("landowner");
+    if (S.bcMine) ids.push("miner");
+    if (S.bcCitadel) ids.push("citadel");
+    if ((S.bcNodes || 0) >= 100) ids.push("nodes100");
+    if (S.bcIndependent) ids.push("declared");
+    if ((S.bcBattlesWon || 0) >= 1) ids.push("beachHolds");
+    const own = loadAwards();
+    const fresh = ids.filter((id) => !own[id]);
+    if (fresh.length) addAwards(fresh);
   }
   function runAwardIds(st) {
     if (!st || (st.candles || 0) < 420) return [];
@@ -12331,23 +12534,62 @@
     if ((st.halvings || 0) === 0) out.push("greedy");
     if ((st.coldLost || 0) === 0) out.push("opsec");
     if ((st.sellsBear || 0) >= 1) out.push("paper");
+    const startNet = (st.startCash || 0) / Math.max(0.01, st.startPrice || 1);
+    const mul = startNet > 0 ? (st.net || 0) / startNet : 0;
+    if (mul >= 2) out.push("doubler");
+    if (mul >= 10) out.push("tenx");
+    if ((st.buys || 0) + (st.sells || 0) >= 50) out.push("dayTrader");
+    if (st.hitCap || (st.endBtc || 0) >= BTC_CAP) out.push("cap21");
+    if ((st.candles || 0) >= 1000) out.push("longHaul");
+    if ((st.candles || 0) >= 2100) out.push("marathon");
+    if ((st.swans || 0) >= 3) out.push("swanHunter");
+    if ((st.lasers || 0) >= 5) out.push("laserEyes");
+    if (st.perkMaxed) out.push("maxedPerk");
+    if ((st.haveSum || 0) >= 15) out.push("perkHoarder");
+    if ((st.iabud || 0) > 0 && (st.iaProfit || 0) > 0) out.push("goodBud");
+    if ((st.job || 0) >= PERK_MAX.job) out.push("career");
     return out;
   }
+  // End of a ranked run: run awards + run counter for the career awards, once per run.
+  function endRunAwards() {
+    if (!S.stats) return;
+    const ids = runAwardIds(S.stats);
+    if (awardsLive() && !S.awRunCounted && (S.stats.candles || 0) >= 420) {
+      S.awRunCounted = true;
+      const bag = awardCounter("choppy-aw-runs");
+      const n = (Number(bag[awardOwner()]) || 0) + 1;
+      bag[awardOwner()] = n;
+      try { localStorage.setItem("choppy-aw-runs", JSON.stringify(bag)); } catch (e) {}
+      if (n >= 10) ids.push("regular");
+      if (n >= 50) ids.push("veteran");
+    }
+    mergeAwards(ids);
+  }
   function runAwards(st) {
-    return runAwardIds(st).map((id) => AWARD_CATALOG.find((a) => a.id === id)).filter(Boolean);
+    return runAwardIds(st).map((id) => awardById(id)).filter(Boolean);
+  }
+  function awardRowHtml(a, on) {
+    const es = window.BZ && BZ.lang && BZ.lang() === "es";
+    if (!on && a.secret) return "<p class=\"aw-off\"><b>○ ???</b> — " + (es ? "Premio oculto. Sigue jugando para descubrirlo." : "Hidden award. Keep playing to find it.") + "</p>";
+    return "<p class=\"" + (on ? "aw-on" : "aw-off") + "\"><b>" + (on ? "✓ " : "○ ") + awardName(a) + "</b> — " + awardWhy(a) + "</p>";
   }
   function awardListHtml(owned, mode) {
     owned = owned || loadAwards();
     const es = window.BZ && BZ.lang && BZ.lang() === "es";
-    const rows = AWARD_CATALOG.filter((a) => mode !== "owned" || owned[a.id]).map((a) => {
-      const on = !!owned[a.id];
-      return "<p class=\"" + (on ? "aw-on" : "aw-off") + "\"><b>" + (on ? "✓ " : "○ ") + awardName(a) + "</b> — " + awardWhy(a) + "</p>";
-    }).join("");
     if (mode === "owned") {
+      const rows = AWARD_CATALOG.filter((a) => owned[a.id]).map((a) => awardRowHtml(a, true)).join("");
       const n = AWARD_CATALOG.filter((a) => owned[a.id]).length;
       return "<details class=\"aw-box\"><summary>" + (es ? "Premios" : "Awards") + " (" + n + ")</summary>" + (rows || "<p>" + (es ? "Todavía no hay premios." : "No awards yet.") + "</p>") + "</details>";
     }
-    return "<div class=\"awards\"><p class=\"k\">" + (es ? "Premios" : "Awards") + "</p>" + rows + "</div>";
+    const reg = isRegistered();
+    const n = reg ? AWARD_CATALOG.filter((a) => owned[a.id]).length : 0;
+    const groups = AWARD_CATS.map((c) => {
+      const list = AWARD_CATALOG.filter((a) => a.cat === c.id);
+      if (!list.length) return "";
+      return "<p class=\"k aw-cat\">" + (es ? c.es : c.en) + "</p>" + list.map((a) => awardRowHtml(a, reg && !!owned[a.id])).join("");
+    }).join("");
+    const note = reg ? "" : "<p class=\"k\">" + (es ? "Inicia sesión para ganar premios." : "Sign in to earn awards.") + "</p>";
+    return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + AWARD_CATALOG.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareRun(kind) {
     const btc = fmtBtc(netBtc());
@@ -12395,7 +12637,7 @@
   }
   window.CHOPPY_AWARDS = AWARD_CATALOG;
   window.choppyAwardHtml = () => awardListHtml(loadAwards(), "owned");
-  window.mergeChoppyAwards = mergeAwards;
+  window.mergeChoppyAwards = syncAwards;
   function jukeLyricsOn() { return localStorage.getItem("choppy-juke-lyrics") === "1"; }
   function setJukeLyrics(on) { localStorage.setItem("choppy-juke-lyrics", on ? "1" : "0"); }
   function jukeEnabledList() {
@@ -13896,8 +14138,7 @@
     } else if (p === "over") {
       try {
         if (!S.stats) snapshotRun();
-        const ids = runAwardIds(S.stats);
-        mergeAwards(ids);
+        endRunAwards();
       } catch (e) {}
       if (S.trainBattleLose && aidOffer()) {
         const cost = aidOffer();
@@ -13932,7 +14173,7 @@
         if ($("share-run")) $("share-run").onclick = () => shareRun("over");
       }
     } else if (p === "win" && S.stats) {
-      mergeAwards(runAwardIds(S.stats));
+      endRunAwards();
       if (S.runTab) {
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
