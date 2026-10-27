@@ -3218,6 +3218,12 @@
     proposal:"abc", wedding:"abc", honeymoon:"abc", phish:"ab", courage:"a", islandInspection:"a",
     protectIsland:"abc", citadelQuestion:"ab", anOffer:"ab", theQuestion:"a"
   };
+  // Cache tags per post image: bump only the files that change (default post3).
+  const POST_ART_VER = {
+    "honeymoon-a":"post4", "citadelQuestion-a":"post4", "islandInspection-a":"post4", "phish-a":"post4", "phish-b":"post4",
+    "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
+    "wedding-a":"post4", "wedding-b":"post4", "wedding-c":"post4"
+  };
   const POST_ART_MISS = new Set();
   function postArtHtml(id, opt) {
     const base = chanceArtHtml(id);
@@ -3225,7 +3231,7 @@
     if (!opt || !POST_ART[id] || POST_ART[id].indexOf(opt) < 0 || POST_ART_MISS.has(key) || base.indexOf("<img") !== 0) return base;
     const m = base.match(/ src="([^"]*)"/);
     if (!m) return base;
-    const src = "chance/" + key + "-wide.jpg?v=post3";
+    const src = "chance/" + key + "-wide.jpg?v=" + (POST_ART_VER[key] || "post3");
     return base.replace(/ onerror="[^"]*"/, "").replace(m[0], " src=\"" + src + "\" data-base=\"" + m[1] + "\"")
       .replace("<img ", "<img onerror=\"this.onerror=null;window.__choppyPostMiss&&window.__choppyPostMiss('" + key + "');this.src=this.dataset.base;\" ");
   }
