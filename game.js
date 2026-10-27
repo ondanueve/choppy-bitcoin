@@ -3163,7 +3163,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin16", chess: "cin16" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3275,9 +3275,9 @@
   };
   // Cache tags per post image: bump only the files that change (default post3).
   const POST_ART_VER = {
-    "honeymoon-a":"post4", "citadelQuestion-a":"post4", "islandInspection-a":"post4", "phish-a":"post4", "phish-b":"post4",
-    "anOffer-b":"post4", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
-    "wedding-a":"post4", "wedding-b":"post4", "wedding-c":"post4"
+    "honeymoon-a":"post5", "citadelQuestion-a":"post4", "islandInspection-a":"post4", "phish-a":"post4", "phish-b":"post4",
+    "anOffer-b":"post5", "anOffer-a":"post5", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
+    "wedding-a":"post4", "wedding-b":"post5", "wedding-c":"post4"
   };
   const POST_ART_MISS = new Set();
   function postArtHtml(id, opt) {
