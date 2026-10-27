@@ -2574,6 +2574,7 @@
   // kept in localStorage so the same problem never comes back too soon.
   const CHESS_POOL = [
     { slug: "opera", side: "w", n: 15, key: "Bxd7+", uci: "b5d7",
+      fen: "4kb1r/p2r1ppp/4qn2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 2 15", last: "e7e6",
       title: "The Opera Game", titleEs: "La partida de la ópera",
       tldr: "Marek sets up Morphy's Opera Game (Paris, 1858) and offers a bitcoin if you type White's first move of the finish. A miss costs nothing.",
       tldrEs: "Marek arma la partida de la ópera de Morphy (París, 1858) y te ofrece un bitcoin si escribes la primera jugada blanca del final. Fallar no cuesta nada.",
@@ -2589,6 +2590,7 @@
       tMiss: "Marek shows you Morphy's line: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. “You can pay me in wine.”",
       tMissEs: "Marek te muestra la línea de Morphy: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. “Págame con vino”." },
     { slug: "immortal", side: "w", n: 21, key: "Nxg7+", uci: "f5g7",
+      fen: "r1b1k1nr/p2p1ppp/n2B4/1p1NPN1P/6P1/3P1Q2/P1P1K3/q5b1 w kq - 2 21", last: "b8a6",
       title: "The Immortal Game", titleEs: "La partida inmortal",
       tldr: "Marek sets up Anderssen's Immortal Game (London, 1851) and offers a bitcoin for White's first move of a mate in three. A miss costs nothing.",
       tldrEs: "Marek arma la partida inmortal de Anderssen (Londres, 1851) y te ofrece un bitcoin por la primera jugada blanca de un mate en tres. Fallar no cuesta nada.",
@@ -2604,6 +2606,7 @@
       tMiss: "Marek shows you Anderssen's line: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. “He gave away almost everything and kept exactly enough.”",
       tMissEs: "Marek te muestra la línea de Anderssen: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. “Regaló casi todo y se quedó con lo justo”." },
     { slug: "evergreen", side: "w", n: 21, key: "Qxd7+", uci: "a4d7",
+      fen: "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21", last: "c6e7",
       title: "The Evergreen Game", titleEs: "La siempreviva",
       tldr: "Marek sets up Anderssen's Evergreen Game (Berlin, 1852) and offers a bitcoin for White's first move of a mate in four. A miss costs nothing.",
       tldrEs: "Marek arma la siempreviva de Anderssen (Berlín, 1852) y te ofrece un bitcoin por la primera jugada blanca de un mate en cuatro. Fallar no cuesta nada.",
@@ -2619,6 +2622,7 @@
       tMiss: "Marek shows you Anderssen's line: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Every move has to be check.”",
       tMissEs: "Marek te muestra la línea de Anderssen: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Cada jugada tiene que ser jaque”." },
     { slug: "saavedra", side: "w", n: 6, key: "c8=R", uci: "c7c8r",
+      fen: "8/2P5/8/8/3r4/8/2K5/k7 w - - 9 6", last: "d3d4",
       title: "The Saavedra Position", titleEs: "La posición de Saavedra",
       tldr: "Marek sets up an 1895 endgame from Glasgow, a pawn against a rook, and offers a bitcoin for the move that wins. A miss costs nothing.",
       tldrEs: "Marek arma un final de Glasgow de 1895, un peón contra una torre, y te ofrece un bitcoin por la jugada que gana. Fallar no cuesta nada.",
@@ -2634,6 +2638,7 @@
       tMiss: "Marek shows you Saavedra's move: 6. c8=R!! A queen allows 6...Rc4+ and stalemate. A rook threatens Rc1# and Kxa4.",
       tMissEs: "Marek te muestra la jugada de Saavedra: 6. c8=T!! Con dama llega 6...Tc4+ y el ahogado. Con torre amenazas Tc1# y Rxa4." },
     { slug: "kinghunt", side: "w", n: 11, key: "Qxh7+", uci: "h5h7",
+      fen: "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - 6 11", last: "d8e7",
       title: "The King Hunt", titleEs: "La cacería del rey",
       tldr: "Marek sets up a casual London game from 1912 and offers a bitcoin for White's first move of a forced mate. A miss costs nothing.",
       tldrEs: "Marek arma una partida amistosa de Londres de 1912 y te ofrece un bitcoin por la primera jugada blanca de un mate forzado. Fallar no cuesta nada.",
@@ -2650,6 +2655,7 @@
       tMiss: "Marek shows you Lasker's hunt: 11. Qxh7+!! drags the black king all the way to g1, and 18. Kd2# ends it.",
       tMissEs: "Marek te muestra la cacería de Lasker: 11. Dxh7+!! arrastra al rey negro hasta g1, y 18. Rd2# termina todo." },
     { slug: "goldcoins", side: "b", n: 23, key: "Qg3", uci: "c3g3",
+      fen: "5rk1/pp4pp/4p3/2R3Q1/3n4/2q4r/P1P2PPP/5RK1 b - - 1 23", last: "e5c5",
       title: "The Gold Coins Game", titleEs: "La partida de las monedas de oro",
       tldr: "Marek sets up Marshall's most famous game (Breslau, 1912) and offers a bitcoin if you find Black's move. A miss costs nothing.",
       tldrEs: "Marek arma la partida más famosa de Marshall (Breslavia, 1912) y te ofrece un bitcoin si encuentras la jugada de las negras. Fallar no cuesta nada.",
@@ -2665,6 +2671,7 @@
       tMiss: "Marek shows you Marshall's move: 23... Qg3!! Three white pieces can take the queen, and every capture loses. Levitsky resigned.",
       tMissEs: "Marek te muestra la jugada de Marshall: 23... Dg3!! Tres piezas blancas pueden tomar la dama, y cualquier captura pierde. Levitsky abandonó." },
     { slug: "century", side: "b", n: 17, key: "Be6", uci: "g4e6",
+      fen: "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 3 17", last: "e1f1",
       title: "The Game of the Century", titleEs: "La partida del siglo",
       tldr: "Marek sets up Byrne–Fischer (New York, 1956) and offers a bitcoin if you find the move a thirteen-year-old played. A miss costs nothing.",
       tldrEs: "Marek arma Byrne–Fischer (Nueva York, 1956) y te ofrece un bitcoin si encuentras la jugada de un chico de trece años. Fallar no cuesta nada.",
@@ -2681,7 +2688,51 @@
       tMiss: "Marek shows you Fischer's move: 17... Be6!! He lets the queen go and mates Byrne on move 41.",
       tMissEs: "Marek te muestra la jugada de Fischer: 17... Ae6!! Deja ir la dama y le da mate a Byrne en la jugada 41." }
   ];
-  const CHESS_ART_READY = new Set([]);  // add a slug once chance/chess-<slug>-wide.jpg (1920x800) is in place
+  // Board diagram of the chess problem, drawn at runtime from its FEN as inline SVG (no downloads, crisp on any screen).
+  // Oriented from the side to move, with coordinates and the previous move highlighted; it never shows the answer.
+  // Piece shapes: Colin M.L. Burnett's set (BSD/GPL/GFDL tri-licensed), as shipped in python-chess.
+  const CHESS_PIECE_SVG = {"b":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zm6-4c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z\" fill=\"#000\" stroke-linecap=\"butt\"/><path d=\"M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5\" stroke=\"#fff\" stroke-linejoin=\"miter\"/></g>","k":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22.5 11.63V6\" stroke-linejoin=\"miter\"/><path d=\"M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5\" fill=\"#000\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z\" fill=\"#000\"/><path d=\"M20 8h5\" stroke-linejoin=\"miter\"/><path d=\"M32 29.5s8.5-4 6.03-9.65C34.15 14 25 18 22.5 24.5l.01 2.1-.01-2.1C20 18 9.906 14 6.997 19.85c-2.497 5.65 4.853 9 4.853 9M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0\" stroke=\"#fff\"/></g>","n":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z\" style=\"fill:#ececec; stroke:#ececec;\"/><path d=\"M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z\" transform=\"matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)\" style=\"fill:#ececec; stroke:#ececec;\"/><path d=\"M 24.55,10.4 L 24.1,11.85 L 24.6,12 C 27.75,13 30.25,14.49 32.5,18.75 C 34.75,23.01 35.75,29.06 35.25,39 L 35.2,39.5 L 37.45,39.5 L 37.5,39 C 38,28.94 36.62,22.15 34.25,17.66 C 31.88,13.17 28.46,11.02 25.06,10.5 L 24.55,10.4 z \" style=\"fill:#ececec; stroke:none;\"/></g>","p":"<g><path d=\"M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z\" fill=\"#000\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g>","q":"<g fill=\"#000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g fill=\"#000\" stroke=\"none\"><circle cx=\"6\" cy=\"12\" r=\"2.75\"/><circle cx=\"14\" cy=\"9\" r=\"2.75\"/><circle cx=\"22.5\" cy=\"8\" r=\"2.75\"/><circle cx=\"31\" cy=\"9\" r=\"2.75\"/><circle cx=\"39\" cy=\"12\" r=\"2.75\"/></g><path d=\"M9 26c8.5-1.5 21-1.5 27 0l2.5-12.5L31 25l-.3-14.1-5.2 13.6-3-14.5-3 14.5-5.2-13.6L14 25 6.5 13.5 9 26zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z\" stroke-linecap=\"butt\"/><path d=\"M11 38.5a35 35 1 0 0 23 0\" fill=\"none\" stroke-linecap=\"butt\"/><path d=\"M11 29a35 35 1 0 1 23 0M12.5 31.5h20M11.5 34.5a35 35 1 0 0 22 0M10.5 37.5a35 35 1 0 0 24 0\" fill=\"none\" stroke=\"#fff\"/></g>","r":"<g fill=\"#000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 39h27v-3H9v3zM12.5 32l1.5-2.5h17l1.5 2.5h-20zM12 36v-4h21v4H12z\" stroke-linecap=\"butt\"/><path d=\"M14 29.5v-13h17v13H14z\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M14 16.5L11 14h23l-3 2.5H14zM11 14V9h4v2h5V9h5v2h5V9h4v5H11z\" stroke-linecap=\"butt\"/><path d=\"M12 35.5h21M13 31.5h19M14 29.5h17M14 16.5h17M11 14h23\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1\" stroke-linejoin=\"miter\"/></g>","B":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g fill=\"#fff\" stroke-linecap=\"butt\"><path d=\"M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z\"/></g><path d=\"M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5\" stroke-linejoin=\"miter\"/></g>","K":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22.5 11.63V6M20 8h5\" stroke-linejoin=\"miter\"/><path d=\"M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5\" fill=\"#fff\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z\" fill=\"#fff\"/><path d=\"M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0\"/></g>","N":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18\" style=\"fill:#ffffff; stroke:#000000;\"/><path d=\"M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10\" style=\"fill:#ffffff; stroke:#000000;\"/><path d=\"M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z\" transform=\"matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)\" style=\"fill:#000000; stroke:#000000;\"/></g>","P":"<g><path d=\"M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z\" fill=\"#fff\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g>","Q":"<g fill=\"#fff\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM33 9a2 2 0 1 1-4 0 2 2 0 1 1 4 0z\"/><path d=\"M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14l2 12zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z\" stroke-linecap=\"butt\"/><path d=\"M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0\" fill=\"none\"/></g>","R":"<g fill=\"#fff\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5\" stroke-linecap=\"butt\"/><path d=\"M34 14l-3 3H14l-3-3\"/><path d=\"M31 17v12.5H14V17\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M31 29.5l1.5 2.5h-20l1.5-2.5\"/><path d=\"M11 14h23\" fill=\"none\" stroke-linejoin=\"miter\"/></g>"};
+  function chessDiagramHtml(cp, es) {
+    if (!cp || !cp.fen) return "";
+    const rows = cp.fen.split(" ")[0].split("/");
+    const blackView = cp.side === "b";
+    const SQ = 45, M = 20, N = 8 * SQ;
+    const hi = new Set(cp.last ? [cp.last.slice(0, 2), cp.last.slice(2, 4)] : []);
+    let sq = "", pcs = "", coords = "";
+    for (let r = 0; r < 8; r++) {
+      let f = 0;
+      for (const ch of rows[r]) {
+        if (/[1-8]/.test(ch)) { f += +ch; continue; }
+        const x = (blackView ? 7 - f : f) * SQ + M, y = (blackView ? 7 - r : r) * SQ;
+        pcs += "<g transform=\"translate(" + x + " " + y + ")\">" + (CHESS_PIECE_SVG[ch] || "") + "</g>";
+        f++;
+      }
+    }
+    for (let rank = 0; rank < 8; rank++) for (let file = 0; file < 8; file++) {
+      const name = "abcdefgh"[file] + (8 - rank);
+      const x = (blackView ? 7 - file : file) * SQ + M, y = (blackView ? 7 - rank : rank) * SQ;
+      const light = (rank + file) % 2 === 0;
+      sq += "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + SQ + "\" height=\"" + SQ + "\" fill=\"" + (hi.has(name) ? (light ? "#e9d77a" : "#c4a94a") : (light ? "#f0d9b5" : "#b58863")) + "\"/>";
+    }
+    for (let i = 0; i < 8; i++) {
+      const file = blackView ? "hgfedcba"[i] : "abcdefgh"[i], rank = blackView ? i + 1 : 8 - i;
+      coords += "<text x=\"" + (M + i * SQ + SQ / 2) + "\" y=\"" + (N + 15) + "\" text-anchor=\"middle\">" + file + "</text>"
+        + "<text x=\"" + (M / 2) + "\" y=\"" + (i * SQ + SQ / 2 + 5) + "\" text-anchor=\"middle\">" + rank + "</text>";
+    }
+    const who = cp.side === "w" ? (es ? "Juegan las blancas" : "White to move") : (es ? "Juegan las negras" : "Black to move");
+    const lastTxt = cp.last ? (es ? " · última jugada: " : " · last move: ") + cp.last.slice(0, 2) + "–" + cp.last.slice(2, 4) : "";
+    const alt = (es ? "Diagrama de la posición. " : "Position diagram. ") + who + ".";
+    return "<figure class=\"chess-diagram\" data-fen=\"" + cp.fen + "\">"
+      + "<svg viewBox=\"0 0 " + (N + M) + " " + (N + M) + "\" role=\"img\" aria-label=\"" + alt + "\" xmlns=\"http://www.w3.org/2000/svg\">"
+      + sq + "<rect x=\"" + M + "\" y=\"0\" width=\"" + N + "\" height=\"" + N + "\" fill=\"none\" stroke=\"#5a4632\" stroke-width=\"1.5\"/>"
+      + "<g class=\"chess-coords\" font-family=\"system-ui, sans-serif\" font-size=\"13\" font-weight=\"600\" fill=\"#e8dcc8\">" + coords + "</g>"
+      + pcs + "</svg>"
+      + "<figcaption><strong>" + who + "</strong>" + lastTxt + "</figcaption></figure>";
+  }
+  // Per-slug art version: bump one entry when that illustration is redrawn. A slug listed here must have
+  // chance/chess-<slug>-wide.jpg (1920x800); a missing file falls back to chance/chess-wide.jpg.
+  const CHESS_ART_VER = { opera: "chs1", immortal: "chs1", evergreen: "chs1", saavedra: "chs1", kinghunt: "chs1", goldcoins: "chs1", century: "chs1" };
+  const CHESS_ART_READY = new Set(Object.keys(CHESS_ART_VER));
   const CHESS_HIST_KEY = "choppy-chess-hist";
   const CHESS_GAP = 4;  // never repeat any of the last four problems
   let chessHistMem = [];
@@ -3125,7 +3176,7 @@
 
     if (id === "chess" && typeof S !== "undefined" && S && S.chessPick != null && S.chessPick >= 0) {
       const cp = CHESS_POOL[S.chessPick];
-      if (cp && CHESS_ART_READY.has(cp.slug)) return { id, artId: "chess-" + cp.slug, src: "chance/chess-" + cp.slug + "-wide.jpg?v=chs1", wide: true, isVideo: false };
+      if (cp && CHESS_ART_READY.has(cp.slug)) return { id, artId: "chess-" + cp.slug, src: "chance/chess-" + cp.slug + "-wide.jpg?v=" + (CHESS_ART_VER[cp.slug] || "chs1"), fallbackSrc: "chance/chess-wide.jpg?v=" + (WIDE_JPG_VER.chess || "cin14"), wide: true, isVideo: false };
     }
     if (ARC_VID[id]) {
       const poster = "chance/" + artId + ".jpg?v=mp86";
@@ -3221,7 +3272,7 @@
   // Cache tags per post image: bump only the files that change (default post3).
   const POST_ART_VER = {
     "honeymoon-a":"post4", "citadelQuestion-a":"post4", "islandInspection-a":"post4", "phish-a":"post4", "phish-b":"post4",
-    "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
+    "anOffer-b":"post4", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
     "wedding-a":"post4", "wedding-b":"post4", "wedding-c":"post4"
   };
   const POST_ART_MISS = new Set();
@@ -3292,7 +3343,7 @@
     }
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
-    const fallback = meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=" + (SQ_JPG_VER[meta.artId] || "mp86") : "chance/hero.jpg";
+    const fallback = meta.fallbackSrc ? meta.fallbackSrc : meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=" + (SQ_JPG_VER[meta.artId] || "mp86") : "chance/hero.jpg";
     return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
   }
 
@@ -13779,6 +13830,7 @@
         overlay.innerHTML = "<div class=\"arc-head\"><h1>" + t("chanceHead") + "</h1>" + arcTldrBtn() + "</div>"
           + pic + "<p class=\"arc-title\" role=\"heading\" aria-level=\"2\">" + title + "</p>"
           + (S.battleTutOpen ? battleTutHtml() : arcStoryHtml(card, body))
+          + (card.input === "move" ? chessDiagramHtml(chessProblem(), es) : "")
           + settled
           + "<div class=\"arc-actions\">" + btns + "</div>";
       }

@@ -1439,6 +1439,11 @@ html.ui-pop .field { overflow: visible; }
 .overlay.dock.chance-ui .arc-move { width: min(100%, 300px); }
 .overlay.dock.chance-ui .arc-move-label { font: 700 11px "IBM Plex Mono", monospace; letter-spacing: .06em; color: var(--gold); text-align: center; }
 .overlay.dock.chance-ui .arc-move input { font-size: 16px; text-transform: none; }
+/* chess problem: position diagram drawn from the FEN (game.js chessDiagramHtml) */
+.overlay.dock.chance-ui .chess-diagram { width: min(100%, 340px); margin: 10px auto 4px; padding: 8px 8px 6px; background: #2a2018; border: 1px solid rgba(232,220,200,.18); border-radius: 8px; box-sizing: border-box; }
+.overlay.dock.chance-ui .chess-diagram svg { display: block; width: 100%; height: auto; }
+.overlay.dock.chance-ui .chess-diagram figcaption { margin-top: 6px; text-align: center; font: 500 12px "IBM Plex Mono", monospace; letter-spacing: .03em; color: #e8dcc8; }
+.overlay.dock.chance-ui .chess-diagram figcaption strong { color: var(--gold); font-weight: 700; }
 
 /* desktop hotkeys */
 .kb-list{display:flex;flex-direction:column;gap:4px;max-height:52vh;overflow-y:auto;text-align:left;margin:6px 0}
