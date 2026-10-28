@@ -2731,7 +2731,7 @@
   }
   // Per-slug art version: bump one entry when that illustration is redrawn. A slug listed here must have
   // chance/chess-<slug>-wide.jpg (1920x800); a missing file falls back to chance/chess-wide.jpg.
-  const CHESS_ART_VER = { opera: "chs1", immortal: "chs1", evergreen: "chs1", saavedra: "chs1", kinghunt: "chs1", goldcoins: "chs1", century: "chs1" };
+  const CHESS_ART_VER = { opera: "chs1", immortal: "chs1", evergreen: "chs1", saavedra: "chs2", kinghunt: "chs2", goldcoins: "chs2", century: "chs2" };
   const CHESS_ART_READY = new Set(Object.keys(CHESS_ART_VER));
   const CHESS_HIST_KEY = "choppy-chess-hist";
   const CHESS_GAP = 4;  // never repeat any of the last four problems
