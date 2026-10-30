@@ -2776,7 +2776,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp196";
+    s.src = "chess-data.js?v=mp197";
     document.head.appendChild(s);
   }
   (function () {
@@ -14127,7 +14127,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp196";
+      s.src = "mp.js?v=mp197";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);

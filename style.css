@@ -138,6 +138,8 @@ body {
 .opt-btn:disabled { opacity: 0.35; cursor: default; }
 .opt-btn:not(:disabled):hover { border-color: var(--gold); color: var(--hud); }
 .hide { display: none !important; pointer-events: none !important; }
+/* A saved session exists but auth is not confirmed yet: keep sign-in buttons invisible (no layout shift) so they do not flash. */
+html.auth-pending #btn-show-auth, html.auth-pending #overlay-auth { visibility: hidden; pointer-events: none; }
 .speed-bar { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 4px; padding: 3px 8px; border-bottom: 1px solid var(--line); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); max-width: 100%; min-height: 34px; }
 .speed-bar button {
   flex: 1; min-width: 0;

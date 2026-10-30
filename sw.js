@@ -10,7 +10,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 (function () {
   "use strict";
 
-  var CACHE_VERSION = "mp196";
+  var CACHE_VERSION = "mp197";
   var SCOPE_PATH = "/choppy-bitcoin/";
   var ART_MAX_COUNT = 40;
   var ART_MAX_BYTES = 30 * 1024 * 1024;
