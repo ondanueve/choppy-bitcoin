@@ -269,6 +269,11 @@
       soundOff: "OFF",
       noAiCalls: "No calls yet. Toggle A.I. bud ON in the HUD.",
       markedPl: "Marked P/L",
+      reduceMotion: "REDUCE MOTION",
+      liveSum: "MATCH ANNOUNCEMENTS",
+      allowZoom: "PAGE ZOOM",
+      a11yNote: "Reduce motion stops shakes and blinks. Announcements read the match every few seconds and start off. Page zoom starts off and is allowed only in menus.",
+      a11yKeys: "KEYBOARD"
     },
     es: {
       brandSub: "Juegos gratis de temática bitcoin",
@@ -537,7 +542,12 @@
       soundOn: "ON",
       soundOff: "OFF",
       noAiCalls: "Todavía no hay llamadas. Activa A.I. bud en el HUD.",
-      markedPl: "P/L marcado"
+      markedPl: "P/L marcado",
+      reduceMotion: "MENOS MOVIMIENTO",
+      liveSum: "ANUNCIOS DE LA PARTIDA",
+      allowZoom: "ZOOM DE PÁGINA",
+      a11yNote: "Menos movimiento apaga sacudidas y parpadeos. Los anuncios leen la partida cada pocos segundos y empiezan apagados. El zoom de página empieza apagado y solo se permite en los menús.",
+      a11yKeys: "TECLADO"
     }
   };
 
@@ -564,6 +574,9 @@
     });
     box.querySelectorAll("[data-i18n-html]").forEach((el) => {
       el.innerHTML = t(el.getAttribute("data-i18n-html"));
+    });
+    box.querySelectorAll("[data-i18n-label]").forEach((el) => {
+      el.setAttribute("aria-label", t(el.getAttribute("data-i18n-label")));
     });
     document.documentElement.lang = lang === "es" ? "es" : "en";
     document.querySelectorAll("[data-lang]").forEach((btn) => {

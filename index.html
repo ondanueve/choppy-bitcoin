@@ -27,8 +27,8 @@
   <meta name="twitter:title" content="Play Choppy Bitcoin">
   <meta name="twitter:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
   <meta name="twitter:image:alt" content="Choppy Bitcoin hero">
-  <link rel="stylesheet" href="style.css?v=mp192">
-  <script src="nozoom.js?v=mp142"></script>
+  <link rel="stylesheet" href="style.css?v=mp193">
+  <script src="nozoom.js?v=mp193"></script>
 </head>
 <body>
   <div id="app">
@@ -79,7 +79,7 @@
       <button type="button" id="bc-army-bar" class="bc-open hide">TIER</button>
     </div>
     <div id="field" class="field">
-      <canvas id="c"></canvas>
+      <canvas id="c" role="img" aria-label="Choppy Bitcoin playfield"></canvas>
       <div id="flap-layer" aria-hidden="true"></div>
       <div id="def-pad" class="def-pad hide" aria-hidden="true">
         <button type="button" id="def-rev" class="def-rev" aria-label="Reverse">REV</button>
@@ -122,7 +122,7 @@
       </div>
       <button id="pause-btn" class="pause hide" aria-label="Pause">||</button>
       <div id="bc-panel" class="bc-panel hide">
-        <div class="bc-head"><b>BITCOIN COUNTRY</b><button type="button" id="bc-close">×</button></div>
+        <div class="bc-head"><b>BITCOIN COUNTRY</b><button type="button" id="bc-close" aria-label="Close">×</button></div>
         <div class="bc-grid">
           <div><span>LIBERTY NODES</span><b id="bc-nodes">0 / 100</b></div>
           <div><span>ARMY</span><b id="bc-army">0 / 7</b></div>
@@ -146,7 +146,7 @@
       </div>
     </div>
   </div>
-  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-labelledby="modal-auth-title">
+  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-modal="true" aria-labelledby="modal-auth-title">
     <div class="auth-card">
       <h2 id="modal-auth-title">Sign in</h2>
       <label class="hide" id="group-alias">Alias<input id="auth-username" autocomplete="username" maxlength="16"></label>
@@ -161,9 +161,9 @@
       <button type="button" class="text-btn" id="btn-close-auth">Close</button>
     </div>
   </div>
-  <div id="profile-modal" class="auth-modal hide" role="dialog">
+  <div id="profile-modal" class="auth-modal hide" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="auth-card">
-      <h2>Profile</h2>
+      <h2 id="profile-modal-title">Profile</h2>
       <p id="profile-score-info"></p>
       <label>Alias<input id="profile-alias" maxlength="16" autocomplete="username"></label>
       <p id="alias-hint" class="auth-msg"></p>
@@ -176,13 +176,14 @@
       <button type="button" class="text-btn" id="btn-close-profile">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp179"></script>
+  <div id="a11y-live" class="a11y-live" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="/choppy-bitcoin/i18n.js?v=mp193"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js" integrity="sha384-QEx1pDqNtno80p4xYN5Cqm5JcAAtUDUCHqFLq0UBhWRFoFzzNHumh20zFGG/9XMi" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="supabase-lib.js"></script>
-  <script src="auth.js?v=mp66"></script>
+  <script src="auth.js?v=mp193"></script>
   <script src="run-stats.js"></script>
   <script src="audio.js?v=mp172"></script>
   <script src="mp.js?v=mp8"></script>
-  <script src="game.js?v=mp192"></script>
+  <script src="game.js?v=mp193"></script>
 </body>
 </html>

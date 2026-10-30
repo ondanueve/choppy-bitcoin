@@ -38,22 +38,68 @@
   const $ = (id) => document.getElementById(id);
   const authModal = $("auth-modal");
   const profileModal = $("profile-modal");
+  const a11yReturn = new WeakMap();
+  function a11yNodes(root) {
+    return Array.prototype.filter.call(root.querySelectorAll("a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled])"), (el) => {
+      if (el.tabIndex < 0 || el.classList.contains("hp") || el.closest(".hide")) return false;
+      return el.getClientRects().length > 0;
+    });
+  }
+  function onModalKey(e) {
+    const root = e.currentTarget;
+    if (!root.classList.contains("open")) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal(root);
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const list = a11yNodes(root);
+    if (!list.length) { e.preventDefault(); return; }
+    const first = list[0], last = list[list.length - 1], cur = document.activeElement;
+    if (e.shiftKey && (cur === first || !root.contains(cur))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (cur === last || !root.contains(cur))) { e.preventDefault(); first.focus(); }
+  }
+  function armModal(el) {
+    if (!el || el.dataset.a11yTrap) return;
+    el.dataset.a11yTrap = "1";
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-modal", "true");
+    const h = el.querySelector("h1, h2");
+    if (h) {
+      if (!h.id) h.id = el.id + "-title";
+      el.setAttribute("aria-labelledby", h.id);
+    }
+    el.addEventListener("keydown", onModalKey);
+  }
   function openModal(el) {
     if (!el) return;
+    armModal(el);
+    const prev = document.activeElement;
+    if (prev && prev !== document.body) a11yReturn.set(el, prev);
     el.classList.add("open");
     el.classList.remove("hide");
     el.hidden = false;
     el.style.setProperty("display", "flex", "important");
     el.style.setProperty("pointer-events", "auto", "important");
     el.style.zIndex = "9999";
+    const nodes = a11yNodes(el);
+    const first = nodes.filter((n) => n.tagName === "INPUT")[0] || nodes[0];
+    setTimeout(() => { try { if (first && el.classList.contains("open")) first.focus(); } catch (err) {} }, 30);
   }
   function closeModal(el) {
     if (!el) return;
+    const was = el.classList.contains("open");
     el.classList.remove("open");
     el.classList.add("hide");
     el.hidden = true;
     el.style.setProperty("display", "none", "important");
     el.style.setProperty("pointer-events", "none", "important");
+    if (!was) return;
+    const prev = a11yReturn.get(el);
+    a11yReturn.delete(el);
+    if (prev && prev.focus && document.contains(prev)) { try { prev.focus(); } catch (err) {} }
   }
   const authMsg = $("auth-msg");
 

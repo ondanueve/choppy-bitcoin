@@ -3,6 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    (function () {
+      var es = false;
+      try {
+        var saved = localStorage.getItem("bitcoinizate-lang");
+        if (saved === "es" || saved === "en") es = saved === "es";
+        else es = (navigator.language || "").toLowerCase().indexOf("es") === 0;
+      } catch (e) {}
+      document.documentElement.lang = es ? "es" : "en";
+      document.title = es ? "Gráfico de la partida | Choppy Bitcoin" : "Run chart | Choppy Bitcoin";
+      document.addEventListener("DOMContentLoaded", function () {
+        var h = document.querySelector("h1");
+        if (h) h.textContent = es ? "GRÁFICO" : "CHART";
+        var c = document.getElementById("big-chart");
+        if (c) c.setAttribute("aria-label", es ? "Gráfico de la partida" : "Run chart");
+      });
+    })();
+  </script>
   <title>Run chart | Choppy Bitcoin</title>
   <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
   <link rel="icon" href="/choppy-bitcoin/favicon.ico" sizes="48x48">
@@ -15,6 +33,8 @@
     .chart-opt input { accent-color: #c8960a; }
     canvas { display: block; width: 100%; background: #0a0a0c; }
     a { color: #c8960a; }
+    :focus-visible { outline: 2px solid #f2a900; outline-offset: 2px; }
+    .chart-opt { min-height: 44px; }
   </style>
 </head>
 <body>

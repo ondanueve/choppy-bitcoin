@@ -236,6 +236,61 @@
   loadTextPrefs();
   loadHero();
   loadArcTldr();
+  let REDUCE_MOTION = false;
+  let LIVE_SUM = false;
+  let ALLOW_ZOOM = false;
+  let zoomLockSent = "";
+  function loadA11yPrefs() {
+    try {
+      REDUCE_MOTION = localStorage.getItem("choppy-reduce-motion") === "1";
+      LIVE_SUM = localStorage.getItem("choppy-live-sum") === "1";
+      ALLOW_ZOOM = localStorage.getItem("choppy-allow-zoom") === "1";
+    } catch (e) {}
+    const root = document.documentElement;
+    if (REDUCE_MOTION) root.setAttribute("data-reduce-motion", "1");
+    else root.removeAttribute("data-reduce-motion");
+    if (window.ChoppyZoom && window.ChoppyZoom.set) window.ChoppyZoom.set(ALLOW_ZOOM, false);
+    zoomLockSent = (ALLOW_ZOOM ? "1" : "0") + "0";
+  }
+  function setReduceMotion(on) {
+    REDUCE_MOTION = !!on;
+    try { localStorage.setItem("choppy-reduce-motion", REDUCE_MOTION ? "1" : "0"); } catch (e) {}
+    if (REDUCE_MOTION) document.documentElement.setAttribute("data-reduce-motion", "1");
+    else document.documentElement.removeAttribute("data-reduce-motion");
+  }
+  function setLiveSum(on) {
+    LIVE_SUM = !!on;
+    try { localStorage.setItem("choppy-live-sum", LIVE_SUM ? "1" : "0"); } catch (e) {}
+    if (!LIVE_SUM) {
+      const el = document.getElementById("a11y-live");
+      if (el) el.textContent = "";
+    }
+  }
+  function setAllowZoom(on) {
+    ALLOW_ZOOM = !!on;
+    try { localStorage.setItem("choppy-allow-zoom", ALLOW_ZOOM ? "1" : "0"); } catch (e) {}
+    zoomLockSent = "";
+    syncZoomLock();
+  }
+  function syncZoomLock() {
+    let playing = false;
+    try { playing = !!(S && (S.phase === "play" || S.phase === "defense")); } catch (e) { playing = false; }
+    const playLock = !!(ALLOW_ZOOM && playing);
+    const sig = (ALLOW_ZOOM ? "1" : "0") + (playLock ? "1" : "0");
+    if (sig === zoomLockSent) return;
+    zoomLockSent = sig;
+    if (window.ChoppyZoom && window.ChoppyZoom.set) window.ChoppyZoom.set(ALLOW_ZOOM, playLock);
+  }
+  function a11ySay(msg) {
+    const el = document.getElementById("a11y-live");
+    if (!el || !msg) return;
+    el.textContent = "";
+    setTimeout(() => {
+      const box = document.getElementById("a11y-live");
+      if (box) box.textContent = msg;
+    }, 40);
+  }
+  loadA11yPrefs();
   const PX_MIN = 1;
   const DRIFT0 = 0.0006;
   const PHI = (1 + Math.sqrt(5)) / 2;
@@ -505,6 +560,9 @@
     testArmy: "YOUR ARMY",
     testWorld: "ENEMY",
     howPlay: "HOW TO PLAY", market: "MARKETPLACE",
+    reduceMotion: "REDUCE MOTION", liveSum: "MATCH ANNOUNCEMENTS", allowZoom: "PAGE ZOOM",
+    a11yKeys: "KEYBOARD",
+    a11yNote: "Reduce motion stops shakes and blinks. Announcements read the match every few seconds and start off. Page zoom starts off and is allowed only in menus.",
     runStats: "STATS", runChart: "CHART", runRecap: "RUN TAPE",
     graphics: "GRAPHICS",
     palClassic: "Classic", palMidnight: "Midnight", palTerminal: "Terminal",
@@ -1328,6 +1386,7 @@
     if (S.halveLeft === 0) {
       spawnHalve();
       S.halveLeft = HALVE_GAP;
+      try { a11ySay(chanceLang() ? "Halving en el campo." : "Halving on the field."); } catch (e) {}
     }
   }
 
@@ -1702,6 +1761,7 @@
   function die() {
     if (S.dead) return;
     S.dead = true;
+    try { a11ySay(chanceLang() ? "Liquidado. Fin de la partida." : "Liquidated. Run over."); } catch (e) {}
     S.phase = "over";
     try { applyLaser(false); } catch (e) {}
     S.power = "NONE"; S.powerT = 0;
@@ -3343,7 +3403,7 @@
   function chanceArtHtml(id) {
     const meta = getChanceArtMeta(id);
     if (meta.isVideo) {
-      return "<video class=\"chance-art\" src=\"" + meta.src + "\" poster=\"" + meta.poster + "\" autoplay muted loop playsinline preload=\"auto\"></video>";
+      return "<video class=\"chance-art\" aria-label=\"" + arcAltText(id) + "\" src=\"" + meta.src + "\" poster=\"" + meta.poster + "\" autoplay muted loop playsinline preload=\"auto\"></video>";
     }
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
@@ -9283,7 +9343,7 @@
     }
     drawCitadelShield(ctx,d,t);
     drawWarFx(ctx,d,t);
-    const blink=(d.playerInv>0||d.god>0)&&Math.floor(t*12)%2===0;
+    const blink=!REDUCE_MOTION&&(d.playerInv>0||d.god>0)&&Math.floor(t*12)%2===0;
     const heroOrange="#c9843a";
     const ecol=(warBloc(d.bloc|0).paint)||"#4a5340";
     const pcol=d.god>0?"#ffe14a":heroOrange;
@@ -11502,7 +11562,7 @@
 
     const m = metrics();
     const pw = pipePw();
-    const endingFlash = S.power === "BULL" && S.powerT < 1.15 && Math.floor(S.powerT * 9) % 2 === 0;
+    const endingFlash = !REDUCE_MOTION && S.power === "BULL" && S.powerT < 1.15 && Math.floor(S.powerT * 9) % 2 === 0;
     const edge = (PALETTE_ID === "simple" && wash) ? "#ffffff" : (wash || (S.laserOn ? "#e8902a" : palRgba(PAL.fg, 0.85)));
     for (const p of S.pipes) {
       const col = endingFlash ? RED : wash || (p.green ? GREEN : RED);
@@ -11537,7 +11597,7 @@
       if (p && !it.freeX) it.x = p.wx;
       drawPowerIcon(ctx, it, wash);
     }
-    const blink = S.invuln > 0 && Math.floor(S.invuln * 10) % 2 === 0;
+    const blink = !REDUCE_MOTION && S.invuln > 0 && Math.floor(S.invuln * 10) % 2 === 0;
     const foc = S.mp ? mpFocusPlayer() : null;
     const mineId = window.ChoppyMP && window.ChoppyMP.id ? window.ChoppyMP.id() : null;
     const selfGhost = !!(S.mp && (S.spectate || S.dead || S.finished) && foc && foc.id !== mineId);
@@ -11599,7 +11659,7 @@
     ctx.fillRect(140, 0, 14, 46);
     ctx.fillRect(140, 86, 14, 34);
     const t = performance.now() * 0.001;
-    drawBirdAt(ctx, w * 0.5, h * 0.54, Math.sin(t * 4.2) * 90, 15, myHero(), null, 1, false, HERO_ANIM, HERO_SKIN);
+    drawBirdAt(ctx, w * 0.5, h * 0.54, REDUCE_MOTION ? 0 : Math.sin(t * 4.2) * 90, 15, myHero(), null, 1, false, HERO_ANIM, HERO_SKIN);
     ctx.font = "700 10px \"IBM Plex Mono\", monospace";
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
@@ -11914,9 +11974,10 @@
     if (pauseBtn) {
       const paused = S.phase === "paused" || S.phase === "perk" || !!S.arcHold;
       pauseBtn.textContent = paused ? "▶" : "||";
-      pauseBtn.setAttribute("aria-label", paused ? "Play" : "Pause");
+      pauseBtn.setAttribute("aria-label", paused ? (chanceLang() ? "Seguir" : "Play") : (chanceLang() ? "Pausa" : "Pause"));
       pauseBtn.classList.toggle("arc-resume", !!(S.arcHold && S.phase === "paused"));
     }
+    try { syncZoomLock(); a11yHudTick(); } catch (e) {}
     if (S.have.ff <= 0) S.speedMul = 1;
     const battleFreeze = !!(S.bcDefense && S.bcDefense.frozen);
     $("trades").classList.toggle("hide", !playing || battleFreeze);
@@ -12364,6 +12425,7 @@
       box.id = "award-toasts";
       box.className = "award-toasts";
       box.setAttribute("aria-live", "polite");
+      box.setAttribute("aria-atomic", "true");
       box.setAttribute("role", "status");
       document.body.appendChild(box);
     }
@@ -13026,12 +13088,12 @@
   }
 
   function optHead(title) {
-    return "<h1>" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"Close\">×</button>";
+    return "<h1 id=\"opt-title\">" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"" + (chanceLang() ? "Cerrar" : "Close") + "\">×</button>";
   }
   function pauseMarkup() {
     const panel = S.optPanel || "";
     if (panel === "help") {
-      return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody();
+      return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody() + kbHelpHtml();
     }
     if (panel === "market") {
       const mul = S.ranked ? 10 : 1;
@@ -13076,7 +13138,7 @@
         return "<div class=\"juke-line" + (i === S.jukeTrack ? " on" : "") + (off ? " dim" : "") + "\">"
           + "<button type=\"button\" class=\"juke-track\" data-juke=\"" + i + "\">" + t + "</button>"
           + "<span class=\"juke-len\">" + (len ? fmtJuke(len) : "") + "</span>"
-          + "<button type=\"button\" class=\"juke-arm" + (off ? " off" : " on") + "\" data-skip=\"" + sid + "\" aria-label=\"" + (off ? "Enable" : "Disable") + "\">" + (off ? "✕" : "✓") + "</button>"
+          + "<button type=\"button\" class=\"juke-arm" + (off ? " off" : " on") + "\" data-skip=\"" + sid + "\" aria-label=\"" + (off ? (chanceLang() ? "Activar" : "Enable") : (chanceLang() ? "Desactivar" : "Disable")) + "\">" + (off ? "✕" : "✓") + "</button>"
           + "</div>";
       }).join("");
       const rpt = S.jukeRepeat || "off";
@@ -13085,16 +13147,16 @@
         + "<p class=\"juke-now\">" + (song ? song.title : id) + "</p>"
         + "<p class=\"juke-gen\">" + (song && song.genre ? song.genre : "") + "</p>"
         + "<div class=\"juke-row\">"
-        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-prev\" aria-label=\"Previous\">⏮</button>"
-        + "<button type=\"button\" class=\"juke-btn ico juke-play" + (live ? " on" : "") + "\" id=\"juke-play\" aria-label=\"Play\">▶</button>"
-        + "<button type=\"button\" class=\"juke-btn ico" + (paused ? " on" : "") + "\" id=\"juke-pause\" aria-label=\"Pause\">❚❚</button>"
-        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-next\" aria-label=\"Next\">⏭</button>"
+        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-prev\" aria-label=\"" + (chanceLang() ? "Anterior" : "Previous") + "\">⏮</button>"
+        + "<button type=\"button\" class=\"juke-btn ico juke-play" + (live ? " on" : "") + "\" id=\"juke-play\" aria-label=\"" + (chanceLang() ? "Reproducir" : "Play") + "\">▶</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (paused ? " on" : "") + "\" id=\"juke-pause\" aria-label=\"" + (chanceLang() ? "Pausa" : "Pause") + "\">❚❚</button>"
+        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-next\" aria-label=\"" + (chanceLang() ? "Siguiente" : "Next") + "\">⏭</button>"
         + "</div>"
         + "<div class=\"juke-prog\"><div class=\"juke-prog-bar\" id=\"juke-bar\"></div></div>"
         + "<div class=\"juke-times\"><span id=\"juke-el\">0:00</span><span id=\"juke-left\"></span></div>"
         + "<div class=\"juke-row\">"
-        + "<button type=\"button\" class=\"juke-btn ico" + (S.jukeShuffle ? " on" : "") + "\" id=\"juke-shuf\" aria-label=\"Shuffle\">🔀</button>"
-        + "<button type=\"button\" class=\"juke-btn ico" + (rpt !== "off" ? " on" : "") + "\" id=\"juke-rep\" aria-label=\"Repeat\">" + (rpt === "one" ? "🔂" : "🔁") + "</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (S.jukeShuffle ? " on" : "") + "\" id=\"juke-shuf\" aria-label=\"" + (chanceLang() ? "Aleatorio" : "Shuffle") + "\">🔀</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (rpt !== "off" ? " on" : "") + "\" id=\"juke-rep\" aria-label=\"" + (chanceLang() ? "Repetir" : "Repeat") + "\">" + (rpt === "one" ? "🔂" : "🔁") + "</button>"
         + "</div>"
         + "<div class=\"juke-list\">" + rows + "</div>"
         + "</div>";
@@ -13142,7 +13204,11 @@
       return "<div class=\"opt-head\">" + optHead(t("gameplay")) + "</div>"
         + "<div class=\"opt-menu\">"
         + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-move\">" + t("battleMove") + " · " + (BATTLE_360 ? "360°" : "↑↓←→") + "</button>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-motion\" aria-pressed=\"" + (REDUCE_MOTION ? "true" : "false") + "\">" + t("reduceMotion") + " · " + (REDUCE_MOTION ? t("soundOn") : t("soundOff")) + "</button>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-live\" aria-pressed=\"" + (LIVE_SUM ? "true" : "false") + "\">" + t("liveSum") + " · " + (LIVE_SUM ? t("soundOn") : t("soundOff")) + "</button>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-zoom\" aria-pressed=\"" + (ALLOW_ZOOM ? "true" : "false") + "\">" + t("allowZoom") + " · " + (ALLOW_ZOOM ? t("soundOn") : t("soundOff")) + "</button>"
         + (KB_DESK || /[?&]kb=1/.test(location.search) ? "<button type=\"button\" class=\"cta opt-item\" id=\"opt-keys\">" + (chanceLang() ? "TECLAS (PC)" : "HOTKEYS (PC)") + "</button>" : "")
+        + "<p class=\"k\">" + t("a11yNote") + "</p>"
         + "</div>";
     }
     if (panel === "keys") {
@@ -13299,6 +13365,12 @@
       setBattleMove(BATTLE_360 ? "ortho" : "360");
       renderOverlay();
     };
+    const optMotion = $("opt-motion");
+    if (optMotion) optMotion.onclick = (e) => { e.stopPropagation(); setReduceMotion(!REDUCE_MOTION); renderOverlay(); };
+    const optLive = $("opt-live");
+    if (optLive) optLive.onclick = (e) => { e.stopPropagation(); setLiveSum(!LIVE_SUM); renderOverlay(); };
+    const optZoom = $("opt-zoom");
+    if (optZoom) optZoom.onclick = (e) => { e.stopPropagation(); setAllowZoom(!ALLOW_ZOOM); renderOverlay(); };
     const optTest = $("opt-test");
     if (optTest) optTest.onclick = (e) => {
       e.stopPropagation();
@@ -13897,6 +13969,98 @@
     });
   }
 
+  let a11ySumAt = 0;
+  let a11ySumLast = "";
+  function a11yHudTick() {
+    if (!LIVE_SUM || S.phase !== "play") return;
+    const now = performance.now();
+    if (now - a11ySumAt < 8000) return;
+    a11ySumAt = now;
+    const es = chanceLang();
+    const msg = (es ? "Partida. Efectivo " : "Run. Cash ") + money(S.cash)
+      + ". BTC " + fmtBtcAmt(S.btc)
+      + (es ? ". Precio " : ". Price ") + money(S.price)
+      + (S.power && S.power !== "NONE" ? ". " + S.power : "")
+      + (es ? ". Velas " : ". Candles ") + String(S.shownCandles || 0);
+    if (msg === a11ySumLast) return;
+    a11ySumLast = msg;
+    const el = document.getElementById("a11y-live");
+    if (el) el.textContent = msg;
+  }
+  let a11yDlgKey = "";
+  let a11yModal = false;
+  let a11yOpener = null;
+  let a11yFocusId = "";
+  let a11ySyncQueued = false;
+  function a11yNodes(root) {
+    return Array.prototype.filter.call(root.querySelectorAll("a[href],button:not([disabled]),input:not([disabled]):not([type='hidden']),select:not([disabled]),textarea:not([disabled])"), (el) => {
+      if (el.tabIndex < 0 || el.classList.contains("hp") || (el.closest && el.closest(".hide"))) return false;
+      return el.getClientRects().length > 0;
+    });
+  }
+  function a11yModalPhase() {
+    if (!overlay || overlay.classList.contains("hide") || !overlay.innerHTML.trim()) return false;
+    const p = S.phase;
+    if (p === "defense" || p === "count") return false;
+    if (p === "play" && !(S.mp && (S.spectate || S.mpRoundOver || S.finished))) return false;
+    if (p === "ready" && !S.optPanel) return false;
+    if (p === "paused" && (S.optPanel === "off" || (S.arcHold && !S.optPanel))) return false;
+    return true;
+  }
+  function a11ySyncOverlay() {
+    if (!overlay) return;
+    const open = !overlay.classList.contains("hide") && overlay.innerHTML.trim() !== "";
+    const modal = open && a11yModalPhase();
+    const key = modal ? (S.phase + "|" + (S.optPanel || "") + "|" + ((S.chanceCard && S.chanceCard.id) || "") + "|" + (S.chanceNote ? "1" : "0") + "|" + (S.bcNameAsk ? "n" : "") + "|" + (S.runTab || "")) : "";
+    if (!modal) {
+      overlay.removeAttribute("aria-modal");
+      if (open && S.phase === "ready") {
+        overlay.setAttribute("role", "region");
+        overlay.setAttribute("aria-label", chanceLang() ? "Menú principal" : "Main menu");
+      } else if (!open) {
+        overlay.removeAttribute("role");
+        overlay.removeAttribute("aria-label");
+        overlay.removeAttribute("aria-labelledby");
+      }
+      if (a11yModal) {
+        a11yModal = false;
+        a11yDlgKey = "";
+        const back = a11yOpener;
+        a11yOpener = null;
+        if (back && back.focus && document.contains(back)) { try { back.focus(); } catch (e) {} }
+      }
+      return;
+    }
+    const was = a11yModal;
+    a11yModal = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    const h = overlay.querySelector("h1, h2, .arc-title");
+    if (h) {
+      if (!h.id) h.id = "ov-title";
+      overlay.setAttribute("aria-labelledby", h.id);
+      overlay.removeAttribute("aria-label");
+    }
+    if (!was) {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && !overlay.contains(ae)) a11yOpener = ae;
+      else a11yOpener = $("opt-btn") || a11yOpener;
+    }
+    if (key === a11yDlgKey && a11yFocusId) {
+      const again = document.getElementById(a11yFocusId);
+      if (again && overlay.contains(again)) { try { again.focus(); } catch (e) {} return; }
+    }
+    a11yDlgKey = key;
+    const prefer = overlay.querySelector("#bc-name-in, #arc-move-in, .arc-actions button, .perk-list button, .opt-menu button, #mp-host, #mp-code, button.cta, input:not([type='hidden'])");
+    if (prefer) { try { prefer.focus(); } catch (e) {} }
+  }
+  function queueA11ySync() {
+    const ae = document.activeElement;
+    if (ae && ae.id && overlay && overlay.contains(ae)) a11yFocusId = ae.id;
+    if (a11ySyncQueued) return;
+    a11ySyncQueued = true;
+    setTimeout(() => { a11ySyncQueued = false; try { a11ySyncOverlay(); } catch (e) {} }, 0);
+  }
   function showOverlay() {
     overlay.classList.remove("hide");
     overlay.classList.add("open");
@@ -13909,9 +14073,11 @@
     overlay.style.setProperty("display", "none", "important");
     overlay.style.pointerEvents = "none";
     overlay.innerHTML = "";
+    queueA11ySync();
   }
 
   function renderOverlay() {
+    queueA11ySync();
     costAsBtc = null;
     const p = S.phase;
     if (p === "defense") {
@@ -14294,6 +14460,7 @@
   function guardWindowBtn(e) {
     const btn = windowBtnOf(e.target);
     if (!btn) return;
+    if (e.type === "click" && e.detail === 0) return;
     const now = performance.now();
     if (now < winLockUntil && btn !== winLockEl) {
       e.preventDefault();
@@ -14308,6 +14475,23 @@
   document.addEventListener("pointerdown", guardWindowBtn, true);
   document.addEventListener("pointerup", guardWindowBtn, true);
   document.addEventListener("click", guardWindowBtn, true);
+  overlay.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab" || overlay.getAttribute("aria-modal") !== "true") return;
+    const list = a11yNodes(overlay);
+    if (!list.length) { e.preventDefault(); return; }
+    const first = list[0], last = list[list.length - 1], cur = document.activeElement;
+    if (e.shiftKey && (cur === first || !overlay.contains(cur))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (cur === last || !overlay.contains(cur))) { e.preventDefault(); first.focus(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab" || !overlay || overlay.getAttribute("aria-modal") !== "true") return;
+    if (document.querySelector("#auth-modal.open, #profile-modal.open")) return;
+    if (overlay.contains(document.activeElement)) return;
+    const list = a11yNodes(overlay);
+    if (!list.length) return;
+    e.preventDefault();
+    (e.shiftKey ? list[list.length - 1] : list[0]).focus();
+  }, true);
   overlay.addEventListener("click", (e) => {
     const go = e.target.closest("#go");
     if (!go) return;
@@ -14375,6 +14559,20 @@
       +"<button type=\"button\" class=\"cta opt-item\" id=\"kb-reset\">"+(es?"Restablecer teclas":"Reset to defaults")+"</button>"
       +"<p class=\"kb-note\">"+(es?"Flechas también mueven en batalla; ↑ también salta. Esc cancela la reasignación.":"Arrow keys also move in battle; ↑ also jumps. Esc cancels rebinding.")+"</p>";
   }
+  function kbHelpHtml() {
+    const es = chanceLang();
+    const head = { play: es ? "Juego" : "Run", battle: es ? "Batalla" : "Battle", ui: es ? "Menús y cartas" : "Menus and cards" };
+    let h = "<div class=\"help kb-help\"><p class=\"k\">" + t("a11yKeys") + "</p>";
+    let g = "";
+    KB_DEFS.forEach((d) => {
+      if (d.g !== g) { g = d.g; h += "<p class=\"k\">" + head[g] + "</p>"; }
+      h += "<p><span>" + (es ? d.es : d.en) + "</span> <kbd>" + kbLabel(KB[d.id]) + "</kbd></p>";
+    });
+    h += "<p><span>" + (es
+      ? "También puedes recorrer los botones con Tab y activarlos con Enter o Espacio. ? abre esta lista."
+      : "You can also move through buttons with Tab and activate them with Enter or Space. ? opens this list.") + "</span></p></div>";
+    return h;
+  }
   function kbBind(){
     overlay.querySelectorAll("[data-kb]").forEach(b=>{b.onclick=(e)=>{e.stopPropagation();kbCapture=b.getAttribute("data-kb");kbMsg="";renderOverlay();};});
     const r=$("kb-reset");if(r)r.onclick=(e)=>{e.stopPropagation();kbCapture=null;try{localStorage.removeItem(KB_STORE);}catch(_){}kbLoad();kbMsg=chanceLang()?"Teclas restablecidas.":"Keys reset.";kbHints();renderOverlay();};
@@ -14391,14 +14589,18 @@
     let el=$("kb-sheet");
     const show=force!=null?force:!(el&&el.classList.contains("open"));
     if(!show){if(el)el.classList.remove("open");document.body.classList.remove("kb-sheet-on");return;}
-    if(!el){el=document.createElement("div");el.id="kb-sheet";el.setAttribute("role","dialog");el.onclick=()=>kbSheetToggle(false);document.body.appendChild(el);}
+    if(!el){el=document.createElement("div");el.id="kb-sheet";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.onclick=()=>kbSheetToggle(false);el.addEventListener("keydown",(ev)=>{if(ev.key!=="Tab")return;const list=el.querySelectorAll("button,a[href]");if(!list.length){ev.preventDefault();return;}const first=list[0],last=list[list.length-1];if(ev.shiftKey&&document.activeElement===first){ev.preventDefault();last.focus();}else if(!ev.shiftKey&&document.activeElement===last){ev.preventDefault();first.focus();}});document.body.appendChild(el);}
     const es=chanceLang();
     const head={play:es?"Juego":"Run",battle:es?"Batalla":"Battle",ui:es?"Menús y cartas":"Menus & cards"};
     let h="<div class=\"kb-sheet-box\"><p class=\"k\">"+(es?"ATAJOS DE TECLADO":"KEYBOARD SHORTCUTS")+"</p><div class=\"kb-sheet-cols\">",g="";
     KB_DEFS.forEach(d=>{if(d.g!==g){if(g)h+="</div>";g=d.g;h+="<div><p class=\"kb-sec\">"+head[g]+"</p>";}
       h+="<div class=\"kb-row\"><span>"+(es?d.es:d.en)+"</span><kbd>"+kbLabel(KB[d.id])+"</kbd></div>";});
-    h+="</div></div><p class=\"kb-note\">"+(es?"? o Esc cierra · Cámbialas en Opciones → Juego → Teclas (PC)":"? or Esc closes · Rebind in Options → Gameplay → Keys (PC)")+"</p></div>";
+    h+="</div></div><p class=\"kb-note\">"+(es?"? o Esc cierra · Cámbialas en Opciones → Juego → Teclas (PC)":"? or Esc closes · Rebind in Options → Gameplay → Keys (PC)")+"</p>"
+      +"<button type=\"button\" class=\"cta\" id=\"kb-sheet-x\">"+(es?"Cerrar":"Close")+"</button></div>";
+    el.setAttribute("aria-label", es?"Atajos de teclado":"Keyboard shortcuts");
     el.innerHTML=h;el.classList.add("open");document.body.classList.add("kb-sheet-on");
+    const xBtn=el.querySelector("#kb-sheet-x");
+    if(xBtn){xBtn.onclick=(ev)=>{ev.stopPropagation();kbSheetToggle(false);};setTimeout(()=>{try{xBtn.focus();}catch(err){}},0);}
     if(S.phase==="play"&&!S.mp)togglePause();
   }
   function kbClickFirst(sel){const el=overlay.querySelector(sel);if(el&&!el.disabled&&el.offsetParent!==null){el.click();return true;}return false;}
@@ -14426,7 +14628,9 @@
     }
     const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || (e.target && e.target.isContentEditable);
-    if (typing) return;
+    if (typing && e.key !== "Escape") return;
+    const ae = document.activeElement;
+    if (ae && ae.closest && ae.closest("button, a[href], summary, [role='button']") && (e.key === " " || e.key === "Enter" || e.code === "Space")) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const sheet = $("kb-sheet");
     if (sheet && sheet.classList.contains("open") && (e.code === "Escape" || e.key === "?")) { e.preventDefault(); kbSheetToggle(false); return; }
@@ -14663,13 +14867,90 @@
       renderHud();
     };
   });
+  function onKeyClick(el, fn) {
+    if (!el || el.dataset.keyClick) return;
+    el.dataset.keyClick = "1";
+    el.addEventListener("click", (e) => {
+      if (e.detail !== 0) return;
+      e.stopPropagation();
+      fn(e);
+    });
+  }
+  onKeyClick($("pause-btn"), () => { if (!S.mp) togglePause(); });
+  onKeyClick($("opt-btn"), () => toggleOptions());
+  onKeyClick($("buy-btc"), () => {
+    if (aiLocks().trade) return;
+    buyBtc();
+    clearManualTradePaint();
+    renderHud();
+  });
+  onKeyClick($("sell-btc"), () => {
+    if (aiLocks().trade) return;
+    sellBtc();
+    clearManualTradePaint();
+    renderHud();
+  });
+  onKeyClick($("dca-btn"), () => {
+    if (S.have.dca <= 0 || aiLocks().dca) return;
+    S.dcaOn = !S.dcaOn;
+    if (S.aibudLit) S.aibudLit.dca = false;
+    renderHud();
+  });
+  onKeyClick($("iabud-btn"), () => {
+    if ((S.have.aibud || 0) <= 0) return;
+    S.aibudOn = !S.aibudOn;
+    if (!S.aibudOn) { S.aibudLit = {}; S.aibudLitAt = {}; }
+    renderHud();
+  });
+  onKeyClick($("trend-btn"), () => {
+    if (S.have.manip <= 0 || aiLocks().trend) return;
+    S.trend = S.trend === "off" ? "up" : S.trend === "up" ? "down" : "off";
+    if (S.aibudLit) S.aibudLit.trend = false;
+    renderHud();
+  });
+  onKeyClick($("market-btn"), () => {
+    if ((S.have.market || 0) <= 0 || S.mp) return;
+    S.optBack = S.phase === "play" ? "play" : (S.optBack || "ready");
+    S.optPanel = "market";
+    if (S.phase === "play") setPhase("paused");
+    else renderOverlay();
+    armWindowLock();
+  });
+  document.querySelectorAll(".spd").forEach((btn) => {
+    onKeyClick(btn, () => {
+      if (S.have.ff <= 0) return;
+      cycleSpeed();
+      renderHud();
+    });
+  });
+  onKeyClick($("juke-hud-play"), () => {
+    if ((S.have.juke || 0) <= 0) return;
+    if ((A.jukePlaying && A.jukePlaying()) || (A.jukePaused && A.jukePaused())) jukePause();
+    else jukePlay();
+    paintJukeHud();
+  });
 
+  function syncStaticAria() {
+    const es = chanceLang();
+    const set = (id, en, sp) => { const el = $(id); if (el) el.setAttribute("aria-label", es ? sp : en); };
+    set("juke-hud-play", "Play or pause", "Reproducir o pausar");
+    set("juke-hud-vol", "Volume", "Volumen");
+    set("def-rev", "Reverse", "Reversa");
+    set("def-arc", "Shot spread", "Dispersión del disparo");
+    set("def-aa", "Fury strike", "Golpe de furia");
+    set("bc-close", "Close", "Cerrar");
+    set("bc-open", "Bitcoin Country", "Bitcoin Country");
+    const canvasEl = $("c");
+    if (canvasEl) canvasEl.setAttribute("aria-label", es ? "Campo de juego de Choppy Bitcoin" : "Choppy Bitcoin playfield");
+  }
   window.addEventListener("bz-lang", () => {
     if (window.BZ) BZ.apply(document);
     if (A && A.setLang && window.BZ && BZ.lang) A.setLang(BZ.lang());
+    try { syncStaticAria(); } catch (e) {}
     renderOverlay();
     renderHud();
   });
+  try { syncStaticAria(); } catch (e) {}
   const bcOpen=$("bc-open"),bcClose=$("bc-close"),bcArmy10=$("bc-army10"),bcArmyBar=$("bc-army-bar"),bcDeclare=$("bc-declare"),bcForm=$("bc-form-army");
   if(bcOpen)bcOpen.addEventListener("click",()=>{const p=$("bc-panel");if(p)p.classList.remove("hide");renderBitcoinCountry();});
   if(bcClose)bcClose.addEventListener("click",()=>{const p=$("bc-panel");if(p)p.classList.add("hide");});

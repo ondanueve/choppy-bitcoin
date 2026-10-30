@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("choppy-allow-zoom") !== "1") return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, viewport-fit=cover");
+      } catch (e) {}
+    })();
+  </script>
   <title>Edit profile | Bitcoinizate</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
@@ -14,14 +23,15 @@
     input[type=text] { width: min(360px, 100%); padding: 8px; background: #1a1a1a; color: #eee; border: 1px solid #444; }
     input[type=file] { display: block; margin-top: 6px; }
     img { width: 96px; height: 96px; object-fit: cover; border: 1px solid #444; background: #222; margin-top: 8px; }
-    button { margin-top: 16px; padding: 8px 14px; }
+    button { margin-top: 16px; padding: 10px 14px; min-height: 44px; }
+    :focus-visible { outline: 2px solid #F2A900; outline-offset: 2px; }
     .msg { margin-top: 10px; min-height: 18px; color: #8f8; font-size: 13px; }
     .msg.bad { color: #f88; }
     .hide { display: none !important; }
     a { color: #F2A900; }
     .stats-mini {
       display: inline-block; font: inherit; font-size: 11px; margin-left: 8px;
-      padding: 4px 10px; cursor: pointer; background: transparent; color: #eee; border: 1px solid #F2A900;
+      padding: 10px 12px; min-height: 44px; cursor: pointer; background: transparent; color: #eee; border: 1px solid #F2A900;
     }
   </style>
 </head>
@@ -46,9 +56,23 @@
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
     (function () {
-      var es = (navigator.language || "").toLowerCase().indexOf("es") === 0;
+      var es = false;
+      try {
+        var saved = localStorage.getItem("bitcoinizate-lang");
+        if (saved === "es" || saved === "en") es = saved === "es";
+        else es = (navigator.language || "").toLowerCase().indexOf("es") === 0;
+      } catch (e) { es = (navigator.language || "").toLowerCase().indexOf("es") === 0; }
+      document.documentElement.lang = es ? "es" : "en";
+      document.title = es ? "Editar perfil | Bitcoinizate" : "Edit profile | Bitcoinizate";
       document.getElementById("title").textContent = es ? "Editar perfil" : "Edit profile";
+      document.getElementById("preview").alt = "";
       document.getElementById("save").textContent = es ? "Guardar cambios" : "Save changes";
+      var aliasLab = document.querySelector("label[for='alias']");
+      if (aliasLab) aliasLab.textContent = es ? "Usuario" : "Username";
+      var photoLab = document.querySelector("label[for='photo']");
+      if (photoLab) photoLab.textContent = es ? "Avatar" : "Avatar";
+      var pub = document.getElementById("public-link");
+      if (pub) pub.textContent = es ? "Perfil público" : "Public profile";
       var sb = window.supabase && window.supabase.createClient && window.supabase.createClient();
       var form = document.getElementById("form");
       var need = document.getElementById("need");
@@ -87,6 +111,7 @@
           if (!data) { setMsg(es ? "No se pudo leer la imagen." : "Could not read image.", true); return; }
           pendingAvatar = data;
           preview.src = data;
+          preview.alt = es ? "Vista previa del avatar" : "Avatar preview";
         });
       };
       if (!sb) {
@@ -119,7 +144,7 @@
           aliasEl.value = profile.username || guess || "";
           try {
             var localAv = localStorage.getItem("choppy-avatar-" + uid);
-            if (localAv) preview.src = localAv;
+            if (localAv) { preview.src = localAv; preview.alt = es ? "Vista previa del avatar" : "Avatar preview"; }
           } catch (err) {}
           document.getElementById("public-link").href = "/choppy-bitcoin/u/?u=" + encodeURIComponent(aliasEl.value || "");
           var sc = document.getElementById("dash-score");
