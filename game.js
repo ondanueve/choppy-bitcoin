@@ -10105,6 +10105,11 @@
     const px=clampPx(S.price);
     return (S.btc||0)+Math.max(0,S.cash||0)/px;
   }
+  // The offer is only shown when the player can pay it (BTC plus cash at the current price).
+  function aidAffordable(){
+    const cost=aidOffer();
+    return !!cost&&aidReach()+1e-6>=cost;
+  }
   function payMilitaryAid(){
     const cost=aidOffer();
     if(!cost||aidReach()+1e-6<cost) return;
@@ -14783,16 +14788,13 @@
         if (!S.stats) snapshotRun();
         endRunAwards();
       } catch (e) {}
-      if (S.trainBattleLose && aidOffer()) {
+      if (S.trainBattleLose && aidAffordable()) {
         const cost = aidOffer();
-        const have = aidReach();
-        const ok = have + 1e-6 >= cost;
         const n = aidBtcLabel(cost);
         const note = t("aidNote").replace("{n}", n).replace("{i}", String((S.bcAidUsed | 0) + 1));
-        const short = ok ? "" : ("<p class=\"k\">" + t("aidShort").replace("{have}", aidBtcLabel(have)) + "</p>");
-        overlay.innerHTML = "<p class=\"k\">" + t("aidTitle") + "</p><h1>" + n + "</h1><p>" + note + "</p>" + short + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"aid-yes\"" + (ok ? "" : " disabled") + ">" + t("aidPay") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"aid-no\">" + t("aidDecline") + "</button></div>";
+        overlay.innerHTML = "<p class=\"k\">" + t("aidTitle") + "</p><h1>" + n + "</h1><p>" + note + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"aid-yes\">" + t("aidPay") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"aid-no\">" + t("aidDecline") + "</button></div>";
         const yes = $("aid-yes");
-        if (yes && ok) {
+        if (yes) {
           const go = (e) => { e.preventDefault(); e.stopPropagation(); payMilitaryAid(); };
           yes.onclick = go;
           yes.onpointerdown = go;
