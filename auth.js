@@ -15,12 +15,12 @@
   }
 
   const AWARD_FALLBACK = [
-    { id: "maxi", name: "Maxi Soul", why: "Never sold BTC — not by hand, not by A.I. bud." },
-    { id: "halver", name: "Halving Catcher", why: "Every halving that spawned was eaten." },
-    { id: "nocoiner", name: "Nocoiner", why: "Never bought BTC in that run." },
-    { id: "greedy", name: "Greedy Miner", why: "Ate 0 halvings." },
-    { id: "opsec", name: "Opsec Warrior", why: "Lost 0 cold storage." },
-    { id: "paper", name: "Paper Hands", why: "Sold BTC in a bear market." }
+    { id: "maxi", name: "Maxi Soul", nameEs: "Alma maxi", why: "Never sold BTC — not by hand, not by A.I. bud.", whyEs: "Nunca vendió BTC, ni a mano ni por A.I. bud." },
+    { id: "halver", name: "Halving Catcher", nameEs: "Atrapa halvings", why: "Every halving that spawned was eaten.", whyEs: "Comió todos los halvings que salieron." },
+    { id: "nocoiner", name: "Nocoiner", nameEs: "Nocoiner", why: "Never bought BTC in that run.", whyEs: "Nunca compró BTC en esa partida." },
+    { id: "greedy", name: "Greedy Miner", nameEs: "Minero greedy", why: "Ate 0 halvings.", whyEs: "Comió 0 halvings." },
+    { id: "opsec", name: "Opsec Warrior", nameEs: "Guerrero opsec", why: "Lost 0 cold storage.", whyEs: "No perdió cold storage." },
+    { id: "paper", name: "Paper Hands", nameEs: "Manos de papel", why: "Sold BTC in a bear market.", whyEs: "Vendió BTC en un bear market." }
   ];
   function awardHtmlLocal() {
     if (window.choppyAwardHtml) return window.choppyAwardHtml();
@@ -29,10 +29,14 @@
       const bag = JSON.parse(localStorage.getItem("choppy-awards") || "{}");
       owned = bag[window.choppyUserId || "guest"] || {};
     } catch (e) {}
+    const es = window.BZ && BZ.lang && BZ.lang() === "es";
     const got = AWARD_FALLBACK.filter((a) => owned[a.id]);
-    if (!got.length) return "<details class=\"aw-box\"><summary>Awards (0)</summary><p>No awards yet.</p></details>";
-    return "<details class=\"aw-box\"><summary>Awards (" + got.length + ")</summary>" + got.map((a) => {
-      return "<p class=\"aw-on\"><b>✓ " + a.name + "</b> — " + a.why + "</p>";
+    const head = tr("awards", "Awards");
+    if (!got.length) return "<details class=\"aw-box\"><summary>" + head + " (0)</summary><p>" + tr("noAwards", "No awards yet.") + "</p></details>";
+    return "<details class=\"aw-box\"><summary>" + head + " (" + got.length + ")</summary>" + got.map((a) => {
+      const name = es ? (a.nameEs || a.name) : a.name;
+      const why = es ? (a.whyEs || a.why) : a.why;
+      return "<p class=\"aw-on\"><b>✓ " + name + "</b> — " + why + "</p>";
     }).join("") + "</details>";
   }
   const $ = (id) => document.getElementById(id);
@@ -57,10 +61,51 @@
   }
   const authMsg = $("auth-msg");
 
+  let lastMsgKey = "";
+  let lastMsgFb = "";
+  let lastMsgBad = false;
+  let lastMsgVars = null;
+  let lastHintKey = "";
+  let lastHintFb = "";
+  let lastHintVars = null;
+
+  function tr(key, fb) {
+    if (window.BZ && typeof BZ.t === "function") {
+      const v = BZ.t(key);
+      if (v && v !== key) return v;
+    }
+    return fb;
+  }
+
   function setMsg(text, bad) {
+    if (!text) {
+      lastMsgKey = "";
+      lastMsgFb = "";
+      lastMsgVars = null;
+    }
     if (!authMsg) return;
     authMsg.textContent = text || "";
     authMsg.classList.toggle("bad", !!bad);
+  }
+
+  function sayMsg(key, fb, bad, vars) {
+    lastMsgKey = key;
+    lastMsgFb = fb;
+    lastMsgBad = !!bad;
+    lastMsgVars = vars || null;
+    let text = tr(key, fb);
+    if (vars) Object.keys(vars).forEach((k) => { text = text.split("{" + k + "}").join(String(vars[k])); });
+    setMsg(text, bad);
+  }
+
+  function sayHint(el, key, fb, vars) {
+    lastHintKey = key;
+    lastHintFb = fb;
+    lastHintVars = vars || null;
+    if (!el) return;
+    let text = tr(key, fb);
+    if (vars) Object.keys(vars).forEach((k) => { text = text.split("{" + k + "}").join(String(vars[k])); });
+    el.textContent = text;
   }
 
   function validAlias(s) {
@@ -153,18 +198,20 @@
 
   async function sendReset() {
     const email = ($("auth-email") && $("auth-email").value || "").trim();
-    if (!email) { setMsg("Enter your email first.", true); return; }
-    if (!supabase) { setMsg("Auth is offline.", true); return; }
-    setMsg("Sending reset mail…");
+    if (!email) { sayMsg("authEmailFirst", "Enter your email first.", true); return; }
+    if (!supabase) { sayMsg("authOffline", "Auth is offline.", true); return; }
+    sayMsg("authSending", "Sending reset mail…");
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: location.origin + "/choppy-bitcoin/"
     });
-    if (error) setMsg(error.message || "Could not send mail.", true);
-    else setMsg("If that inbox exists, a reset link is on the way.");
+    if (error) {
+      lastMsgKey = "";
+      setMsg(error.message || tr("authMailFail", "Could not send mail."), true);
+    } else sayMsg("authMailSent", "If that inbox exists, a reset link is on the way.");
   }
 
   function openReset() {
-    if ($("modal-auth-title")) $("modal-auth-title").textContent = "New password";
+    if ($("modal-auth-title")) $("modal-auth-title").textContent = tr("newPass", "New password");
     if ($("group-alias")) $("group-alias").classList.add("hide");
     const emailLab = $("auth-email") && $("auth-email").closest("label");
     if (emailLab) emailLab.classList.add("hide");
@@ -175,13 +222,13 @@
     }
     if ($("auth-password2")) $("auth-password2").value = "";
     if ($("btn-submit-auth")) {
-      $("btn-submit-auth").textContent = "Save password";
+      $("btn-submit-auth").textContent = tr("savePass", "Save password");
       $("btn-submit-auth").dataset.reset = "1";
     }
     if ($("btn-forgot")) $("btn-forgot").classList.add("hide");
     if ($("btn-toggle-auth")) $("btn-toggle-auth").classList.add("hide");
     if (authModal) openModal(authModal);
-    setMsg("Choose a new password.");
+    sayMsg("choosePass", "Choose a new password.");
   }
 
   function showSignFields() {
@@ -197,17 +244,21 @@
   async function saveNewPassword() {
     const password = ($("auth-password") && $("auth-password").value || "").trim();
     const again = ($("auth-password2") && $("auth-password2").value || "").trim();
-    if (password.length < 8) { setMsg("Password must be at least 8 characters.", true); return; }
-    if (password !== again) { setMsg("Passwords do not match.", true); return; }
+    if (password.length < 8) { sayMsg("authPassShort", "Password must be at least 8 characters.", true); return; }
+    if (password !== again) { sayMsg("authPassMatch", "Passwords do not match.", true); return; }
     const { error } = await supabase.auth.updateUser({ password });
-    if (error) { setMsg(error.message || "Could not update password.", true); return; }
+    if (error) {
+      lastMsgKey = "";
+      setMsg(error.message || tr("authPassFail", "Could not update password."), true);
+      return;
+    }
     try {
       const s = JSON.parse(localStorage.getItem("bitcoinizate-sb") || "null");
       if (s) { delete s.type; localStorage.setItem("bitcoinizate-sb", JSON.stringify(s)); }
     } catch (e) {}
     if ($("btn-submit-auth")) delete $("btn-submit-auth").dataset.reset;
     showSignFields();
-    setMsg("Password saved. You are signed in.");
+    sayMsg("authPassSaved", "Password saved. You are signed in.");
     await checkActiveSession();
   }
 
@@ -266,13 +317,13 @@
     const email = ($("auth-email") && $("auth-email").value || "").trim();
     const password = ($("auth-password") && $("auth-password").value || "").trim();
     const username = ($("auth-username") && $("auth-username").value || "").trim();
-    if (!email || !password) { setMsg("Enter email or alias, and password.", true); return; }
-    if (password.length < 8) { setMsg("Password must be at least 8 characters.", true); return; }
-    if (!supabase) { setMsg("Auth is offline.", true); return; }
-    setMsg("Working…");
+    if (!email || !password) { sayMsg("authNeedBoth", "Enter email or alias, and password.", true); return; }
+    if (password.length < 8) { sayMsg("authPassShort", "Password must be at least 8 characters.", true); return; }
+    if (!supabase) { sayMsg("authOffline", "Auth is offline.", true); return; }
+    sayMsg("authWorking", "Working…");
     try {
       if (isSignUpMode) {
-        if (!validAlias(username)) { setMsg("Alias: 3–16 letters, numbers or _.", true); return; }
+        if (!validAlias(username)) { sayMsg("authAliasRule", "Alias: 3–16 letters, numbers or _.", true); return; }
         const { data, error } = await supabase.auth.signUp({
           email, password, options: { data: { username } }
         });
@@ -286,13 +337,13 @@
           if (authModal) closeModal(authModal);
           setMsg("");
         } else {
-          setMsg("Check your email to confirm the account.");
+          sayMsg("authConfirmEmail", "Check your email to confirm the account.");
         }
       } else {
         let loginId = email;
         if (loginId.indexOf("@") < 0) {
           const look = await supabase.rpc("email_for_alias", { p_alias: loginId });
-          if (look.error || !look.data) throw new Error("No account for that alias.");
+          if (look.error || !look.data) throw new Error(tr("authNoAlias", "No account for that alias."));
           loginId = typeof look.data === "string" ? look.data : (look.data.email || look.data);
         }
         const { data, error } = await supabase.auth.signInWithPassword({ email: loginId, password });
@@ -303,7 +354,8 @@
         setMsg("");
       }
     } catch (e) {
-      setMsg(e.message || "Authentication failed.", true);
+      lastMsgKey = "";
+      setMsg(e.message || tr("authFailed", "Authentication failed."), true);
     }
   }
 
@@ -313,14 +365,14 @@
     const aliasEl = $("profile-alias");
     const next = aliasEl ? aliasEl.value.trim() : "";
     if (!validAlias(next)) {
-      if (hint) hint.textContent = "Alias: 3–16 letters, numbers or _.";
+      sayHint(hint, "authAliasRule", "Alias: 3–16 letters, numbers or _.");
       return;
     }
     try { localStorage.setItem("choppy-alias", next); } catch (e) {}
     if (currentProfile) currentProfile.username = next;
     window.choppyUsername = next;
     updateAuthUI(currentProfile || { username: next, highscore: 0 });
-    if (hint) hint.textContent = "Saving alias…";
+    sayHint(hint, "authSavingAlias", "Saving alias…");
     if (!supabase) return;
     try {
       let { error } = await supabase.from("profiles").update({ username: next }).eq("id", currentUser.id);
@@ -331,9 +383,9 @@
       if (error) {
         await supabase.from("profiles").insert([{ id: currentUser.id, username: next, email: currentUser.email || null, highscore: 0 }]);
       }
-      if (hint) hint.textContent = "Alias updated.";
+      sayHint(hint, "authAliasSaved", "Alias updated.");
     } catch (e) {
-      if (hint) hint.textContent = "Could not save alias online.";
+      sayHint(hint, "authAliasOnline", "Could not save alias online.");
     }
   }
 
@@ -361,30 +413,35 @@
     const same = btcAddr === (currentProfile && currentProfile.btc_address || "")
       && lnAddr === (currentProfile && currentProfile.ln_address || "");
     if (same) {
-      if (hint) hint.textContent = "No changes.";
+      sayHint(hint, "authNoChange", "No changes.");
       return;
     }
     if (!addrReady()) {
-      const msg = "Addresses can change once a day. Next: " + addrNextDate();
-      if (hint) hint.textContent = msg;
-      setMsg(msg, true);
+      const when = addrNextDate();
+      sayHint(hint, "authAddrDaily", "Addresses can change once a day. Next: {when}", { when: when });
+      sayMsg("authAddrDaily", "Addresses can change once a day. Next: {when}", true, { when: when });
       return;
     }
     try {
       const res = await supabase.from("profiles").update({ btc_address: btcAddr, ln_address: lnAddr }).eq("id", currentUser.id);
       if (res && res.error) {
-        const msg = res.error.message || "Could not save.";
+        lastHintKey = "";
+        lastMsgKey = "";
+        const msg = res.error.message || tr("authSaveFail", "Could not save.");
         if (hint) hint.textContent = msg;
         setMsg(msg, true);
         return;
       }
       try { localStorage.setItem("choppy-addr-at", String(Date.now())); } catch (e) {}
       await loadUserProfile();
-      if (hint) hint.textContent = "Saved. Next change after 24h.";
+      sayHint(hint, "authSaved24", "Saved. Next change after 24h.");
       if (btcEl) btcEl.disabled = true;
       if (lnEl) lnEl.disabled = true;
     } catch (e) {
-      const msg = "Update failed: " + (e.message || "error");
+      const why = e.message || tr("authFailed", "Authentication failed.");
+      lastHintKey = "";
+      lastMsgKey = "";
+      const msg = tr("authUpdateFail", "Update failed: {why}").split("{why}").join(why);
       if (hint) hint.textContent = msg;
       setMsg(msg, true);
     }
@@ -566,10 +623,10 @@
     showSignFields();
     const title = $("modal-auth-title");
     const group = $("group-alias");
-    if (title) title.textContent = isSignUpMode ? ((window.BZ && BZ.t("signUp")) || "Sign up") : ((window.BZ && BZ.t("signIn")) || "Sign in");
+    if (title) title.textContent = isSignUpMode ? tr("signUp", "Sign up") : tr("signIn", "Sign in");
     if (group) group.classList.toggle("hide", !isSignUpMode);
-    if ($("btn-submit-auth")) $("btn-submit-auth").textContent = isSignUpMode ? ((window.BZ && BZ.t("createAccount")) || "Create account") : ((window.BZ && BZ.t("signIn")) || "Sign in");
-    if ($("btn-toggle-auth")) $("btn-toggle-auth").textContent = isSignUpMode ? ((window.BZ && BZ.t("haveAccount")) || "Have an account?") : ((window.BZ && BZ.t("needAccount")) || "Need an account?");
+    if ($("btn-submit-auth")) $("btn-submit-auth").textContent = isSignUpMode ? tr("createAccount", "Create account") : tr("signIn", "Sign in");
+    if ($("btn-toggle-auth")) $("btn-toggle-auth").textContent = isSignUpMode ? tr("haveAccount", "Have an account?") : tr("needAccount", "Need an account?");
     setMsg("");
   }
 
@@ -581,13 +638,54 @@
     }
     isSignUpMode = false;
     showSignFields();
-    if ($("modal-auth-title")) $("modal-auth-title").textContent = (window.BZ && BZ.t("signIn")) || "Sign in";
+    if ($("modal-auth-title")) $("modal-auth-title").textContent = tr("signIn", "Sign in");
     if ($("group-alias")) $("group-alias").classList.add("hide");
-    if ($("btn-submit-auth")) $("btn-submit-auth").textContent = (window.BZ && BZ.t("signIn")) || "Sign in";
-    if ($("btn-toggle-auth")) $("btn-toggle-auth").textContent = (window.BZ && BZ.t("needAccount")) || "Need an account?";
+    if ($("btn-submit-auth")) $("btn-submit-auth").textContent = tr("signIn", "Sign in");
+    if ($("btn-toggle-auth")) $("btn-toggle-auth").textContent = tr("needAccount", "Need an account?");
     setMsg("");
     if (authModal) openModal(authModal);
   }
+
+  function refreshAuthText() {
+    const title = $("modal-auth-title");
+    const submit = $("btn-submit-auth");
+    const toggle = $("btn-toggle-auth");
+    const reset = submit && submit.dataset.reset === "1";
+    if (reset) {
+      if (title) title.textContent = tr("newPass", "New password");
+      if (submit) submit.textContent = tr("savePass", "Save password");
+    } else if (isSignUpMode) {
+      if (title) title.textContent = tr("signUp", "Sign up");
+      if (submit) submit.textContent = tr("createAccount", "Create account");
+      if (toggle) toggle.textContent = tr("haveAccount", "Have an account?");
+    } else {
+      if (title) title.textContent = tr("signIn", "Sign in");
+      if (submit) submit.textContent = tr("signIn", "Sign in");
+      if (toggle) toggle.textContent = tr("needAccount", "Need an account?");
+    }
+    if (lastMsgKey) {
+      let text = tr(lastMsgKey, lastMsgFb);
+      if (lastMsgVars) Object.keys(lastMsgVars).forEach((k) => { text = text.split("{" + k + "}").join(String(lastMsgVars[k])); });
+      setMsg(text, lastMsgBad);
+    }
+    const hint = $("alias-hint");
+    if (lastHintKey && hint) sayHint(hint, lastHintKey, lastHintFb, lastHintVars);
+    const box = $("profile-awards");
+    if (box && profileModal && !profileModal.classList.contains("hide")) box.innerHTML = awardHtmlLocal();
+    const score = $("profile-score-info");
+    if (score && currentProfile && profileModal && !profileModal.classList.contains("hide")) {
+      const hs = seasonScore(currentProfile);
+      score.innerHTML = tr("highScore", "High score") + "  " + fmtScoreBtc(hs)
+        + (currentProfile.run_stats ? " <button type=\"button\" class=\"stats-mini\" id=\"profile-stats-btn\">" + tr("runStats", "STATS") + "</button>" : "");
+      const ps = $("profile-stats-btn");
+      if (ps) ps.onclick = (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (window.openSavedRunStats) window.openSavedRunStats(currentProfile.run_stats);
+      };
+    }
+  }
+  window.addEventListener("bz-lang", refreshAuthText);
 
   window.openAuth = openAuth;
   window.closeAuth = () => closeModal(authModal);
@@ -621,8 +719,8 @@
       if (!currentProfile) return;
       if ($("profile-score-info")) {
         const hs = seasonScore(currentProfile);
-        $("profile-score-info").innerHTML = ((window.BZ && BZ.t("highScore")) || "High score") + "  " + fmtScoreBtc(hs)
-          + (currentProfile.run_stats ? " <button type=\"button\" class=\"stats-mini\" id=\"profile-stats-btn\">STATS</button>" : "");
+        $("profile-score-info").innerHTML = tr("highScore", "High score") + "  " + fmtScoreBtc(hs)
+          + (currentProfile.run_stats ? " <button type=\"button\" class=\"stats-mini\" id=\"profile-stats-btn\">" + tr("runStats", "STATS") + "</button>" : "");
         const ps = $("profile-stats-btn");
         if (ps) ps.onclick = (e) => {
           e.preventDefault();
@@ -635,7 +733,12 @@
         $("profile-alias").value = localA || currentProfile.username || "";
         $("profile-alias").disabled = false;
       }
-      if ($("alias-hint")) $("alias-hint").textContent = addrReady() ? "" : ("Addresses locked until " + addrNextDate());
+      if ($("alias-hint")) {
+        if (addrReady()) {
+          lastHintKey = "";
+          $("alias-hint").textContent = "";
+        } else sayHint($("alias-hint"), "authAddrLock", "Addresses locked until {when}", { when: addrNextDate() });
+      }
       if ($("profile-btc-addr")) {
         $("profile-btc-addr").value = currentProfile.btc_address || "";
         $("profile-btc-addr").disabled = !addrReady();
