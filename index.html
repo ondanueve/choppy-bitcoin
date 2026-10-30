@@ -58,8 +58,8 @@
           <b class="juke-hud-time hide" id="juke-hud-time"></b>
         </div>
         <div class="juke-hud-row">
-          <button type="button" id="juke-hud-play" class="juke-hud-btn" aria-label="Play/Pause">▶</button>
-          <input type="range" id="juke-hud-vol" min="0" max="100" value="80" step="1" aria-label="Volume">
+          <button type="button" id="juke-hud-play" class="juke-hud-btn" data-i18n-aria="ariaPlayPause" aria-label="Play/Pause">▶</button>
+          <input type="range" id="juke-hud-vol" min="0" max="100" value="80" step="1" data-i18n-aria="ariaVolume" aria-label="Volume">
         </div>
       </div>
       <div class="stat stat-opt">
@@ -73,7 +73,7 @@
       <button type="button" id="market-btn" class="dca-tog" disabled data-i18n="market">MARKET</button>
     </div>
     <div id="mp-hud-list" class="mp-hud-list hide"></div>
-    <div id="bc-bar" class="bc-bar hide" aria-label="Bitcoin Country">
+    <div id="bc-bar" class="bc-bar hide" data-i18n-aria="ariaCountry" aria-label="Bitcoin Country">
       <button type="button" id="bc-open" class="bc-open">BITCOIN COUNTRY</button>
       <span id="bc-mini">NODES 0/100 · ARMY 0 · WORLD 20</span>
       <button type="button" id="bc-army-bar" class="bc-open hide">TIER</button>
@@ -82,18 +82,18 @@
       <canvas id="c"></canvas>
       <div id="flap-layer" aria-hidden="true"></div>
       <div id="def-pad" class="def-pad hide" aria-hidden="true">
-        <button type="button" id="def-rev" class="def-rev" aria-label="Reverse">REV</button>
+        <button type="button" id="def-rev" class="def-rev" data-i18n-aria="ariaReverse" aria-label="Reverse">REV</button>
         <div id="def-stick" class="def-stick">
           <div class="def-stick-well"></div>
           <div class="def-stick-cross"></div>
           <div id="def-knob" class="def-knob"></div>
         </div>
-        <div id="def-arc" class="def-arc hide" aria-label="Shot spread">
+        <div id="def-arc" class="def-arc hide" data-i18n-aria="ariaSpread" aria-label="Shot spread">
           <span class="def-arc-lab">V</span>
           <div class="def-arc-slot"></div>
           <div id="def-arc-knob" class="def-arc-knob"></div>
         </div>
-        <button type="button" id="def-aa" class="def-aa hide" aria-label="Fury strike">FURY</button>
+        <button type="button" id="def-aa" class="def-aa hide" data-i18n-aria="ariaFury" aria-label="Fury strike">FURY</button>
         <div id="def-fire" class="def-fire"></div>
       </div>
       <div id="now-playing" class="hide"></div>
@@ -120,7 +120,7 @@
           <button id="sell-btc" class="sell" data-i18n="sellBtc">SELL BTC</button>
         </div>
       </div>
-      <button id="pause-btn" class="pause hide" aria-label="Pause">||</button>
+      <button id="pause-btn" class="pause hide" data-i18n-aria="ariaPause" aria-label="Pause">||</button>
       <div id="bc-panel" class="bc-panel hide">
         <div class="bc-head"><b>BITCOIN COUNTRY</b><button type="button" id="bc-close">×</button></div>
         <div class="bc-grid">
@@ -148,32 +148,32 @@
   </div>
   <div id="auth-modal" class="auth-modal hide" role="dialog" aria-labelledby="modal-auth-title">
     <div class="auth-card">
-      <h2 id="modal-auth-title">Sign in</h2>
-      <label class="hide" id="group-alias">Alias<input id="auth-username" autocomplete="username" maxlength="16"></label>
-      <label>Email or alias<input id="auth-email" type="text" autocomplete="username"></label>
-      <label>Password<input id="auth-password" type="password" autocomplete="current-password"></label>
-      <label class="hide" id="group-pass2">Confirm password<input id="auth-password2" type="password" autocomplete="new-password"></label>
+      <h2 id="modal-auth-title" data-i18n="signIn">Sign in</h2>
+      <label class="hide" id="group-alias"><span data-i18n="alias">Alias</span><input id="auth-username" autocomplete="username" maxlength="16"></label>
+      <label><span data-i18n="email">Email or alias</span><input id="auth-email" type="text" autocomplete="username"></label>
+      <label><span data-i18n="password">Password</span><input id="auth-password" type="password" autocomplete="current-password"></label>
+      <label class="hide" id="group-pass2"><span data-i18n="confirmPass">Confirm password</span><input id="auth-password2" type="password" autocomplete="new-password"></label>
       <input id="arcade-honeypot" class="hp" tabindex="-1" autocomplete="off">
       <p id="auth-msg" class="auth-msg"></p>
-      <button type="button" class="cta" id="btn-submit-auth">Sign in</button>
-      <button type="button" class="text-btn" id="btn-toggle-auth">Need an account?</button>
-      <button type="button" class="text-btn" id="btn-forgot">Forgot password?</button>
-      <button type="button" class="text-btn" id="btn-close-auth">Close</button>
+      <button type="button" class="cta" id="btn-submit-auth" data-i18n="signIn">Sign in</button>
+      <button type="button" class="text-btn" id="btn-toggle-auth" data-i18n="needAccount">Need an account?</button>
+      <button type="button" class="text-btn" id="btn-forgot" data-i18n="forgot">Forgot password?</button>
+      <button type="button" class="text-btn" id="btn-close-auth" data-i18n="close">Close</button>
     </div>
   </div>
   <div id="profile-modal" class="auth-modal hide" role="dialog">
     <div class="auth-card">
-      <h2>Profile</h2>
+      <h2 data-i18n="profile">Profile</h2>
       <p id="profile-score-info"></p>
-      <label>Alias<input id="profile-alias" maxlength="16" autocomplete="username"></label>
+      <label><span data-i18n="alias">Alias</span><input id="profile-alias" maxlength="16" autocomplete="username"></label>
       <p id="alias-hint" class="auth-msg"></p>
       <button type="button" class="cta" id="btn-save-alias" data-i18n="saveAlias">Save alias</button>
       <div id="profile-awards" class="awards"></div>
-      <label>BTC address<input id="profile-btc-addr" autocomplete="off"></label>
-      <label>Lightning<input id="profile-ln-addr" autocomplete="off"></label>
-      <button type="button" class="cta" id="btn-save-profile">Save</button>
-      <button type="button" class="text-btn" id="btn-logout">Sign out</button>
-      <button type="button" class="text-btn" id="btn-close-profile">Close</button>
+      <label><span data-i18n="btcAddr">BTC address</span><input id="profile-btc-addr" autocomplete="off"></label>
+      <label><span data-i18n="lightning">Lightning</span><input id="profile-ln-addr" autocomplete="off"></label>
+      <button type="button" class="cta" id="btn-save-profile" data-i18n="save">Save</button>
+      <button type="button" class="text-btn" id="btn-logout" data-i18n="signOut">Sign out</button>
+      <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
   <script src="/choppy-bitcoin/i18n.js?v=mp179"></script>
