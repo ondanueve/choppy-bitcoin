@@ -1920,6 +1920,25 @@ E,2 [E,G,B,]2 E,2 [E,G,B,]2 | C,2 [C,E,G,]2 C,2 [E,G,C]2 | B,,2 [D,F,A,]2 B,,2 [
     return true;
   }
 
+  const ABCJS_SRC = "https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js";
+  const ABCJS_SRI = "sha384-QEx1pDqNtno80p4xYN5Cqm5JcAAtUDUCHqFLq0UBhWRFoFzzNHumh20zFGG/9XMi";
+  let abcLoading = null;
+  function ensureAbc() {
+    if (window.ABCJS) return Promise.resolve(window.ABCJS);
+    if (abcLoading) return abcLoading;
+    abcLoading = new Promise((resolve) => {
+      const s = document.createElement("script");
+      s.src = ABCJS_SRC;
+      s.integrity = ABCJS_SRI;
+      s.crossOrigin = "anonymous";
+      s.referrerPolicy = "no-referrer";
+      s.onload = () => resolve(window.ABCJS || null);
+      s.onerror = () => { abcLoading = null; resolve(null); };
+      document.head.appendChild(s);
+    });
+    return abcLoading;
+  }
+  A.ensureAbc = ensureAbc;
   function abcLib() { return window.ABCJS || null; }
   function songAbc(id) {
     return (A.SONGS[id] && A.SONGS[id].abc) || BONNY_ABC;
@@ -2039,6 +2058,8 @@ E,2 [E,G,B,]2 E,2 [E,G,B,]2 | C,2 [C,E,G,]2 C,2 [E,G,C]2 | B,,2 [D,F,A,]2 B,,2 [
     const gen = ++jukeGen;
     const run = async () => {
       try {
+        await ensureAbc();
+        if (!abcWant || gen !== jukeGen) return;
         stopJukeSource();
         if (abcSynth && abcSynth.stop) try { abcSynth.stop(); } catch (e) {}
         const synth = await ensureSynth(id || "bonny");
