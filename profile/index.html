@@ -43,6 +43,7 @@
   </form>
   <p><a id="public-link" href="/" data-i18n="profilePublic">Public profile</a></p>
   <script src="/choppy-bitcoin/i18n.js"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp194"></script>
   <script src="/choppy-bitcoin/supabase-lib.js"></script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
@@ -195,7 +196,7 @@
       try { on = new URLSearchParams(location.search).get("nftpreview") === "1"; } catch (e) { on = false; }
       if (!on) return;
       var s = document.createElement("script");
-      s.src = "/choppy-bitcoin/nft-preview.js?v=mp193";
+      s.src = "/choppy-bitcoin/nft-preview.js?v=mp194";
       s.defer = true;
       document.body.appendChild(s);
     })();

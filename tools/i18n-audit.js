@@ -19,6 +19,7 @@ const OUT = path.join(ROOT, "tests", "out", "i18n-report.md");
 
 const FILES = [
   "i18n.js",
+  "i18n-extra.js",
   "game.js",
   "auth.js",
   "audio.js",
@@ -1038,16 +1039,17 @@ function fillDict(stats, tokens, match) {
 }
 
 function rebuildDict(file, src, stats) {
-  if (file !== "i18n.js" && file !== "game.js") return;
+  if (file !== "i18n.js" && file !== "i18n-extra.js" && file !== "game.js") return;
   const tokens = tokenize(src);
   const { match } = braceMap(tokens);
   for (let i = 0; i < tokens.length; i++) {
     if (tokens[i].type !== "punct" || tokens[i].value !== "{") continue;
     const name = findAssignName(tokens, i);
-    if (file === "i18n.js" && name === "dict") {
+    if ((file === "i18n.js" && name === "dict") || (file === "i18n-extra.js" && name === "extra")) {
       const close = match.get(i);
       const props = propsOf(tokens, i, close, match);
-      const out = { en: {}, es: {} };
+      // i18n-extra.js holds lazily loaded keys; merge them into the same dict.
+      const out = stats.dict || { en: {}, es: {} };
       props.forEach((side) => {
         if ((side.key !== "en" && side.key !== "es") || side.node.k !== "obj") return;
         const inner = propsOf(tokens, side.node.open, side.node.close, match);
