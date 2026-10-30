@@ -1532,3 +1532,41 @@ body.kb-sheet-on #overlay{visibility:hidden}
 }
 .aw-all summary { cursor: pointer; color: var(--gold); list-style-position: inside; margin-bottom: 6px; }
 .awards .aw-cat { margin: 10px 0 4px; color: var(--gold); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+.net-block, .pwa-update {
+  position: fixed;
+  z-index: 10060;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 24px));
+  background: #141416;
+  color: #f3efe6;
+  border: 1px solid #c8960a;
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.net-block { top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.net-block h2 { font-size: 15px; margin: 0 0 6px; color: #f2a900; }
+.net-block p { font-size: 13px; line-height: 1.4; margin: 0 0 10px; }
+.pwa-update {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.pwa-update p { flex: 1 1 180px; margin: 0; font-size: 13px; line-height: 1.35; }
+.net-block button, .pwa-update button {
+  font: 700 12px "IBM Plex Mono", ui-monospace, monospace;
+  background: #0a0a0c;
+  color: #f3efe6;
+  border: 1px solid #3a3a40;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.art-miss {
+  background: linear-gradient(160deg, #1a1408 0%, #0a0a0c 48%, #3a2a10 100%) !important;
+}

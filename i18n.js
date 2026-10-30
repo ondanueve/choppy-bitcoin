@@ -272,7 +272,21 @@
       ariaRepeat: "Repeat",
       ariaEnable: "Enable",
       ariaDisable: "Disable",
-      jukeRetro: "Retro Jukebox"
+      jukeRetro: "Retro Jukebox",
+      pwaOpt: "OFFLINE APP",
+      pwaOn: "ON",
+      pwaOff: "OFF",
+      pwaUpdate: "A new version is ready.",
+      pwaReload: "Reload",
+      pwaLater: "Not now",
+      pwaReloadOn: "Reload once to store the game on this device.",
+      pwaReloadOff: "Reload once to remove the offline copy.",
+      netTitle: "No connection",
+      netSignIn: "Sign-in needs a connection. You can keep playing as a guest on this device.",
+      netScore: "This score stays on this device. It was not sent, and it will not be sent later by itself.",
+      netVersus: "Versus needs a connection. Ranked and training still work on this device.",
+      netArt: "That picture is not saved on this device. Play continues on a plain background.",
+      netClose: "OK"
     },
     es: {
       signIn: "INICIAR SESIÓN",
@@ -545,7 +559,21 @@
       ariaRepeat: "Repetir",
       ariaEnable: "Activar",
       ariaDisable: "Desactivar",
-      jukeRetro: "Jukebox retro"
+      jukeRetro: "Jukebox retro",
+      pwaOpt: "APP SIN CONEXIÓN",
+      pwaOn: "ACTIVADA",
+      pwaOff: "APAGADA",
+      pwaUpdate: "Hay una versión nueva.",
+      pwaReload: "Recargar",
+      pwaLater: "Ahora no",
+      pwaReloadOn: "Recarga una vez para guardar el juego en este dispositivo.",
+      pwaReloadOff: "Recarga una vez para quitar la copia sin conexión.",
+      netTitle: "No hay conexión",
+      netSignIn: "Para iniciar sesión hace falta conexión. Puedes seguir jugando como invitado en este dispositivo.",
+      netScore: "Este puntaje se queda en este dispositivo. No se envió y no se enviará solo más tarde.",
+      netVersus: "Versus necesita conexión. Ranked y el entrenamiento siguen en este dispositivo.",
+      netArt: "Esa imagen no está guardada en este dispositivo. La partida sigue con un fondo liso.",
+      netClose: "ENTENDIDO"
     }
   };
 
