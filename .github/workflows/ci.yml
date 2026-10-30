@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch main for size and version checks
+        run: git fetch --no-tags origin main:refs/remotes/origin/main || true
+
+      - name: Syntax
+        run: |
+          set -e
+          for f in *.js tools/*.js tests/*.js; do node --check "$f"; done
+
+      - name: Smoke test
+        run: node tests/smoke.js
+
+      - name: Versus simulation
+        run: node tests/mp-sim.js
+
+      - name: Award ids
+        run: node tests/award-ids.js
+
+      - name: Persisted awards
+        run: node tests/persist-awards.js
+
+      - name: i18n audit
+        run: node tools/i18n-audit.js
+
+      - name: Startup JS budget
+        run: node docs/perf/check-budget.mjs
+
+      - name: Service worker simulation
+        run: node tests/sw-sim.js
+
+      - name: Headless boot (uses the runner's preinstalled Chrome; skips if none)
+        run: node tests/boot.js
