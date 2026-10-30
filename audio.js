@@ -1694,8 +1694,8 @@ T:Bella Ciao
 C:Tradicional
 M:4/4
 L:1/8
-Q:1/4=96
-K:Emin
+Q:1/4=104
+K:Amin
 %%MIDI gchord off
 %%score (Melodia) (Bajo)
 V:Melodia clef=treble name="Melodia"
@@ -1705,15 +1705,11 @@ V:Bajo clef=bass name="Bajo"
 %%MIDI program 24
 %%MIDI channel 2
 V:Melodia
-|: E2 G2 B2 B2 | B2 A G F2 E2 | D2 F2 A2 A2 | A2 G F E4 |
-E2 G2 B2 B2 | B2 A G F2 E2 | D2 F2 G2 F2 | E4 E4 |
-B2 B2 B2 A G | F2 F2 F2 E D | E2 G2 B2 B2 | B4 z4 |
-B2 B2 B A G F | E2 F2 G2 F2 | E4 E4 | z8 :|
+|: E A B c A4 | E A B c A4 | E A B c B A c2 | B A E2 E2 E2 |
+e d e f f4 | f e d f e4 | e d c B2 e2 z | c2 B2 A4 :|
 V:Bajo
-|: E,2 [E,G,B,]2 B,,2 [E,G,B,]2 | E,2 [E,G,B,]2 B,,2 [B,,D,F,]2 | D,2 [D,F,A,]2 A,,2 [D,F,A,]2 | B,,2 [B,,D,F,]2 E,4 |
-E,2 [E,G,B,]2 B,,2 [E,G,B,]2 | E,2 [E,G,B,]2 B,,2 [B,,D,F,]2 | D,2 [D,F,A,]2 B,,2 [B,,D,F,]2 | E,4 E,4 |
-E,2 [E,G,B,]2 B,,2 [B,,D,F,]2 | D,2 [D,F,A,]2 B,,2 [B,,D,F,]2 | E,2 [E,G,B,]2 B,,2 [E,G,B,]2 | E,4 z4 |
-E,2 [E,G,B,]2 B,,2 [B,,D,F,]2 | D,2 [D,F,A,]2 B,,2 [B,,D,F,]2 | E,4 E,4 | z8 :|
+|: A,,2 [A,,C,E,]2 E,,2 [A,,C,E,]2 | A,,2 [A,,C,E,]2 E,,2 [A,,C,E,]2 | A,,2 [A,,C,E,]2 E,,2 [A,,C,E,]2 | A,,2 [A,,C,E,]2 E,,2 [A,,C,E,]2 |
+D,2 [D,F,A,]2 A,,2 [D,F,A,]2 | D,2 [D,F,A,]2 A,,2 [D,F,A,]2 | E,2 [E,G,B,]2 B,,2 [E,G,B,]2 | A,,2 [A,,C,E,]2 A,,4 :|
 `),
     plaza: tune("plaza", "En la plaza de mi pueblo", "folk", `X:1
 T:En la plaza de mi pueblo
