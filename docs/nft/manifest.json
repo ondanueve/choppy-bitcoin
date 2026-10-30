@@ -1,0 +1,4049 @@
+{
+  "generated_by": "tools/nft-manifest.js",
+  "phase": 1,
+  "unsigned": true,
+  "signed": false,
+  "broadcast": false,
+  "on_chain": false,
+  "issuer_pubkey_field": "ISSUER_PUBKEY",
+  "player_pubkey_field": "PLAYER_PUBKEY",
+  "nip58": {
+    "source": "https://github.com/nostr-protocol/nips/blob/master/58.md",
+    "badge_definition_kind": 30009,
+    "badge_award_kind": 8,
+    "profile_badges_kind": 10008,
+    "badge_set_kind": 30008,
+    "profile_badges_example": {
+      "unsigned": true,
+      "signed": false,
+      "broadcast": false,
+      "pubkey": "",
+      "issuer_pubkey_field": "ISSUER_PUBKEY",
+      "kind": 10008,
+      "created_at": 0,
+      "tags": [
+        [
+          "a",
+          "30009:ISSUER_PUBKEY:choppy-maxi"
+        ],
+        [
+          "e",
+          "AWARD_EVENT_ID"
+        ],
+        [
+          "a",
+          "30009:ISSUER_PUBKEY:choppy-nocoiner"
+        ],
+        [
+          "e",
+          "AWARD_EVENT_ID"
+        ]
+      ],
+      "content": "",
+      "id": "",
+      "sig": ""
+    }
+  },
+  "ordinals": {
+    "source": "https://docs.ordinals.com/inscriptions.html",
+    "metadata_tag": 5,
+    "properties_tag": 17,
+    "push_max_bytes": 520,
+    "standard_relay_weight_units": 400000,
+    "safe_content_bytes": 390000,
+    "derivative_max_bytes": 61440,
+    "fee_is_a_quote": false
+  },
+  "counts": {
+    "awards": 46,
+    "ok": 18,
+    "new_art": 28,
+    "excluded": 0,
+    "issuable": 18
+  },
+  "awards": [
+    {
+      "award_id": "maxi",
+      "category": "trading",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-maxi"
+          ],
+          [
+            "name",
+            "Maxi Soul / Alma maxi"
+          ],
+          [
+            "description",
+            "Never sold BTC — not by hand, not by A.I. bud. / Nunca vendió BTC, ni a mano ni por A.I. bud."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-maxi"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Maxi Soul / Alma maxi",
+          "description": "Never sold BTC — not by hand, not by A.I. bud. / Nunca vendió BTC, ni a mano ni por A.I. bud.",
+          "award_id": "maxi",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "nocoiner",
+      "category": "trading",
+      "secret": false,
+      "rarity": "comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-nocoiner"
+          ],
+          [
+            "name",
+            "Nocoiner / Nocoiner"
+          ],
+          [
+            "description",
+            "Never bought BTC in that run. / Nunca compró BTC en esa partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-nocoiner"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Nocoiner / Nocoiner",
+          "description": "Never bought BTC in that run. / Nunca compró BTC en esa partida.",
+          "award_id": "nocoiner",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "paper",
+      "category": "trading",
+      "secret": false,
+      "rarity": "comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-paper"
+          ],
+          [
+            "name",
+            "Paper Hands / Manos de papel"
+          ],
+          [
+            "description",
+            "Sold BTC in a bear market. / Vendió BTC en un bear market."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-paper"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Paper Hands / Manos de papel",
+          "description": "Sold BTC in a bear market. / Vendió BTC en un bear market.",
+          "award_id": "paper",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "doubler",
+      "category": "trading",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-doubler"
+          ],
+          [
+            "name",
+            "Double Stack / Stack doble"
+          ],
+          [
+            "description",
+            "Finished a run with at least 2× the starting net worth in BTC. / Terminó una partida con al menos el doble del patrimonio inicial en BTC."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-doubler"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Double Stack / Stack doble",
+          "description": "Finished a run with at least 2× the starting net worth in BTC. / Terminó una partida con al menos el doble del patrimonio inicial en BTC.",
+          "award_id": "doubler",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "tenx",
+      "category": "trading",
+      "secret": false,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-tenx"
+          ],
+          [
+            "name",
+            "Ten Bagger / Diez veces"
+          ],
+          [
+            "description",
+            "Finished a run with at least 10× the starting net worth in BTC. / Terminó una partida con al menos 10 veces el patrimonio inicial en BTC."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-tenx"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Ten Bagger / Diez veces",
+          "description": "Finished a run with at least 10× the starting net worth in BTC. / Terminó una partida con al menos 10 veces el patrimonio inicial en BTC.",
+          "award_id": "tenx",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "dayTrader",
+      "category": "trading",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-dayTrader"
+          ],
+          [
+            "name",
+            "Day Trader / Day trader"
+          ],
+          [
+            "description",
+            "Made 50 or more trades in one run. / Hizo 50 operaciones o más en una partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-dayTrader"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Day Trader / Day trader",
+          "description": "Made 50 or more trades in one run. / Hizo 50 operaciones o más en una partida.",
+          "award_id": "dayTrader",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "cap21",
+      "category": "trading",
+      "secret": false,
+      "rarity": "legendaria",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-cap21"
+          ],
+          [
+            "name",
+            "Twenty One Million / Veintiún millones"
+          ],
+          [
+            "description",
+            "Stacked 21M BTC. / Juntó 21M BTC."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-cap21"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Twenty One Million / Veintiún millones",
+          "description": "Stacked 21M BTC. / Juntó 21M BTC.",
+          "award_id": "cap21",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "halver",
+      "category": "survival",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-halver"
+          ],
+          [
+            "name",
+            "Halving Catcher / Atrapa halvings"
+          ],
+          [
+            "description",
+            "Every halving that spawned was eaten. / Comió todos los halvings que salieron."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-halver"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Halving Catcher / Atrapa halvings",
+          "description": "Every halving that spawned was eaten. / Comió todos los halvings que salieron.",
+          "award_id": "halver",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "greedy",
+      "category": "survival",
+      "secret": false,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-greedy"
+          ],
+          [
+            "name",
+            "Greedy Miner / Minero greedy"
+          ],
+          [
+            "description",
+            "Ate 0 halvings. / Comió 0 halvings."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-greedy"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Greedy Miner / Minero greedy",
+          "description": "Ate 0 halvings. / Comió 0 halvings.",
+          "award_id": "greedy",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "opsec",
+      "category": "survival",
+      "secret": false,
+      "rarity": "comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-opsec"
+          ],
+          [
+            "name",
+            "Opsec Warrior / Guerrero opsec"
+          ],
+          [
+            "description",
+            "Lost 0 cold storage. / No perdió cold storage."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-opsec"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Opsec Warrior / Guerrero opsec",
+          "description": "Lost 0 cold storage. / No perdió cold storage.",
+          "award_id": "opsec",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "longHaul",
+      "category": "survival",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-longHaul"
+          ],
+          [
+            "name",
+            "Long Haul / Larga distancia"
+          ],
+          [
+            "description",
+            "Survived 1,000 candles in one run. / Sobrevivió 1.000 velas en una partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-longHaul"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Long Haul / Larga distancia",
+          "description": "Survived 1,000 candles in one run. / Sobrevivió 1.000 velas en una partida.",
+          "award_id": "longHaul",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "marathon",
+      "category": "survival",
+      "secret": false,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-marathon"
+          ],
+          [
+            "name",
+            "Marathon / Maratón"
+          ],
+          [
+            "description",
+            "Survived 2,100 candles in one run. / Sobrevivió 2.100 velas en una partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-marathon"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Marathon / Maratón",
+          "description": "Survived 2,100 candles in one run. / Sobrevivió 2.100 velas en una partida.",
+          "award_id": "marathon",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "swanHunter",
+      "category": "survival",
+      "secret": false,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-swanHunter"
+          ],
+          [
+            "name",
+            "Swan Hunter / Cazador de cisnes"
+          ],
+          [
+            "description",
+            "Vaporized 3 black swans in one run. / Vaporizó 3 cisnes negros en una partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-swanHunter"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Swan Hunter / Cazador de cisnes",
+          "description": "Vaporized 3 black swans in one run. / Vaporizó 3 cisnes negros en una partida.",
+          "award_id": "swanHunter",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "laserEyes",
+      "category": "survival",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-laserEyes"
+          ],
+          [
+            "name",
+            "Laser Eyes / Ojos láser"
+          ],
+          [
+            "description",
+            "Grabbed laser eyes 5 times in one run. / Agarró ojos láser 5 veces en una partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-laserEyes"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Laser Eyes / Ojos láser",
+          "description": "Grabbed laser eyes 5 times in one run. / Agarró ojos láser 5 veces en una partida.",
+          "award_id": "laserEyes",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "maxedPerk",
+      "category": "perks",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-maxedPerk"
+          ],
+          [
+            "name",
+            "Maxed Out / Al máximo"
+          ],
+          [
+            "description",
+            "Took a perk to its top tier. / Llevó una perk a su nivel máximo."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-maxedPerk"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Maxed Out / Al máximo",
+          "description": "Took a perk to its top tier. / Llevó una perk a su nivel máximo.",
+          "award_id": "maxedPerk",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "perkHoarder",
+      "category": "perks",
+      "secret": false,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-perkHoarder"
+          ],
+          [
+            "name",
+            "Perk Hoarder / Coleccionista de perks"
+          ],
+          [
+            "description",
+            "Took 15 perk tiers in one run. / Tomó 15 niveles de perks en una partida."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-perkHoarder"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Perk Hoarder / Coleccionista de perks",
+          "description": "Took 15 perk tiers in one run. / Tomó 15 niveles de perks en una partida.",
+          "award_id": "perkHoarder",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "goodBud",
+      "category": "perks",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-goodBud"
+          ],
+          [
+            "name",
+            "Good Bud / Buen compañero"
+          ],
+          [
+            "description",
+            "A.I. bud finished a run in profit. / El A.I. bud terminó una partida con ganancia."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-goodBud"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Good Bud / Buen compañero",
+          "description": "A.I. bud finished a run in profit. / El A.I. bud terminó una partida con ganancia.",
+          "award_id": "goodBud",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "career",
+      "category": "perks",
+      "secret": false,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-career"
+          ],
+          [
+            "name",
+            "Career Ladder / Escalera profesional"
+          ],
+          [
+            "description",
+            "Reached the top of the job ladder. / Llegó a lo más alto de su carrera."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-career"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Career Ladder / Escalera profesional",
+          "description": "Reached the top of the job ladder. / Llegó a lo más alto de su carrera.",
+          "award_id": "career",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "engaged",
+      "category": "family",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/proposal-a-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/proposal-a-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 273827,
+        "sha256": "050f0d1d06b00f9dc61c876ff7691d1d166e2b5009e4f62c408baf3fb40b221f",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/engaged-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-engaged"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-engaged"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/engaged-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "engaged",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "married",
+      "category": "family",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [
+        "art-archive/choppy/replaced-mp191/wedding-b-wide.replaced-mp191.jpg",
+        "art-archive/choppy/replaced-mp188/wedding-a-wide.jpg",
+        "art-archive/choppy/replaced-mp188/wedding-b-wide.jpg"
+      ],
+      "image": {
+        "path": "chance/wedding-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/wedding-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 314040,
+        "sha256": "ac34dbc1025078a7b31cf7e8e299cfb675ef4606e9a8f0beb4ba6b73967fa9dd",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/married-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-married"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-married"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/married-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "married",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "runaway",
+      "category": "family",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [
+        "art-archive/choppy/replaced-mp188/wedding-c-wide.jpg"
+      ],
+      "image": {
+        "path": "chance/wedding-c-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/wedding-c-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 292344,
+        "sha256": "c2ae0ce01317af09e366df46677a95cbbfdbbeb82590c18aef7ab5ac20a8f536",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/runaway-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-runaway"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-runaway"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/runaway-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "runaway",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "babyBoard",
+      "category": "family",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/baby-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/baby-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 294405,
+        "sha256": "3bf2dcce144b33b5761c5f29434917e9ef74eee1410fe324c15b3bb25914ab3f",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/babyBoard-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-babyBoard"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-babyBoard"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/babyBoard-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "babyBoard",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "familyOffice",
+      "category": "family",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-familyOffice"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-familyOffice"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "familyOffice",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "classicFartface",
+      "category": "family",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-classicFartface"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-classicFartface"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "classicFartface",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "landowner",
+      "category": "country",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [
+        "art-archive/choppy/replaced-mp188/islandInspection-a-wide.jpg",
+        "art-archive/choppy/replaced-mp191/islandInspection-wide.replaced-mp191.jpg"
+      ],
+      "image": {
+        "path": "chance/islandInspection-a-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/islandInspection-a-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 305260,
+        "sha256": "3df97ae2868fb9fdb0ef838cceb1ce02b7488d0170dbf25b5a40489b4331cc3b",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/landowner-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-landowner"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-landowner"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/landowner-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "landowner",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "notForSale",
+      "category": "country",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [
+        "art-archive/choppy/replaced-mp191/anOffer-b-wide.replaced-mp191.jpg"
+      ],
+      "image": {
+        "path": "chance/anOffer-b-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/anOffer-b-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 236392,
+        "sha256": "c8ba847aef00f049201ded9982b09b347a0371e60fd7722d8fa891be44b7f59a",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/notForSale-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-notForSale"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-notForSale"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/notForSale-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "notForSale",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "sellout",
+      "category": "country",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [
+        "art-archive/choppy/replaced-mp191/anOffer-a-wide.replaced-mp191.jpg"
+      ],
+      "image": {
+        "path": "chance/anOffer-a-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/anOffer-a-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 283700,
+        "sha256": "9de78866f58b928b8151fa3fbf0cd374eb0a3bf0b95ee1823d31f3e8a343de9f",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/sellout-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-sellout"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-sellout"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/sellout-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "sellout",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "miner",
+      "category": "country",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/obviously-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/obviously-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 420594,
+        "sha256": "7cb7d2acb9e30b89542e7a81189454594e98116c07820ef517e6e05ee7758399",
+        "raw_jpeg_exceeds_safe_relay_budget": true
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/miner-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-miner"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-miner"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/miner-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "miner",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "citadel",
+      "category": "country",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [
+        "art-archive/choppy/replaced-mp188/citadelQuestion-a-wide.jpg"
+      ],
+      "image": {
+        "path": "chance/citadelQuestion-a-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/citadelQuestion-a-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 296920,
+        "sha256": "b0540a45e6b00dcdad84dbc430b376df99d86bcfd272307a162b80cf55fc4561",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/citadel-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-citadel"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-citadel"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/citadel-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "citadel",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "nodes100",
+      "category": "country",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/theQuestion-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/theQuestion-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 312635,
+        "sha256": "555a2e3b58f426dd06eab3eb2577a39c204fbdc6924aafa61156718ddf05bf48",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/nodes100-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-nodes100"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-nodes100"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/nodes100-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "nodes100",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "declared",
+      "category": "country",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/declaration-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/declaration-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 364983,
+        "sha256": "8bbabf0a5e919db4e92ff1f1b51f5c60bab5f9243b7784145e6c5e51c20a00b2",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/declared-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-declared"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-declared"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/declared-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "declared",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "beachHolds",
+      "category": "country",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/battleWon-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/battleWon-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 390223,
+        "sha256": "1b07febfa740c35eaa8163edb2e79aabe89f2232e0250dff740421ebf6422834",
+        "raw_jpeg_exceeds_safe_relay_budget": true
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/beachHolds-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-beachHolds"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-beachHolds"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/beachHolds-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "beachHolds",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "fourth",
+      "category": "country",
+      "secret": true,
+      "rarity": "legendaria",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "no",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/fourthColor-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/fourthColor-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 355307,
+        "sha256": "877cdf94ce8cd052a4e65729ae7c3a990e3ae75382ca0eb2f3b9b29fc7109401",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/fourth-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-fourth"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-fourth"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/fourth-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "fourth",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "noAid",
+      "category": "country",
+      "secret": true,
+      "rarity": "legendaria",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "no",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-noAid"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-noAid"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "noAid",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "freeNation",
+      "category": "country",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "no",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-freeNation"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-freeNation"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "freeNation",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "chessWin",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "poco-comun",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/chess-opera-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/chess-opera-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 281188,
+        "sha256": "85e689976fce56b12343976839742260fd40bbfc0954c562e87e67d049368869",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/chessWin-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-chessWin"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-chessWin"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/chessWin-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "chessWin",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "chess3",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "epica",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-chess3"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-chess3"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "chess3",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "chess7",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "legendaria",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-chess7"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-chess7"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "chess7",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "scoop",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/poker-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/poker-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 218739,
+        "sha256": "49437f0ac25e4e76e1e7c5895dc2d86c27ea0c66165b71da88641d8019023ca1",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/scoop-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-scoop"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-scoop"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/scoop-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "scoop",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "unicorn",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/startup-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/startup-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 305713,
+        "sha256": "9b2ef7be2b0da43c9207a5d90e5a712d2d0abca3a8b0c6bfd79ae3f90279b7e8",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/unicorn-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-unicorn"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-unicorn"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/unicorn-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "unicorn",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "highRoller",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/casino-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/casino-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 266757,
+        "sha256": "54190f04b495e65b75ac20f160f3b6e3664211d53d920fa376e95ca2d2760e6d",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/highRoller-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-highRoller"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-highRoller"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/highRoller-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "highRoller",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "soldPump",
+      "category": "challenge",
+      "secret": true,
+      "rarity": "rara",
+      "eligibility": "ok",
+      "issuable": true,
+      "lena_check": "n/a",
+      "edition": "actual",
+      "art_vintage": [],
+      "image": {
+        "path": "chance/cousin-wide.jpg",
+        "url": "https://bitcoinizate.com/choppy-bitcoin/chance/cousin-wide.jpg",
+        "width": 1920,
+        "height": 800,
+        "bytes": 312027,
+        "sha256": "51a518c91a8f8824c09ea08dac2fd3b0bda27b9054c97ea89d67bc9a33aeaf11",
+        "raw_jpeg_exceeds_safe_relay_budget": false
+      },
+      "derivative": {
+        "url": "https://bitcoinizate.com/choppy-bitcoin/nft/soldPump-960.webp",
+        "width": 960,
+        "height": 400,
+        "max_bytes": 61440,
+        "content_type": "image/webp",
+        "built": false
+      },
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-soldPump"
+          ],
+          [
+            "name",
+            "???"
+          ],
+          [
+            "description",
+            "Hidden award. / Premio oculto."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "image_omitted_until_earned": true,
+        "d_tag_policy": "example only; replace with an opaque d before any relay write"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-soldPump"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": "image/webp",
+        "file_url": "https://bitcoinizate.com/choppy-bitcoin/nft/soldPump-960.webp",
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "???",
+          "description": "Hidden award. / Premio oculto.",
+          "award_id": "soldPump",
+          "edition": "actual",
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "regular",
+      "category": "meta",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-regular"
+          ],
+          [
+            "name",
+            "Regular / Habitual"
+          ],
+          [
+            "description",
+            "Finished 10 ranked runs of 420+ candles. / Terminó 10 partidas ranked de 420 velas o más."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-regular"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Regular / Habitual",
+          "description": "Finished 10 ranked runs of 420+ candles. / Terminó 10 partidas ranked de 420 velas o más.",
+          "award_id": "regular",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "veteran",
+      "category": "meta",
+      "secret": false,
+      "rarity": "epica",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-veteran"
+          ],
+          [
+            "name",
+            "Veteran / Veterano"
+          ],
+          [
+            "description",
+            "Finished 50 ranked runs of 420+ candles. / Terminó 50 partidas ranked de 420 velas o más."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-veteran"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Veteran / Veterano",
+          "description": "Finished 50 ranked runs of 420+ candles. / Terminó 50 partidas ranked de 420 velas o más.",
+          "award_id": "veteran",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "collector",
+      "category": "meta",
+      "secret": false,
+      "rarity": "poco-comun",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-collector"
+          ],
+          [
+            "name",
+            "Collector / Coleccionista"
+          ],
+          [
+            "description",
+            "Earned 10 awards. / Ganó 10 premios."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-collector"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Collector / Coleccionista",
+          "description": "Earned 10 awards. / Ganó 10 premios.",
+          "award_id": "collector",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    },
+    {
+      "award_id": "curator",
+      "category": "meta",
+      "secret": false,
+      "rarity": "epica",
+      "eligibility": "requiere arte nuevo",
+      "issuable": false,
+      "lena_check": "n/a",
+      "edition": null,
+      "art_vintage": [],
+      "image": null,
+      "derivative": null,
+      "nip58_definition": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 30009,
+        "created_at": 0,
+        "tags": [
+          [
+            "d",
+            "choppy-curator"
+          ],
+          [
+            "name",
+            "Curator / Curador"
+          ],
+          [
+            "description",
+            "Earned 25 awards. / Ganó 25 premios."
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "d_tag_policy": "stable example d; freeze the image url after publication"
+      },
+      "nip58_award": {
+        "unsigned": true,
+        "signed": false,
+        "broadcast": false,
+        "pubkey": "",
+        "issuer_pubkey_field": "ISSUER_PUBKEY",
+        "kind": 8,
+        "created_at": 0,
+        "tags": [
+          [
+            "a",
+            "30009:ISSUER_PUBKEY:choppy-curator"
+          ],
+          [
+            "p",
+            "PLAYER_PUBKEY"
+          ]
+        ],
+        "content": "",
+        "id": "",
+        "sig": "",
+        "player_pubkey_field": "PLAYER_PUBKEY"
+      },
+      "ordinal": {
+        "inscribed": false,
+        "player_pays": true,
+        "project_pays": false,
+        "content_type": null,
+        "file_url": null,
+        "file_built": false,
+        "metadata_tag": 5,
+        "properties_tag": 17,
+        "metadata": {
+          "name": "Curator / Curador",
+          "description": "Earned 25 awards. / Ganó 25 premios.",
+          "award_id": "curator",
+          "edition": null,
+          "collection": "Choppy Bitcoin"
+        }
+      }
+    }
+  ]
+}

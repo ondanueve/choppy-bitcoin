@@ -49,7 +49,7 @@
       + row(t("Net worth", "Patrimonio"), fmtBtc(st.net))
       + row(t("Stack multiple", "Múltiplo de stack"), netMul.toFixed(2) + "x")
       + row(t("Buys / sells", "Compras / ventas"), (st.buys || 0) + " / " + (st.sells || 0))
-      + row(t("Halvings", "Halvings"), (st.halvings || 0) + " · miss " + (st.halveMiss || 0))
+      + row(t("Halvings", "Halvings"), (st.halvings || 0) + t(" · miss ", " · fallos ") + (st.halveMiss || 0))
       + row(t("Swans vaporized", "Swans vaporizados"), String(st.swans || 0))
       + row(t("Laser eyes", "Ojos láser"), String(st.lasers || 0))
       + row(t("Cold lost", "Cold perdidos"), String(st.coldLost || 0))
@@ -191,7 +191,7 @@
     if (opts.trades) { legend(GREEN, "B"); legend(RED, "S"); }
     if (opts.btc) legend(GOLD, t("BTC bag", "BTC"));
     if (opts.usd) legend(CYAN, t("USD bag", "USD"));
-    if (opts.net) legend(CREAM, t("Net", "Net"));
+    if (opts.net) legend(CREAM, t("Net", "Neto"));
   }
 
   function runStatsUrl() {

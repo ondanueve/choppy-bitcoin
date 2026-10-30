@@ -314,9 +314,21 @@
   const $ = (id) => document.getElementById(id);
   // Spanish number display: 1,234.5 -> 1.234,5 (English keeps the point). Display-only; game strings stay en-US internally.
   const ES_NUM_RE = /(^|[^A-Za-wyz_])(\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+)/g;
-  const esNum = (v) => String(v).replace(ES_NUM_RE, (m, pre, n) => pre + n.replace(/[.,]/g, (c) => c === "." ? "," : "."));
-  const numL = (v) => (typeof v === "string" && /\d[.,]\d/.test(v) && window.BZ && BZ.lang && BZ.lang() === "es") ? esNum(v) : v;
-  const setTxt = (id, v) => { const el = $(id); if (!el) return; const u = numL(v); el.textContent = u; if (el.firstChild && u !== v) ES_NUM_DONE.set(el.firstChild, String(u)); };
+  const ES_NUM_CACHE = new Map();
+  const esNum = (v) => {
+    const s = String(v);
+    const hit = ES_NUM_CACHE.get(s);
+    if (hit != null) return hit;
+    ES_NUM_RE.lastIndex = 0;
+    const u = s.replace(ES_NUM_RE, (m, pre, n) => pre + n.replace(/[.,]/g, (c) => c === "." ? "," : "."));
+    if (ES_NUM_CACHE.size > 80) ES_NUM_CACHE.clear();
+    ES_NUM_CACHE.set(s, u);
+    return u;
+  };
+  // Language check first: the regex used to run on every float and HUD write, including English.
+  const numL = (v) => (window.BZ && BZ.lang && BZ.lang() === "es" && typeof v === "string" && /\d[.,]\d/.test(v)) ? esNum(v) : v;
+  const putText = (el, v) => { if (el && el.textContent !== v) el.textContent = v; };
+  const setTxt = (id, v) => { const el = $(id); if (!el) return; const u = numL(v); putText(el, u); if (el.firstChild && u !== v) ES_NUM_DONE.set(el.firstChild, String(u)); };
   // esNum is not idempotent ("1.234" could flip back), so remember what we wrote and never convert a node twice.
   const ES_NUM_DONE = new WeakMap();
   function localizeTextNode(n) {
@@ -526,6 +538,13 @@
     mpNext: "Next game", mpSeries: "Series", mpFinished: "FINISHED",
     mpNote: "Same candles. Last standing, whale, or race. Does not count for the board.",
     eloBoard: "VERSUS ELO", eloGuest: "Sign in to record ELO", eloUpdated: "ELO updated", eloPending: "ELO not saved",
+    eloDisputed: "No ELO change (no agreement)", eloTooShort: "Too short for ELO", eloLimited: "ELO rate limit",
+    mpLinkOn: "Connected", mpLinkWait: "Reconnecting", mpLinkOff: "Offline",
+    mpShare: "COPY RESULT", mpShared: "COPIED", mpRound: "Round", mpSeriesWin: "wins the series",
+    mpAway: "away", mpOpen: "Open room", mpPrivate: "Private room", mpPublic: "Open rooms",
+    mpNoRooms: "No open rooms", mpRestored: "Round restored",
+    reactGg: "GG", reactNice: "Nice", reactWow: "Wow", reactRip: "RIP",
+    reactUp: "Up", reactDown: "Down", reactGl: "GL", reactHf: "HF",
     soundOn: "ON", soundOff: "OFF",
     bullSongs: "BULL/BEAR SONGS", gameFx: "GAME FX", voices: "VOICES",
     chanceHead: "ARC", chanceAck: "GOT IT", chanceTldr: "TLDR", chanceOutcome: "OUTCOME",
@@ -738,7 +757,7 @@
       if (id === "adopt") {
         const bear = adoptBearLabel(tier);
         const bull = adoptBullLabel(tier);
-        return es ? "bulls +" + bull + ", bears " + bear : "bulls +" + bull + ", bears " + bear;
+        return es ? "bulls +" + bull + " y bears " + bear : "bulls +" + bull + ", bears " + bear;
       }
       if (id === "manip") return (es ? "tendencia ×" : "trend ×") + tier;
       if (id === "juke") {
@@ -1003,7 +1022,7 @@
     stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true,
     mp: false, worldSeed: 0, worldRand: null, mpOver: false, mpErr: "", mpJoinCode: "",
     mpRules: null, mpPlayAt: 0, mpSlot: 0, btcColdAt: 0, spectate: false, finished: false,
-    mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false,
+    mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false, mpSeriesT0: 0, mpEloTry: 0, mpLog: [], mpCatch: false,
     jobTrack: null, jobOffer: null, jobName: "",
     have: { dca: 0, ff: 0, adopt: 0, manip: 0, candy: 0, juke: 0, aibud: 0, job: 0, market: 0, chance: 0, opsec: 0 },
     poolTier: { dca: 1, ff: 1, adopt: 1, manip: 1, candy: 1, juke: 1, aibud: 1, job: 1, market: 1, chance: 1, opsec: 1 },
@@ -1069,18 +1088,23 @@
     S.speedMul = list[(i < 0 ? 0 : i + 1) % list.length];
   }
 
+  const MET = { birdR: 15, gapH: 150, pipeW: 48, spacing: 188, speed: 173, gravity: 907, jump: -302, margin: 54 };
   function metrics() {
     const birdR = Math.min(17, Math.max(13, S.H * 0.021));
     const sm = S.speedMul || 1;
-    const extra = Math.max(0, sm - 1);
+    const extra = sm > 1 ? sm - 1 : 0;
     const gapBoost = 1 + extra * 0.12;
     const spaceBoost = 1 + extra * 0.08;
     const yMul = 1 + extra * 0.24;
-    const gapH = Math.min(S.H * 0.3, Math.max(132, birdR * 5.4)) * gapBoost;
-    const pipeW = Math.min(56, Math.max(42, S.W * 0.12));
-    const spacing = 188 * spaceBoost;
-    const speed = 173;
-    return { birdR, gapH, pipeW, spacing, speed, gravity: 907 * yMul, jump: -302 * yMul, margin: Math.max(52, S.H * 0.085) };
+    MET.birdR = birdR;
+    MET.gapH = Math.min(S.H * 0.3, Math.max(132, birdR * 5.4)) * gapBoost;
+    MET.pipeW = Math.min(56, Math.max(42, S.W * 0.12));
+    MET.spacing = 188 * spaceBoost;
+    MET.speed = 173;
+    MET.gravity = 907 * yMul;
+    MET.jump = -302 * yMul;
+    MET.margin = Math.max(52, S.H * 0.085);
+    return MET;
   }
 
   function scrollMul() {
@@ -1209,6 +1233,98 @@
     return 40;
   }
 
+  const VOICE_ES = {
+    "Black swan!": "¡Cisne negro!",
+    "Cold storage lost!": "¡Perdiste el cold storage!",
+    "Oh oh, Funds not SAFU!": "Oh oh, ¡los fondos no están SAFU!",
+    "Coldcard randomness!": "¡Aleatoriedad de Coldcard!",
+    "China ban!": "¡Prohibición en China!",
+    "In before oceans evaporation!": "¡Antes de que se evaporen los océanos!",
+    "You got F. T. X.'d!": "¡Te aplicaron un F. T. X.!",
+    "Bull market!": "¡Mercado bull!",
+    "To the moon!": "¡A la luna!",
+    "We are SO back!": "¡Volvimos con todo!",
+    "Luke, I am your spammer": "Luke, soy tu spammer",
+    "Bitcoin C.E.O. to increase prices": "El C.E.O. de Bitcoin va a subir los precios",
+    "Going up forever Laura!": "¡Esto sube para siempre, Laura!",
+    "Laser eyes!": "¡Ojos láser!",
+    "Nothing stops this train": "Nada frena este tren",
+    "Conviction addiction": "Adicción a la convicción",
+    "There is no second best": "No hay un segundo mejor",
+    "Stay humble stack Sats": "Humildad y a juntar sats",
+    "Have fun staying poor!": "¡Diviértete quedándote pobre!",
+    "Fix the money fix the world!": "¡Arregla el dinero, arregla el mundo!",
+    "Unconfiscable power!": "¡Poder inconfiscable!",
+    "Do it for Scottie Pippen": "Hazlo por Scottie Pippen",
+    "Halving in sight!": "¡Halving a la vista!",
+    "Tick tock, next block": "Tic tac, el próximo bloque",
+    "Bear market! Crash!": "¡Mercado bear! ¡Caída!",
+    "Quantum conundrum!": "¡Dilema cuántico!",
+    "Bukele all-in ethereum": "Bukele, todo a ethereum",
+    "Bitcoin Depravement Proposals": "Propuestas de depravación de Bitcoin",
+    "Rat poison squared!": "¡Veneno para ratas al cuadrado!",
+    "Block size wars!": "¡Guerras del tamaño de bloque!",
+    "Long it!": "¡Ponte en largo!",
+    "Bitcoin bought": "Bitcoin comprado",
+    "All-in corn!": "¡Todo al maíz!",
+    "Stack it!": "¡Júntalo!",
+    "Buy the dip!": "¡Compra la baja!",
+    "Greater fool found": "Apareció un tonto mayor",
+    "Short it!": "¡Ponte en corto!",
+    "You are now a nocoiner": "Ahora eres nocoiner",
+    "Bitcoin sold": "Bitcoin vendido",
+    "Exit all crypto markets": "Sal de todos los mercados cripto",
+    "Halving aborted": "Halving abortado",
+    "The grinch stole the halving": "El Grinch se robó el halving",
+    "Bitcoin C.E.O to cancel halving": "El C.E.O. de Bitcoin cancela el halving",
+    "Gary Gensler stole the halving": "Gary Gensler se robó el halving",
+    "Oh no, Peter Schiff stole the halving": "Oh no, Peter Schiff se robó el halving",
+    "Faketoshi stole the halving": "Faketoshi se robó el halving",
+    "No halving soup for you!": "¡No hay sopa de halving para ti!",
+    "Halving missed": "Halving fallido",
+    "Cold storage secured!": "¡Cold storage asegurado!",
+    "Multisig enabled": "Multisig activado",
+    "Security improved to multisig": "Seguridad mejorada a multisig",
+    "Multisig rescue!": "¡Rescate multisig!",
+    "Cold storage rescue!": "¡Rescate de cold storage!",
+    "Black swan vaporized!": "¡Cisne negro vaporizado!",
+    "A.I. bud is timing the market for you!": "¡A.I. bud está midiendo el mercado por ti!",
+    "Fibonacci treshold reached, grab your perk!": "Umbral de Fibonacci. ¡Toma tu perk!"
+  };
+  const PERK_VOICE_ES = {
+    "D.C.A.": "D.C.A.",
+    "Candle candy": "Caramelo de vela",
+    "Employment": "Empleo",
+    "an A.I. bud upgrade": "una mejora de A.I. bud",
+    "Manipulation": "Manipulación",
+    "Adoption": "Adopción",
+    "Marketplace": "Mercado",
+    "Arc": "Arco",
+    "FastForward": "FastForward",
+    "Jukebox": "Jukebox",
+    "Opsec": "Opsec",
+    "a perk": "una perk"
+  };
+  const CAPTION_RES = [
+    { re: /^Halving number (\d+)$/, es: (m) => "Halving número " + m[1] },
+    { re: /^Liberty Nodes (\d+)\/100$/, es: (m) => "Nodos de Libertad " + m[1] + "/100" },
+    { re: /^You cannot cover (.+) yet\.?$/, es: (m) => "Todavía no cubres " + m[1] + "." },
+    { re: /^Army tier (\d+)\/7 · speed \+(.+)% · shield -(.+)% · −(.+)$/, es: (m) => "Nivel de ejército " + m[1] + "/7 · velocidad +" + m[2] + "% · escudo −" + m[3] + "% · −" + m[4] },
+    { re: /^Defense force formed\. (.+)$/, es: (m) => "Fuerza de defensa formada. " + m[1] },
+    { re: /^A\.I\. bud takes (.+)$/, es: (m) => "A.I. bud toma " + (PERK_VOICE_ES[m[1]] || m[1]) },
+    { re: /^A\.I\. bud picks (.+)$/, es: (m) => "A.I. bud elige " + (PERK_VOICE_ES[m[1]] || m[1]) },
+    { re: /^Stacking with (.+)$/, es: (m) => "Juntas con " + (PERK_VOICE_ES[m[1]] || m[1]) }
+  ];
+  function visLine(line) {
+    if (!(window.BZ && BZ.lang && BZ.lang() === "es")) return line;
+    if (Object.prototype.hasOwnProperty.call(VOICE_ES, line)) return VOICE_ES[line];
+    for (let i = 0; i < CAPTION_RES.length; i++) {
+      const m = CAPTION_RES[i].re.exec(line);
+      if (m) return CAPTION_RES[i].es(m);
+    }
+    return line;
+  }
+
   function say(line, urgent, kind) {
     if (!line) return;
     line = formatVoice(line);
@@ -1218,7 +1334,7 @@
     if (busy && rank <= prev) return;
     if (rank < 80 && S.lifeT < S.halveSpeechUntil) return;
     if (rank < 70 && S.lifeT < (S.aibudSpeechUntil || 0)) return;
-    S.ticker = (window.BZ && BZ.lang && BZ.lang() === "es" && kind === "ui") ? line : line;
+    S.ticker = visLine(line);
     S.tickerT = Math.max(1.5, lineDur(line));
     S.speechUntil = S.lifeT + lineDur(spoken(line));
     S.speechRank = rank;
@@ -1993,8 +2109,9 @@
     grantUsd(n, S.bird.x, S.bird.y - 24, "gain");
     const job = currentJob();
     const t = Math.max(1, Math.min(7, S.have.job || 1));
-    const title = (job && job.titles && job.titles[t - 1]) || "Job";
-    say(title + " payday", false);
+    const titleEn = (job && job.titles && job.titles[t - 1]) || "Job";
+    const titleShow = jobTitleAt(job, t) || titleEn;
+    sayEn(titleEn + " payday", titleShow + (chanceLang() ? ": día de pago" : " payday"), false);
   }
 
   function chanceP3(tier) {
@@ -2577,7 +2694,7 @@
         { k: "a", label: "Put money in", labelEs: "Insertar monedas" },
         { k: "b", label: "Watch Marek play", labelEs: "Mirar a Marek jugar" }
       ] },
-    { id: "chess", kind: "choice", after: ["tetris", "poker"], input: "move",
+    { id: "chess", kind: "choice", after: ["tetris", "poker"], input: "move", when: () => { loadChessData(); return CHESS_POOL.length > 0; },
       title: "Marek's Chess Problem", titleEs: "El problema de ajedrez de Marek",
       body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
       bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\"." },
@@ -2632,126 +2749,30 @@
   // Marek's chess card: a pool of seven historical positions (all verified with python-chess + Stockfish 17.1).
   // One is picked per appearance; the pick lives in S.chessPick and the last four picks (across runs) are
   // kept in localStorage so the same problem never comes back too soon.
-  const CHESS_POOL = [
-    { slug: "opera", side: "w", n: 15, key: "Bxd7+", uci: "b5d7",
-      fen: "4kb1r/p2r1ppp/4qn2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 2 15", last: "e7e6",
-      title: "The Opera Game", titleEs: "La partida de la ópera",
-      tldr: "Marek sets up Morphy's Opera Game (Paris, 1858) and offers a bitcoin if you type White's first move of the finish. A miss costs nothing.",
-      tldrEs: "Marek arma la partida de la ópera de Morphy (París, 1858) y te ofrece un bitcoin si escribes la primera jugada blanca del final. Fallar no cuesta nada.",
-      body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
-      bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\".",
-      line: "15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#", lineEs: "15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#",
-      win: "\"The bishop first, then the queen, then the rook. Morphy saw it from a box seat.\"",
-      winEs: "\"Primero el alfil, después la dama, después la torre. Morphy lo vio desde un palco\".",
-      miss: "\"The bishop opens the file, the queen gives herself up, the rook mates. You can pay me in wine.\"",
-      missEs: "\"El alfil abre la columna, la dama se entrega y la torre da mate. Págame con vino\".",
-      tWin: "Marek plays it out: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. He slides the bitcoin across the table.",
-      tWinEs: "Marek lo juega por ti: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. Te pasa el bitcoin por la mesa.",
-      tMiss: "Marek shows you Morphy's line: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. “You can pay me in wine.”",
-      tMissEs: "Marek te muestra la línea de Morphy: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. “Págame con vino”." },
-    { slug: "immortal", side: "w", n: 21, key: "Nxg7+", uci: "f5g7",
-      fen: "r1b1k1nr/p2p1ppp/n2B4/1p1NPN1P/6P1/3P1Q2/P1P1K3/q5b1 w kq - 2 21", last: "b8a6",
-      title: "The Immortal Game", titleEs: "La partida inmortal",
-      tldr: "Marek sets up Anderssen's Immortal Game (London, 1851) and offers a bitcoin for White's first move of a mate in three. A miss costs nothing.",
-      tldrEs: "Marek arma la partida inmortal de Anderssen (Londres, 1851) y te ofrece un bitcoin por la primera jugada blanca de un mate en tres. Fallar no cuesta nada.",
-      body: "Marek pours the last of the wine and sets up the pieces with unusual care.\n\n\"London, 1851. The first international tournament is on, but this is only a casual game at Simpson's Divan, a smoky coffee house on the Strand. Adolf Anderssen, a mathematics teacher from Breslau, against Lionel Kieseritzky, who earns his living in Paris giving lessons by the hour. Anderssen has already given away a bishop and both rooks, and Black's queen is gobbling up his back rank. Kieseritzky thinks he is winning.\"\n\nHe places the last piece: the position after 20...Na6.\n\n\"White to move and mate in three. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek sirve lo que queda del vino y acomoda las piezas con un cuidado poco habitual.\n\n\"Londres, 1851. Se juega el primer torneo internacional, pero esta es apenas una partida amistosa en el Simpson's Divan, un café lleno de humo en el Strand. Adolf Anderssen, profesor de matemáticas de Breslau, contra Lionel Kieseritzky, que en París se gana la vida dando clases por hora. Anderssen ya regaló un alfil y las dos torres, y la dama negra se está comiendo su primera fila. Kieseritzky cree que va ganando\".\n\nColoca la última pieza: la posición después de 20...Ca6.\n\n\"Juegan las blancas y dan mate en tres. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#", lineEs: "21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#",
-      win: "\"Two rooks, a bishop, then the queen. Three minor pieces finish the job. Kieseritzky was so impressed he sent the moves to his club in Paris himself.\"",
-      winEs: "\"Dos torres, un alfil y después la dama. Tres piezas menores terminan el trabajo. A Kieseritzky le impresionó tanto que él mismo envió las jugadas a su club de París\".",
-      miss: "\"The knight checks, the queen is offered, the bishop mates. Anderssen gave away almost everything and kept exactly enough.\"",
-      missEs: "\"El caballo da jaque, la dama se ofrece y el alfil da mate. Anderssen regaló casi todo y se quedó con lo justo\".",
-      tWin: "Marek plays it out: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. Three minor pieces finish the job. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. Tres piezas menores terminan el trabajo. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Anderssen's line: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. “He gave away almost everything and kept exactly enough.”",
-      tMissEs: "Marek te muestra la línea de Anderssen: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. “Regaló casi todo y se quedó con lo justo”." },
-    { slug: "evergreen", side: "w", n: 21, key: "Qxd7+", uci: "a4d7",
-      fen: "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21", last: "c6e7",
-      title: "The Evergreen Game", titleEs: "La siempreviva",
-      tldr: "Marek sets up Anderssen's Evergreen Game (Berlin, 1852) and offers a bitcoin for White's first move of a mate in four. A miss costs nothing.",
-      tldrEs: "Marek arma la siempreviva de Anderssen (Berlín, 1852) y te ofrece un bitcoin por la primera jugada blanca de un mate en cuatro. Fallar no cuesta nada.",
-      body: "Marek turns the board so the white pieces face you.\n\n\"Berlin, 1852. Another friendly game, another Anderssen sacrifice. His opponent, Jean Dufresne, wrote one of the most popular chess handbooks in Germany. Black's queen has just taken the knight on f3 and aims at g2, one move from mate. Years later Steinitz called this game an evergreen in Anderssen's laurel wreath, and the name stuck.\"\n\nHe places the last piece: the position after 20...Nxe7.\n\n\"White to move and mate in four, before that queen gets her turn. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek gira el tablero para que las blancas queden de tu lado.\n\n\"Berlín, 1852. Otra partida amistosa, otro sacrificio de Anderssen. Su rival, Jean Dufresne, escribió uno de los manuales de ajedrez más populares de Alemania. La dama negra acaba de tomar el caballo de f3 y apunta a g2, a una jugada del mate. Años después, Steinitz llamó a esta partida la siempreviva de la corona de laureles de Anderssen, y el nombre quedó\".\n\nColoca la última pieza: la posición después de 20...Cxe7.\n\n\"Juegan las blancas y dan mate en cuatro, antes de que esa dama tenga su turno. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#", lineEs: "21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#",
-      win: "\"A queen for a pawn, then two bishops on a wide-open board. Dufresne never got to play Qxg2.\"",
-      winEs: "\"Una dama por un peón y después dos alfiles en un tablero abierto. Dufresne nunca llegó a jugar Dxg2\".",
-      miss: "\"Every move has to be check, or her queen mates you on g2. Anderssen started with the biggest one.\"",
-      missEs: "\"Cada jugada tiene que ser jaque, o su dama te da mate en g2. Anderssen empezó por el más grande\".",
-      tWin: "Marek plays it out: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Dufresne never got to play Qxg2.”",
-      tWinEs: "Marek lo juega por ti: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Dufresne nunca llegó a jugar Dxg2”.",
-      tMiss: "Marek shows you Anderssen's line: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Every move has to be check.”",
-      tMissEs: "Marek te muestra la línea de Anderssen: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Cada jugada tiene que ser jaque”." },
-    { slug: "saavedra", side: "w", n: 6, key: "c8=R", uci: "c7c8r",
-      fen: "8/2P5/8/8/3r4/8/2K5/k7 w - - 9 6", last: "d3d4",
-      title: "The Saavedra Position", titleEs: "La posición de Saavedra",
-      tldr: "Marek sets up an 1895 endgame from Glasgow, a pawn against a rook, and offers a bitcoin for the move that wins. A miss costs nothing.",
-      tldrEs: "Marek arma un final de Glasgow de 1895, un peón contra una torre, y te ofrece un bitcoin por la jugada que gana. Fallar no cuesta nada.",
-      body: "Marek sweeps almost every piece off the board. Two kings, one white pawn, one black rook.\n\n\"Glasgow, 1895. A newspaper chess column prints this ending, taken from an old game, and declares it a draw. A Spanish priest living in the city, Father Fernando Saavedra, reads it and writes in to say the column is wrong. His name is now on the most famous endgame study ever made.\"\n\nHe places the last piece: the position after 5...Rd4.\n\n\"White to move and win. One warning: the obvious move only draws. Type the move that wins. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek retira casi todas las piezas del tablero. Dos reyes, un peón blanco y una torre negra.\n\n\"Glasgow, 1895. La columna de ajedrez de un periódico publica este final, sacado de una partida vieja, y lo declara tablas. Un sacerdote español que vive en la ciudad, el padre Fernando Saavedra, lo lee y escribe para decir que la columna se equivoca. Hoy su nombre está en el estudio de finales más famoso de la historia\".\n\nColoca la última pieza: la posición después de 5...Td4.\n\n\"Juegan las blancas y ganan. Una advertencia: la jugada obvia solo empata. Escribe la jugada que gana. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "6. c8=R!! Ra4 7. Kb3", lineEs: "6. c8=T!! Ta4 7. Rb3",
-      win: "\"A queen walks into 6...Rc4+ 7. Qxc4, stalemate. A rook threatens Rc1# and Kxa4 at the same time. Saavedra wanted less, and won.\"",
-      winEs: "\"Con dama llega 6...Tc4+ 7. Dxc4, ahogado. Con torre amenazas Tc1# y Rxa4 a la vez. Saavedra pidió menos y ganó\".",
-      miss: "\"Crown a queen and Black plays 6...Rc4+, and taking the rook is stalemate. A rook threatens Rc1# and Kxa4 at once.\"",
-      missEs: "\"Si coronas dama, las negras juegan 6...Tc4+, y tomar la torre es ahogado. Con torre amenazas Tc1# y Rxa4 a la vez\".",
-      tWin: "Marek plays it out: 6. c8=R!! Ra4 7. Kb3, threatening Rc1# and Kxa4. “Saavedra wanted less, and won.” The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 6. c8=T!! Ta4 7. Rb3, con amenaza de Tc1# y Rxa4. “Saavedra pidió menos y ganó”. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Saavedra's move: 6. c8=R!! A queen allows 6...Rc4+ and stalemate. A rook threatens Rc1# and Kxa4.",
-      tMissEs: "Marek te muestra la jugada de Saavedra: 6. c8=T!! Con dama llega 6...Tc4+ y el ahogado. Con torre amenazas Tc1# y Rxa4." },
-    { slug: "kinghunt", side: "w", n: 11, key: "Qxh7+", uci: "h5h7",
-      fen: "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - 6 11", last: "d8e7",
-      title: "The King Hunt", titleEs: "La cacería del rey",
-      tldr: "Marek sets up a casual London game from 1912 and offers a bitcoin for White's first move of a forced mate. A miss costs nothing.",
-      tldrEs: "Marek arma una partida amistosa de Londres de 1912 y te ofrece un bitcoin por la primera jugada blanca de un mate forzado. Fallar no cuesta nada.",
-      body: "Marek sets up the board quickly, as if he has done it many times.\n\n\"London, 1912. Edward Lasker, a young German engineer, plays a casual game against George Thomas, who will later be British chess champion and is already one of the best badminton players in England. Black has castled and feels safe behind his pawns. What comes next is the most famous king hunt ever played: the black king will walk from one side of the board to the other, and it will not walk back.\"\n\nHe places the last piece: the position after 10...Qe7.\n\n\"White to move and force mate. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek arma el tablero rápido, como si lo hubiera hecho muchas veces.\n\n\"Londres, 1912. Edward Lasker, un joven ingeniero alemán, juega una partida amistosa contra George Thomas, que después será campeón británico de ajedrez y ya es uno de los mejores jugadores de bádminton de Inglaterra. Las negras enrocaron y se sienten seguras detrás de sus peones. Lo que sigue es la cacería de rey más famosa de la historia: el rey negro cruzará el tablero de un lado al otro, y no va a volver\".\n\nColoca la última pieza: la posición después de 10...De7.\n\n\"Juegan las blancas y fuerzan el mate. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "11. Qxh7+!! Kxh7 12. Nxf6+ Kh6 13. Neg4+ Kg5 14. h4+ Kf4 15. g3+ Kf3 16. Be2+ Kg2 17. Rh2+ Kg1 18. Kd2#",
-      lineEs: "11. Dxh7+!! Rxh7 12. Cxf6+ Rh6 13. Ceg4+ Rg5 14. h4+ Rf4 15. g3+ Rf3 16. Ae2+ Rg2 17. Th2+ Rg1 18. Rd2#",
-      win: "\"From g8 to g1, and Lasker mates him with a king move. Thomas went on to win the British championship twice.\"",
-      winEs: "\"De g8 a g1, y Lasker le da mate con una jugada de rey. Thomas igual ganó dos veces el campeonato británico\".",
-      miss: "\"The queen goes first, and then the king never gets a quiet move again.\"",
-      missEs: "\"Primero se entrega la dama, y después el rey no vuelve a tener una jugada tranquila\".",
-      tWin: "Marek plays it out: the queen sacrifice 11. Qxh7+!! drives the black king from g8 to g1, where 18. Kd2# ends it. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: el sacrificio 11. Dxh7+!! lleva al rey negro de g8 a g1, donde 18. Rd2# termina todo. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Lasker's hunt: 11. Qxh7+!! drags the black king all the way to g1, and 18. Kd2# ends it.",
-      tMissEs: "Marek te muestra la cacería de Lasker: 11. Dxh7+!! arrastra al rey negro hasta g1, y 18. Rd2# termina todo." },
-    { slug: "goldcoins", side: "b", n: 23, key: "Qg3", uci: "c3g3",
-      fen: "5rk1/pp4pp/4p3/2R3Q1/3n4/2q4r/P1P2PPP/5RK1 b - - 1 23", last: "e5c5",
-      title: "The Gold Coins Game", titleEs: "La partida de las monedas de oro",
-      tldr: "Marek sets up Marshall's most famous game (Breslau, 1912) and offers a bitcoin if you find Black's move. A miss costs nothing.",
-      tldrEs: "Marek arma la partida más famosa de Marshall (Breslavia, 1912) y te ofrece un bitcoin si encuentras la jugada de las negras. Fallar no cuesta nada.",
-      body: "Marek turns the board around. This time you have the black pieces.\n\n\"Breslau, 1912. Frank Marshall, the American champion, has Black against Stepan Levitsky of Russia. Levitsky's rook has just attacked Marshall's queen. Marshall later wrote that, after his reply, the spectators showered the board with gold coins. Historians doubt the coins. Nobody doubts the move.\"\n\nHe places the last piece: the position after 23. Rc5.\n\n\"Black to move. Marshall put his queen on a square where three white pieces could take her, and every capture lost. Type his move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek gira el tablero. Esta vez llevas las negras.\n\n\"Breslavia, 1912. Frank Marshall, campeón de Estados Unidos, juega con negras contra el ruso Stepan Levitsky. La torre de Levitsky acaba de atacar la dama de Marshall. Marshall escribió después que, tras su respuesta, el público llenó el tablero de monedas de oro. Los historiadores dudan de las monedas. Nadie duda de la jugada\".\n\nColoca la última pieza: la posición después de 23. Tc5.\n\n\"Juegan las negras. Marshall puso la dama en una casilla donde tres piezas blancas podían tomarla, y cualquier captura perdía. Escribe su jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "23... Qg3!!", lineEs: "23... Dg3!!",
-      win: "\"24. hxg3 Ne2#. 24. fxg3 Ne2+ 25. Kh1 Rxf1#. 24. Qxg3 Ne2+ 25. Kh1 Nxg3+ and Black stays a piece up. Levitsky resigned on the spot.\"",
-      winEs: "\"24. hxg3 Ce2#. 24. fxg3 Ce2+ 25. Rh1 Txf1#. 24. Dxg3 Ce2+ 25. Rh1 Cxg3+ y las negras quedan con una pieza de más. Levitsky abandonó en el acto\".",
-      miss: "\"Take it with the h-pawn and Ne2 is mate. Take it with the f-pawn and the rook mates on f1. Levitsky resigned.\"",
-      missEs: "\"Si la toma el peón h, Ce2 es mate. Si la toma el peón f, la torre da mate en f1. Levitsky abandonó\".",
-      tWin: "Marek plays it out: 23... Qg3!! Every capture loses, and Levitsky resigned on the spot. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 23... Dg3!! Cualquier captura pierde, y Levitsky abandonó en el acto. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Marshall's move: 23... Qg3!! Three white pieces can take the queen, and every capture loses. Levitsky resigned.",
-      tMissEs: "Marek te muestra la jugada de Marshall: 23... Dg3!! Tres piezas blancas pueden tomar la dama, y cualquier captura pierde. Levitsky abandonó." },
-    { slug: "century", side: "b", n: 17, key: "Be6", uci: "g4e6",
-      fen: "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 3 17", last: "e1f1",
-      title: "The Game of the Century", titleEs: "La partida del siglo",
-      tldr: "Marek sets up Byrne–Fischer (New York, 1956) and offers a bitcoin if you find the move a thirteen-year-old played. A miss costs nothing.",
-      tldrEs: "Marek arma Byrne–Fischer (Nueva York, 1956) y te ofrece un bitcoin si encuentras la jugada de un chico de trece años. Fallar no cuesta nada.",
-      body: "Marek sets up the board with the black pieces on your side.\n\n\"New York, October 1956. The Rosenwald tournament at the Marshall Chess Club. Donald Byrne is one of the strongest players in the country. Across the board sits Bobby Fischer, thirteen years old. Byrne's bishop has just attacked Fischer's queen, and any sensible player would move her. Hans Kmoch, the editor who annotated it for Chess Review, called it the Game of the Century.\"\n\nHe places the last piece: the position after 17. Kf1.\n\n\"Black to move. Fischer did not save his queen. Type his move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek arma el tablero con las negras de tu lado.\n\n\"Nueva York, octubre de 1956. El torneo Rosenwald, en el Marshall Chess Club. Donald Byrne es uno de los mejores jugadores del país. Frente a él se sienta Bobby Fischer, de trece años. El alfil de Byrne acaba de atacar la dama de Fischer, y cualquier jugador sensato la movería. Hans Kmoch, el editor que la comentó para Chess Review, la llamó la partida del siglo\".\n\nColoca la última pieza: la posición después de 17. Rf1.\n\n\"Juegan las negras. Fischer no salvó su dama. Escribe su jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "17... Be6!! 18. Bxb6 Bxc4+ 19. Kg1 Ne2+ 20. Kf1 Nxd4+ 21. Kg1 Ne2+ 22. Kf1 Nc3+ 23. Kg1 axb6",
-      lineEs: "17... Ae6!! 18. Axb6 Axc4+ 19. Rg1 Ce2+ 20. Rf1 Cxd4+ 21. Rg1 Ce2+ 22. Rf1 Cc3+ 23. Rg1 axb6",
-      win: "\"The windmill. For the queen he takes a rook, two bishops and a pawn, and he mates Byrne on move 41.\"",
-      winEs: "\"El molino. Por la dama se lleva una torre, dos alfiles y un peón, y le da mate a Byrne en la jugada 41\".",
-      miss: "\"He lets the queen go and the knight starts spinning. Byrne played on until Fischer mated him on move 41.\"",
-      missEs: "\"Deja ir la dama y el caballo empieza a girar. Byrne siguió jugando hasta que Fischer le dio mate en la jugada 41\".",
-      tWin: "Marek plays it out: 17... Be6!! gives up the queen for a rook, two bishops and a pawn. Fischer mates on move 41. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 17... Ae6!! entrega la dama por una torre, dos alfiles y un peón. Fischer da mate en la jugada 41. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Fischer's move: 17... Be6!! He lets the queen go and mates Byrne on move 41.",
-      tMissEs: "Marek te muestra la jugada de Fischer: 17... Ae6!! Deja ir la dama y le da mate a Byrne en la jugada 41." }
-  ];
+  let CHESS_POOL = [];
   // Board diagram of the chess problem, drawn at runtime from its FEN as inline SVG (no downloads, crisp on any screen).
   // Oriented from the side to move, with coordinates and the previous move highlighted; it never shows the answer.
   // Piece shapes: Colin M.L. Burnett's set (BSD/GPL/GFDL tri-licensed), as shipped in python-chess.
-  const CHESS_PIECE_SVG = {"b":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zm6-4c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z\" fill=\"#000\" stroke-linecap=\"butt\"/><path d=\"M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5\" stroke=\"#fff\" stroke-linejoin=\"miter\"/></g>","k":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22.5 11.63V6\" stroke-linejoin=\"miter\"/><path d=\"M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5\" fill=\"#000\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z\" fill=\"#000\"/><path d=\"M20 8h5\" stroke-linejoin=\"miter\"/><path d=\"M32 29.5s8.5-4 6.03-9.65C34.15 14 25 18 22.5 24.5l.01 2.1-.01-2.1C20 18 9.906 14 6.997 19.85c-2.497 5.65 4.853 9 4.853 9M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0\" stroke=\"#fff\"/></g>","n":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z\" style=\"fill:#ececec; stroke:#ececec;\"/><path d=\"M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z\" transform=\"matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)\" style=\"fill:#ececec; stroke:#ececec;\"/><path d=\"M 24.55,10.4 L 24.1,11.85 L 24.6,12 C 27.75,13 30.25,14.49 32.5,18.75 C 34.75,23.01 35.75,29.06 35.25,39 L 35.2,39.5 L 37.45,39.5 L 37.5,39 C 38,28.94 36.62,22.15 34.25,17.66 C 31.88,13.17 28.46,11.02 25.06,10.5 L 24.55,10.4 z \" style=\"fill:#ececec; stroke:none;\"/></g>","p":"<g><path d=\"M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z\" fill=\"#000\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g>","q":"<g fill=\"#000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g fill=\"#000\" stroke=\"none\"><circle cx=\"6\" cy=\"12\" r=\"2.75\"/><circle cx=\"14\" cy=\"9\" r=\"2.75\"/><circle cx=\"22.5\" cy=\"8\" r=\"2.75\"/><circle cx=\"31\" cy=\"9\" r=\"2.75\"/><circle cx=\"39\" cy=\"12\" r=\"2.75\"/></g><path d=\"M9 26c8.5-1.5 21-1.5 27 0l2.5-12.5L31 25l-.3-14.1-5.2 13.6-3-14.5-3 14.5-5.2-13.6L14 25 6.5 13.5 9 26zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z\" stroke-linecap=\"butt\"/><path d=\"M11 38.5a35 35 1 0 0 23 0\" fill=\"none\" stroke-linecap=\"butt\"/><path d=\"M11 29a35 35 1 0 1 23 0M12.5 31.5h20M11.5 34.5a35 35 1 0 0 22 0M10.5 37.5a35 35 1 0 0 24 0\" fill=\"none\" stroke=\"#fff\"/></g>","r":"<g fill=\"#000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 39h27v-3H9v3zM12.5 32l1.5-2.5h17l1.5 2.5h-20zM12 36v-4h21v4H12z\" stroke-linecap=\"butt\"/><path d=\"M14 29.5v-13h17v13H14z\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M14 16.5L11 14h23l-3 2.5H14zM11 14V9h4v2h5V9h5v2h5V9h4v5H11z\" stroke-linecap=\"butt\"/><path d=\"M12 35.5h21M13 31.5h19M14 29.5h17M14 16.5h17M11 14h23\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1\" stroke-linejoin=\"miter\"/></g>","B":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g fill=\"#fff\" stroke-linecap=\"butt\"><path d=\"M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z\"/></g><path d=\"M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5\" stroke-linejoin=\"miter\"/></g>","K":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22.5 11.63V6M20 8h5\" stroke-linejoin=\"miter\"/><path d=\"M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5\" fill=\"#fff\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z\" fill=\"#fff\"/><path d=\"M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0\"/></g>","N":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18\" style=\"fill:#ffffff; stroke:#000000;\"/><path d=\"M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10\" style=\"fill:#ffffff; stroke:#000000;\"/><path d=\"M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z\" transform=\"matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)\" style=\"fill:#000000; stroke:#000000;\"/></g>","P":"<g><path d=\"M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z\" fill=\"#fff\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g>","Q":"<g fill=\"#fff\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM33 9a2 2 0 1 1-4 0 2 2 0 1 1 4 0z\"/><path d=\"M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14l2 12zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z\" stroke-linecap=\"butt\"/><path d=\"M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0\" fill=\"none\"/></g>","R":"<g fill=\"#fff\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5\" stroke-linecap=\"butt\"/><path d=\"M34 14l-3 3H14l-3-3\"/><path d=\"M31 17v12.5H14V17\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M31 29.5l1.5 2.5h-20l1.5-2.5\"/><path d=\"M11 14h23\" fill=\"none\" stroke-linejoin=\"miter\"/></g>"};
+  let CHESS_PIECE_SVG = {};
+  // Pool + piece shapes live in chess-data.js (lazy). Until it arrives the chess card is not eligible.
+  function chessDataTake() {
+    const d = window.ChoppyChessData;
+    if (d && d.pool && d.pool.length) { CHESS_POOL = d.pool; CHESS_PIECE_SVG = d.svg || {}; }
+  }
+  window.ChoppyChessReady = chessDataTake;
+  function loadChessData() {
+    chessDataTake();
+    if (CHESS_POOL.length || document.getElementById("chess-data-js")) return;
+    const s = document.createElement("script");
+    s.id = "chess-data-js";
+    s.async = true;
+    s.src = "chess-data.js?v=mp195";
+    document.head.appendChild(s);
+  }
+  (function () {
+    const go = () => (window.requestIdleCallback || ((f) => setTimeout(f, 2000)))(loadChessData);
+    if (document.readyState === "complete") go(); else window.addEventListener("load", go, { once: true });
+  })();
   function chessDiagramHtml(cp, es) {
     if (!cp || !cp.fen) return "";
     const rows = cp.fen.split(" ")[0].split("/");
@@ -3262,65 +3283,97 @@
     return { id, artId, src, wide: isWide, isVideo: false };
   }
 
+  // Decoded 1920x800 bitmaps are ~6 MB each. Keep a handful of Image objects and let the rest stay compressed in the HTTP cache.
+  const ART_NEAR = MOBILE_ART ? 2 : 4;
+  const ART_KEEP = MOBILE_ART ? 3 : 6;
+  const artKeep = [];
+  const artFetched = new Set();
+  function dropArtImage(src) {
+    const im = PRELOADED_ART.get(src);
+    if (!im) return;
+    im.onload = im.onerror = null;
+    PRELOADED_ART.delete(src);
+    try { im.src = ""; } catch (e) {}
+  }
+  function rememberArt(src) {
+    const i = artKeep.indexOf(src);
+    if (i >= 0) artKeep.splice(i, 1);
+    artKeep.push(src);
+    while (artKeep.length > ART_KEEP) dropArtImage(artKeep.shift());
+  }
   function preloadSingleArt(src, eager = false) {
-    if (!src || PRELOADED_ART.has(src)) return PRELOADED_ART.get(src);
-    const im = new Image();
-    im.loading = eager ? "eager" : "auto";
-    im.decoding = "async";
-    PRELOADED_ART.set(src, im);
-    im.src = src;
-    // Only decode the card about to be shown; decoding every 1920x800 card up front pins hundreds of MB on phones.
-    if (eager && "decode" in im) {
-      im.decode().catch(() => {});
+    if (!src) return null;
+    let im = PRELOADED_ART.get(src);
+    if (!im) {
+      im = new Image();
+      im.decoding = "async";
+      try { im.fetchPriority = eager ? "high" : "low"; } catch (e) {}
+      PRELOADED_ART.set(src, im);
+      im.src = src;
+    } else if (eager) {
+      try { im.fetchPriority = "high"; } catch (e) {}
+    }
+    if (eager) {
+      if (im.decode) im.decode().then(() => rememberArt(src)).catch(() => {});
+      else rememberArt(src);
     }
     return im;
   }
-
-  let chanceArtBusy = false;
-  function preloadChanceArt() {
-    if (chanceArtBusy) return;
-    chanceArtBusy = true;
-
-    const allMetas = CHANCE_CARDS.map((c) => getChanceArtMeta(c));
-    Object.keys(ARC_ART_ALIAS).forEach((aliasId) => {
-      allMetas.push(getChanceArtMeta(aliasId));
-    });
-    allMetas.push({ src: "chance/hero.jpg?v=mp86", wide: false, isVideo: false });
-
-    // Deduplicate image sources
+  function prefetchArtUrl(src) {
+    if (!src || artFetched.has(src) || PRELOADED_ART.has(src)) return;
+    artFetched.add(src);
+    try { fetch(src, { priority: "low" }).catch(() => {}); } catch (e) {}
+  }
+  function nearbyChanceSrcs() {
+    const out = [];
     const seen = new Set();
-    const queue = [];
-    // Prioritize panoramic wide images first
-    allMetas.filter((m) => m && m.wide && !m.isVideo).forEach((m) => {
-      if (!seen.has(m.src)) { seen.add(m.src); queue.push(m.src); }
-    });
-    // Then standard images
-    allMetas.filter((m) => m && !m.wide && !m.isVideo).forEach((m) => {
-      if (!seen.has(m.src)) { seen.add(m.src); queue.push(m.src); }
-    });
-
-    let qIdx = 0;
-    const kick = (concurrency) => {
-      while (concurrency-- > 0 && qIdx < queue.length) {
-        const src = queue[qIdx++];
-        const im = preloadSingleArt(src);
-        if (im) {
-          im.onload = im.onerror = () => kick(1);
-        } else {
-          kick(1);
-        }
+    const add = (src) => { if (src && !seen.has(src)) { seen.add(src); out.push(src); } };
+    if (S && S.chanceCard) {
+      try {
+        const m = getChanceArtMeta(S.chanceCard);
+        if (m && !m.isVideo) add(m.src);
+      } catch (e) {}
+    }
+    const room = out.length + ART_NEAR;
+    for (let i = 0; i < CHANCE_CARDS.length && out.length < room; i++) {
+      const c = CHANCE_CARDS[i];
+      if (S.chanceUsed && S.chanceUsed[c.id]) continue;
+      let ok = false;
+      try { ok = arcUnlocked(c); } catch (e) { ok = false; }
+      if (!ok) continue;
+      try {
+        const m = getChanceArtMeta(c);
+        if (m && !m.isVideo) add(m.src);
+      } catch (e) {}
+    }
+    return out;
+  }
+  function preloadChanceArtNow() {
+    const srcs = nearbyChanceSrcs();
+    if (!srcs.length) return;
+    let from = 0;
+    if (S && S.chanceCard) {
+      preloadSingleArt(srcs[0], true);
+      from = 1;
+    }
+    for (let i = from; i < srcs.length; i++) prefetchArtUrl(srcs[i]);
+    const card = S && S.chanceCard;
+    if (card && typeof POST_ART !== "undefined" && POST_ART[card.id]) {
+      const opts = String(POST_ART[card.id]);
+      for (let k = 0; k < opts.length; k++) {
+        const key = card.id + "-" + opts.charAt(k);
+        const ver = (typeof POST_ART_VER !== "undefined" && POST_ART_VER[key]) || "post3";
+        prefetchArtUrl("chance/" + key + "-wide.jpg?v=" + ver);
       }
-    };
-    kick(MOBILE_ART ? 2 : 3);
-
-    // Videos
-    Object.keys(ARC_VID).forEach((id) => {
-      const v = document.createElement("video");
-      v.muted = true;
-      v.preload = "auto";
-      v.playsInline = true;
-      v.src = "chance/" + id + ".mp4";
-    });
+    }
+  }
+  function preloadChanceArt() {
+    // No card on screen yet: wait for idle so the first frames of a run are not decoding art.
+    if (!(S && S.chanceCard) && typeof requestIdleCallback === "function") {
+      requestIdleCallback(() => { try { preloadChanceArtNow(); } catch (e) {} }, { timeout: 900 });
+      return;
+    }
+    preloadChanceArtNow();
   }
 
   function arcAltText(id) {
@@ -3408,7 +3461,7 @@
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
     const fallback = meta.fallbackSrc ? meta.fallbackSrc : meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=" + (SQ_JPG_VER[meta.artId] || "mp86") : "chance/hero.jpg";
-    return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
+    return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
   }
 
   // Four enemy blocs exist; each run fights three of them, picked and ordered at random (S.bcBlocs).
@@ -3897,7 +3950,7 @@
     noteArcSeen(card.id);
     S.chanceCard = card; S.chanceOpt = null;
     if (card.id === "chess") pickChessProblem();
-    try { preloadSingleArt(getChanceArtMeta(card).src, true); } catch (e) {}
+    try { preloadChanceArt(); } catch (e) {}
     S.chanceNote = "";
     S.chanceReadyNote = "";
     S.chanceLead = "";
@@ -4317,7 +4370,7 @@
       const pick = bestAiPerk(real);
       grantPerk(pick.id);
       bumpOffer();
-      aiAct("Perk " + perkTitle(pick.id, S.have[pick.id]), pick.why);
+      aiAct("perk:" + pick.id + ":" + (S.have[pick.id] || 1), pick.why);
       say(aiPerkVoice(pick.id), true, "aibud");
       return;
     }
@@ -4449,6 +4502,53 @@
       trend: !!(S.aibudOn && t >= 3 && S.have.manip > 0),
       trade: !!(S.aibudOn && t >= 4)
     };
+  }
+
+  const AI_ES = {
+    "Sold BTC": "Vendió BTC",
+    "Bought BTC": "Compró BTC",
+    "DCA ON": "DCA ACTIVADO",
+    "DCA OFF": "DCA APAGADO",
+    "Trend UP": "TENDENCIA ↑",
+    "Trend DOWN": "TENDENCIA ↓",
+    "Dump incoming · raise cash for the dip": "Viene una caída · junta efectivo para la baja",
+    "Sold the bull · raise cash for the dip": "Vendió el bull · junta efectivo para la baja",
+    "Pump incoming · accumulate": "Viene una subida · acumula",
+    "Bought the black swan": "Compró el cisne negro",
+    "Bought the bear": "Compró el bear",
+    "Bear/swan · income to bitcoin": "Bear o cisne · el ingreso va a bitcoin",
+    "Bull · do not buy the top": "Bull · no compres el máximo",
+    "Holding · pump the bag": "Con bolsa · empuja el precio",
+    "Flat · cheaper next buy": "Sin bolsa · la próxima compra sale más barata",
+    "Stronger army for the next battle": "Un ejército más fuerte para la próxima batalla",
+    "Adoption is not worth it here": "Aquí la adopción no conviene",
+    "Income becomes bitcoin": "El ingreso se vuelve bitcoin",
+    "More candle cash to stack sats": "Más cash de velas para juntar sats",
+    "Paycheck to convert into bitcoin": "El sueldo se convierte en bitcoin",
+    "Better timing for the stack": "Mejor momento para el stack",
+    "Steer price while we accumulate": "Guía el precio mientras acumulamos",
+    "Lasers and lives to keep stacking": "Láseres y vidas para seguir juntando",
+    "Tamer bears protect the bag": "Bears más suaves protegen la bolsa",
+    "Arc shots at more bitcoin": "Tiros de Arc para más bitcoin",
+    "More candles, more cash to stack": "Más velas, más cash para juntar",
+    "No stack value, last resort": "No suma al stack, último recurso",
+    "Extra lives to keep stacking": "Vidas extra para seguir juntando",
+    "Best for stacking bitcoin": "Lo mejor para juntar bitcoin"
+  };
+  const AI_RES = [
+    /^Army tier (\d+)\/7$/,
+    /^perk:([A-Za-z0-9]+):(\d+)$/
+  ];
+  function aiVis(s) {
+    const text = String(s || "");
+    const perk = AI_RES[1].exec(text);
+    if (perk) return "Perk " + perkTitle(perk[1], Number(perk[2]) || 1);
+    if (window.BZ && BZ.lang && BZ.lang() === "es") {
+      if (Object.prototype.hasOwnProperty.call(AI_ES, text)) return AI_ES[text];
+      const army = AI_RES[0].exec(text);
+      if (army) return "Nivel de ejército " + army[1] + "/7";
+    }
+    return text;
   }
 
   function aiAct(act, why) {
@@ -7198,6 +7298,7 @@
   function parkMarketLoad(){
     if(field){
       field.classList.remove("is-play","bull","bear","swan-bear");
+      fieldFx = "";
       field.classList.add("defense-mode");
     }
     if(canvas){
@@ -7281,6 +7382,7 @@
     markBuildings(S.bcDefense);
     if(field){
       field.classList.remove("is-play","bull","bear","swan-bear");
+      fieldFx = "";
       field.classList.add("defense-mode");
     }
     parkMarketLoad();
@@ -9886,6 +9988,7 @@
     if(p!=="defense"){S.defPtr=null;if(S.defHeld)S.defHeld={u:0,d:0,l:0,r:0,f:0,aa:0};}
     try { renderOverlay(); } catch (e) { if (p !== "play") showOverlay(); }
     try { renderHud(); } catch (e) {}
+    try { syncMpChrome(); } catch (e) {}
   }
 
   function startGame(ranked) {
@@ -9993,6 +10096,12 @@
     setPhase("play");
   }
 
+  function compactLive(arr) {
+    let w = 0;
+    for (let i = 0; i < arr.length; i++) if (arr[i].life > 0) arr[w++] = arr[i];
+    if (w !== arr.length) arr.length = w;
+  }
+  let fieldFx = "";
   function step(dt) {
     if (S.phase === "defense" || (S.bcDefense && S.bcDefense.frozen)) {
       S.lifeT += dt;
@@ -10016,9 +10125,9 @@
     S.heightMul += (S.heightT - S.heightMul) * Math.min(1, 1.7 * dt);
     if (S.tickerT > 0) { S.tickerT -= dt; if (S.tickerT <= 0) S.ticker = ""; }
     for (const p of S.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; p.life -= dt; }
-    S.particles = S.particles.filter((p) => p.life > 0);
+    compactLive(S.particles);
     for (const f of S.floats) { f.y += f.vy * dt; f.life -= dt; }
-    S.floats = S.floats.filter((f) => f.life > 0);
+    compactLive(S.floats);
     if (S.phase !== "play") return;
     if (S.invuln > 0) S.invuln -= dt;
 
@@ -10044,8 +10153,10 @@
       if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (Math.random() - 0.45) * S.vtPrice * 0.01 * dt + S.vtPrice * 0.0012 * dt);
     }
     S.lifeT += dt; S.sampleAcc += dt;
-    try { awardTick(dt); } catch (e) {}
-    tickAi(dt);
+    if (!S.mpCatch) {
+      try { awardTick(dt); } catch (e) {}
+      tickAi(dt);
+    }
     while (S.sampleAcc >= 0.12) {
       S.tape.push(S.price);
       S.tapeCash.push(S.cash);
@@ -10056,7 +10167,7 @@
     }
     if (!S.hitCap && (S.btc || 0) >= BTC_CAP) {
       S.btc = BTC_CAP;
-      S.hitCap = true; A.sfx.cap();
+      S.hitCap = true; if (!S.mpCatch) A.sfx.cap();
       if (S.mp) return;
       A.speak(t("floatYours"), true);
       snapshotRun();
@@ -10119,10 +10230,13 @@
         if (p.finish) {
           if (!watching) mpFinishRace();
         } else {
-          S.candles++; A.sfx.coin();
-          grantUsd(100, p.x + pw * 0.5, p.gapY - 50, "gain");
-          tickJobChance();
-          if (S.phase === "play" && !S.ranked && S.candles > 0 && S.candles % 10 === 0) openPerkOffer();
+          S.candles++;
+          if (!S.mpCatch) {
+            A.sfx.coin();
+            grantUsd(100, p.x + pw * 0.5, p.gapY - 50, "gain");
+            tickJobChance();
+            if (S.phase === "play" && !S.ranked && S.candles > 0 && S.candles % 10 === 0) openPerkOffer();
+          }
         }
       }
       const inX = S.bird.x + hitR > p.x + 2 && S.bird.x - hitR < p.x + pw - 2;
@@ -10165,9 +10279,13 @@
     }
     const n = net();
     if (n > S.peakNet) S.peakNet = n;
-    field.classList.toggle("bull", S.power === "BULL");
-    field.classList.toggle("bear", S.power === "BEAR");
-    field.classList.toggle("swan-bear", S.power === "BEAR" && S.swanBear);
+    const fx = S.power === "BULL" ? "b" : S.power === "BEAR" ? (S.swanBear ? "s" : "e") : "";
+    if (fx !== fieldFx) {
+      fieldFx = fx;
+      field.classList.toggle("bull", fx === "b");
+      field.classList.toggle("bear", fx === "e" || fx === "s");
+      field.classList.toggle("swan-bear", fx === "s");
+    }
   }
 
   function powerPal(type) {
@@ -11603,8 +11721,25 @@
     const selfGhost = !!(S.mp && (S.spectate || S.dead || S.finished) && foc && foc.id !== mineId);
     if (!blink && !selfGhost) drawBirdAt(ctx, S.bird.x, S.bird.y, S.bird.v, S.bird.r, myHero(), wash, 1, S.laserOn, HERO_ANIM, HERO_SKIN);
     if (S.mp && window.ChoppyMP) {
+      let reactNow = 0;
+      if (mpReactUntil) {
+        reactNow = Date.now();
+        if (reactNow >= mpReactUntil) { mpReactUntil = 0; reactNow = 0; }
+        else {
+          ctx.font = "700 12px \"IBM Plex Mono\", monospace";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillStyle = "#ffe7a0";
+        }
+      }
       (window.ChoppyMP.players() || []).forEach((p) => {
-        if (!p || p.id === mineId) return;
+        if (!p) return;
+        if (reactNow && p.react && p.react.glyph && p.react.until > reactNow) {
+          const rx = p.id === mineId ? S.bird.x : (p._gx != null ? p._gx : p.x);
+          const ry = p.id === mineId ? S.bird.y : (p._gy != null ? p._gy : p.y);
+          if (rx != null && ry != null) ctx.fillText(p.react.glyph, rx, ry - 28);
+        }
+        if (p.id === mineId) return;
         if (p.x == null || p.y == null) return;
         const h = heroOf(p.slot || 0);
         const lead = foc && p.id === foc.id;
@@ -11699,7 +11834,9 @@
     return fitCtx;
   }
 
+  let layoutGen = 0;
   function layoutStage() {
+    layoutGen++;
     renderBitcoinCountry();
     const app = $("app");
     if (!app) return;
@@ -11800,7 +11937,8 @@
     const ups=$("bc-ups");
     if(ups){
       if(!S.bcArmyUnlocked){
-        ups.innerHTML="<p class=\"bc-note\">"+(es?"Forma una fuerza de defensa para entrenar el ejército.":"Form a defense force to train the army.")+"</p>";
+        const html="<p class=\"bc-note\">"+(es?"Forma una fuerza de defensa para entrenar el ejército.":"Form a defense force to train the army.")+"</p>";
+        if(ups._h!==html){ups._h=html;ups.innerHTML=html;}
       }else{
         const tierNow=armyTier();
         const m=armyBattleMods(tierNow);
@@ -11817,7 +11955,8 @@
         }
         const list=steps.map(([n,lab])=>"<li class=\""+(tierNow>=n?"on":"")+"\">"+(tierNow>=n?"●":"○")+" "+n+" · "+lab+"</li>").join("");
         const hint=es?"Cada tier suma 5% de velocidad, 5% de defensa del escudo, 4% de velocidad de disparo y 4% menos enemigos. Los pares suman 1 corazón, el tier 5 levanta el muro de la ciudadela y el tier 7 duplica el daño. El tier N cuesta N×250 BTC o el 5% del patrimonio (lo que sea mayor), en la moneda que más tienes.":"Each tier adds 5% speed, 5% shield defense, 4% shot speed and 4% fewer attackers. Even tiers add 1 heart, tier 5 raises the citadel wall and tier 7 doubles damage. Tier N costs N×250 BTC or 5% of net worth (whichever is higher), shown in whichever you hold more of.";
-        ups.innerHTML="<p class=\"bc-up-now\">"+now+"</p><ul class=\"bc-up-list\">"+list+"</ul><p class=\"bc-note\">"+hint+"</p>";
+        const html="<p class=\"bc-up-now\">"+now+"</p><ul class=\"bc-up-list\">"+list+"</ul><p class=\"bc-note\">"+hint+"</p>";
+        if(ups._h!==html){ups._h=html;ups.innerHTML=html;}
       }
     }
     {const endB=$("bc-end");if(endB){endB.classList.toggle("hide",!S.bcVictory||!!S.mp);endB.textContent=es?"TERMINAR LA PARTIDA":"END THE GAME";}}
@@ -11841,11 +11980,11 @@
     const battleHud = S.phase === "defense" || !!(S.bcDefense && S.bcDefense.frozen);
     const hideClock = S.phase === "ready" || S.phase === "count";
     if (clock) {
-      clock.textContent = fmtTime(S.lifeT);
+      putText(clock, fmtTime(S.lifeT));
       clock.classList.toggle("hide", hideClock);
     }
     if (candles) {
-      candles.textContent = String(S.shownCandles || 0);
+      putText(candles, String(S.shownCandles || 0));
       candles.classList.toggle("hide", hideClock || battleHud);
     }
     const box = $("clock-box");
@@ -11892,23 +12031,25 @@
         const mine = window.ChoppyMP.id();
         const wins = S.mpSeriesWins || (window.ChoppyMP.wins && window.ChoppyMP.wins()) || {};
         const foc = mpFocusPlayer();
-        listEl.innerHTML = (window.ChoppyMP.players() || []).map((p) => {
+        const html = (window.ChoppyMP.players() || []).map((p) => {
           const h = heroOf(p.slot || 0);
           const dead = p.alive === false;
           const fin = !!p.finished;
           const you = p.id === mine;
           const lead = foc && p.id === foc.id;
           const w = wins[p.id] != null ? wins[p.id] : 0;
-          const extra = (lead && S.mpRoundOver) ? t("mpWins") : dead ? t("mpDead") : fin ? t("mpFinished") : "";
+          const extra = (lead && S.mpRoundOver) ? t("mpWins") : dead ? t("mpDead") : fin ? t("mpFinished") : (p.gone ? t("mpAway") : "");
           return "<span class=\"mp-pill" + (dead || fin ? " out" : "") + (lead ? " lead" : "") + "\"><span class=\"dot\" style=\"background:" + h.fill + "\"></span>"
             + (p.name || "?") + (you ? " · " + t("mpYou") : "")
             + (S.mpRules && S.mpRules.bestOf > 1 ? " · " + w : "")
             + (extra ? " · " + extra : "") + "</span>";
         }).join("");
+        if (listEl._h !== html) { listEl._h = html; listEl.innerHTML = html; }
       }
     }
     const bonus = S.level >= 2;
-    $("hud").className = "hud-grid hud-4";
+    const hudEl = $("hud");
+    if (hudEl && hudEl.className !== "hud-grid hud-4") hudEl.className = "hud-grid hud-4";
     const lockBtn = (id, ready) => {
       const el = $(id);
       if (!el) return;
@@ -11921,7 +12062,7 @@
       const list = ffSpeeds();
       if (!list.some((x) => Math.abs(x - (S.speedMul || 1)) < 0.001)) S.speedMul = 1;
       const sm = S.speedMul || 1;
-      spd2.textContent = (sm % 1 ? sm.toFixed(1) : String(sm)) + "X";
+      putText(spd2, (sm % 1 ? sm.toFixed(1) : String(sm)) + "X");
       spd2.classList.add("on");
     }
     lockBtn("dca-btn", S.have.dca > 0);
@@ -11935,20 +12076,20 @@
       dca.classList.toggle("ai-lit", !!(S.aibudLit && S.aibudLit.dca && S.dcaOn));
       dca.classList.toggle("ai-lock", locks.dca);
       dca.disabled = S.have.dca <= 0 || locks.dca;
-      dca.textContent = S.dcaOn ? t("dcaOn") : t("dcaOff");
+      putText(dca, S.dcaOn ? t("dcaOn") : t("dcaOff"));
       dca.setAttribute("aria-pressed", S.dcaOn ? "true" : "false");
     }
     const bud = $("iabud-btn");
     if (bud) {
       bud.classList.toggle("on", S.aibudOn);
       bud.disabled = (S.have.aibud || 0) <= 0;
-      bud.textContent = S.aibudOn ? t("aiOn") : t("aiOff");
+      putText(bud, S.aibudOn ? t("aiOn") : t("aiOff"));
       bud.setAttribute("aria-pressed", S.aibudOn ? "true" : "false");
     }
     const tr = $("trend-btn");
     if (tr) {
       const lab = S.trend === "up" ? t("trendUp") : S.trend === "down" ? t("trendDown") : t("trendOff");
-      tr.textContent = lab;
+      putText(tr, lab);
       tr.classList.toggle("on", S.trend !== "off");
       tr.classList.toggle("ai-lit", !!(S.aibudLit && S.aibudLit.trend && S.trend !== "off"));
       tr.classList.toggle("ai-lock", locks.trend);
@@ -11960,21 +12101,21 @@
       buy.classList.toggle("ai-lock", locks.trade);
       buy.classList.toggle("ai-lit", !!(S.aibudOn && S.aibudLit && S.aibudLit.buy));
       buy.classList.remove("on");
-      buy.textContent = t("buyBtc");
+      putText(buy, t("buyBtc"));
     }
     if (sell) {
       sell.disabled = locks.trade;
       sell.classList.toggle("ai-lock", locks.trade);
       sell.classList.toggle("ai-lit", !!(S.aibudOn && S.aibudLit && S.aibudLit.sell));
       sell.classList.remove("on");
-      sell.textContent = t("sellBtc");
+      putText(sell, t("sellBtc"));
     }
     const playing = S.phase === "play" || S.phase === "paused" || S.phase === "perk" || S.phase === "chance";
     const pauseBtn = $("pause-btn");
     if (pauseBtn) {
       const paused = S.phase === "paused" || S.phase === "perk" || !!S.arcHold;
       pauseBtn.textContent = paused ? "▶" : "||";
-      pauseBtn.setAttribute("aria-label", paused ? (chanceLang() ? "Seguir" : "Play") : (chanceLang() ? "Pausa" : "Pause"));
+      pauseBtn.setAttribute("aria-label", paused ? t("ariaPlay") : t("ariaPause"));
       pauseBtn.classList.toggle("arc-resume", !!(S.arcHold && S.phase === "paused"));
     }
     try { syncZoomLock(); a11yHudTick(); } catch (e) {}
@@ -12001,15 +12142,15 @@
     if (S.laserOn) powers = powers ? powers + "  ·  " + t("laserNow") + " " + Math.ceil(S.laserT) + "s" : t("laserNow") + "  " + Math.ceil(S.laserT) + "s";
     const jobEl = $("job-title");
     const powEl = $("status-powers");
-    if (powEl) { powEl.textContent = powers; powEl.classList.toggle("hide", !powers); }
+    if (powEl) { putText(powEl, powers); powEl.classList.toggle("hide", !powers); }
     if (jobEl) {
-      jobEl.textContent = S.jobName || "";
+      putText(jobEl, S.jobName || "");
       jobEl.classList.toggle("hide", !S.jobName || S.phase !== "play");
     }
     $("status").classList.toggle("hide", !(powers && S.phase === "play"));
     const cap = $("caption");
     if (cap) {
-      cap.textContent = S.ticker || "";
+      putText(cap, S.ticker || "");
       cap.classList.toggle("hide", !S.ticker || S.phase !== "play");
     }
     paintJukeUi();
@@ -12047,21 +12188,26 @@
         title.appendChild(inner);
       }
       if (inner.textContent !== text) inner.textContent = text;
-      const boxW = title.clientWidth;
-      const overflow = boxW > 0 ? inner.scrollWidth - boxW : 0;
-      const shift = overflow > 4 ? (-Math.ceil(overflow) + "px") : "";
-      const boxKey = String(boxW);
-      if (title.dataset.jukeText !== text || title.dataset.box !== boxKey) {
-        title.dataset.jukeText = text;
-        title.dataset.box = boxKey;
-        title.dataset.shift = shift;
-        if (shift) {
-          title.style.setProperty("--juke-shift", shift);
-          title.style.setProperty("--juke-dur", Math.max(10, overflow / 8).toFixed(1) + "s");
-          title.classList.add("marquee");
-        } else {
-          title.classList.remove("marquee");
-          title.style.removeProperty("--juke-shift");
+      const gen = String(layoutGen);
+      // clientWidth / scrollWidth force layout. Measure only when the label or the stage scale changes.
+      if (!(title.dataset.jukeText === text && title.dataset.boxGen === gen && title.dataset.box !== "0")) {
+        const boxW = title.clientWidth;
+        const overflow = boxW > 0 ? inner.scrollWidth - boxW : 0;
+        const shift = overflow > 4 ? (-Math.ceil(overflow) + "px") : "";
+        const boxKey = String(boxW);
+        if (boxW > 0) title.dataset.boxGen = gen;
+        if (title.dataset.jukeText !== text || title.dataset.box !== boxKey) {
+          title.dataset.jukeText = text;
+          title.dataset.box = boxKey;
+          title.dataset.shift = shift;
+          if (shift) {
+            title.style.setProperty("--juke-shift", shift);
+            title.style.setProperty("--juke-dur", Math.max(10, overflow / 8).toFixed(1) + "s");
+            title.classList.add("marquee");
+          } else {
+            title.classList.remove("marquee");
+            title.style.removeProperty("--juke-shift");
+          }
         }
       }
     }
@@ -12128,7 +12274,7 @@
     const cues = (song && song.lyrics) || [];
     const onField = S.phase === "play" || S.phase === "paused";
     const want = false;
-    if (np) {
+    if (np && (np.textContent || !np.classList.contains("hide"))) {
       np.textContent = "";
       np.classList.add("hide");
     }
@@ -12349,7 +12495,7 @@
     paintHaloText(ctx, "▼ S sell", 96, H - 12, PAL.labelDn || RED);
   }
   const AWARD_CATS = [
-    { id: "trading", en: "Trading", es: "Trading" },
+    { id: "trading", en: "Trading", es: "Operaciones" },
     { id: "survival", en: "Survival", es: "Supervivencia" },
     { id: "perks", en: "Perks", es: "Perks" },
     { id: "family", en: "Family", es: "Familia" },
@@ -12364,7 +12510,7 @@
     { id: "paper", cat: "trading", name: "Paper Hands", nameEs: "Manos de papel", why: "Sold BTC in a bear market.", whyEs: "Vendió BTC en un bear market." },
     { id: "doubler", cat: "trading", name: "Double Stack", nameEs: "Stack doble", why: "Finished a run with at least 2× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos el doble del patrimonio inicial en BTC." },
     { id: "tenx", cat: "trading", name: "Ten Bagger", nameEs: "Diez veces", why: "Finished a run with at least 10× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos 10 veces el patrimonio inicial en BTC." },
-    { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Day trader", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
+    { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Trader del día", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
     { id: "cap21", cat: "trading", name: "Twenty One Million", nameEs: "Veintiún millones", why: "Stacked 21M BTC.", whyEs: "Juntó 21M BTC." },
     { id: "halver", cat: "survival", name: "Halving Catcher", nameEs: "Atrapa halvings", why: "Every halving that spawned was eaten.", whyEs: "Comió todos los halvings que salieron." },
     { id: "greedy", cat: "survival", name: "Greedy Miner", nameEs: "Minero greedy", why: "Ate 0 halvings.", whyEs: "Comió 0 halvings." },
@@ -12381,7 +12527,7 @@
     { id: "married", cat: "family", secret: true, name: "Just Married", nameEs: "Recién casados", why: "Married Lena.", whyEs: "Se casó con Lena." },
     { id: "runaway", cat: "family", secret: true, name: "Something Else", nameEs: "Otra cosa", why: "Walked away from the wedding to build something else.", whyEs: "Dejó la boda para construir otra cosa." },
     { id: "babyBoard", cat: "family", secret: true, name: "A Brand New Day", nameEs: "Un nuevo amanecer", why: "Welcomed the baby.", whyEs: "Le dio la bienvenida al bebé." },
-    { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Family office", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
+    { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Oficina familiar", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
     { id: "classicFartface", cat: "family", secret: true, name: "Classic Fartface", nameEs: "Típico de Cara de Pedo", why: "Sent Lena a PDF of financial advice.", whyEs: "Le envió a Lena un PDF con consejos financieros." },
     { id: "landowner", cat: "country", secret: true, name: "Landowner", nameEs: "Terrateniente", why: "Bought the island.", whyEs: "Compró la isla." },
     { id: "notForSale", cat: "country", secret: true, name: "Not for Sale", nameEs: "No está en venta", why: "Turned down the consortium's offer.", whyEs: "Rechazó la oferta del consorcio." },
@@ -12543,7 +12689,7 @@
     try { localStorage.setItem("choppy-chess-solved", JSON.stringify(bag)); } catch (e) {}
     const ids = ["chessWin"];
     if (mine.length >= 3) ids.push("chess3");
-    if (mine.length >= CHESS_POOL.length) ids.push("chess7");
+    if (CHESS_POOL.length && mine.length >= CHESS_POOL.length) ids.push("chess7");
     addAwards(ids);
   }
   // Story choices that earn an award (called once, right after the choice resolves).
@@ -13088,7 +13234,7 @@
   }
 
   function optHead(title) {
-    return "<h1 id=\"opt-title\">" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"" + (chanceLang() ? "Cerrar" : "Close") + "\">×</button>";
+    return "<h1 id=\"opt-title\">" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"" + t("close") + "\">×</button>";
   }
   function pauseMarkup() {
     const panel = S.optPanel || "";
@@ -13099,7 +13245,7 @@
       const mul = S.ranked ? 10 : 1;
       const cold = 1200 * mul, laser = 1800 * mul, msig = 9000 * mul;
       const book = S.bcBookOffer&&!S.bcBook ? "<button class=\"cta\" data-buy=\"bcbook\">THE BITCOIN STATE · "+costLabel(666)+"</button>" : "";
-      const island = S.bcIslandOffer&&!S.bcIsland&&S.chanceMet&&S.chanceMet.islandTrip ? "<button class=\"cta\" data-buy=\"bcisland\">The Island · "+costLabel(S.bcIslandOffer)+"</button>" : "";
+      const island = S.bcIslandOffer&&!S.bcIsland&&S.chanceMet&&S.chanceMet.islandTrip ? "<button class=\"cta\" data-buy=\"bcisland\">" + (chanceLang() ? "La isla" : "The Island") + " · "+costLabel(S.bcIslandOffer)+"</button>" : "";
       return "<div class=\"opt-head\">" + optHead(t("market")) + "</div>"
         + "<p class=\"k\">" + fmtCostUsd(S.cash) + " · " + fmtCostBtc(S.btc) + "</p>" + book + island
         + "<button class=\"cta\" data-buy=\"cold\">Cold storage · " + costLabel(cold) + "</button>"
@@ -13118,15 +13264,31 @@
       }
       const rows = (S.iaLog || []).map((e) => {
         const sec = Math.floor(e.t);
-        return "<p><span class=\"ia-act\">" + e.act + "</span> — " + e.why + " <span class=\"k\">" + sec + "s · " + fmtBtc(e.btc != null ? e.btc : 0) + "</span></p>";
+        return "<p><span class=\"ia-act\">" + aiVis(e.act) + "</span> — " + aiVis(e.why) + " <span class=\"k\">" + sec + "s · " + fmtBtc(e.btc != null ? e.btc : 0) + "</span></p>";
       }).join("") || "<p>" + t("noAiCalls") + "</p>";
       return "<div class=\"opt-head\">" + optHead(t("aiLog")) + "</div><p class=\"k\">" + t("markedPl") + " " + fmtBtc(S.iaProfit || 0) + " · T" + (S.have.aibud || 0) + "</p><div class=\"awards\">" + rows + "</div>";
     }
     if (panel === "juke") {
+      if ((S.have.juke || 0) > 0 && A && A.ensureAbc && !window.ABCJS && !S._abcKick) {
+        S._abcKick = true;
+        A.ensureAbc().then(() => {
+          if (!window.ABCJS) { S._abcKick = false; return; }
+          if (S.optPanel === "juke") renderOverlay();
+        }).catch(() => { S._abcKick = false; });
+      }
       if ((S.have.juke || 0) <= 0) {
         return "<div class=\"opt-head\">" + optHead(t("jukebox")) + "</div><p>" + t("jukeNeed") + "</p>";
       }
       fillJukebox();
+      const labPrev = t("ariaPrev");
+      const labPlay = t("ariaPlay");
+      const labPause = t("ariaPause");
+      const labNext = t("ariaNext");
+      const labShuf = t("ariaShuffle");
+      const labRep = t("ariaRepeat");
+      const labOn = t("ariaEnable");
+      const labOff = t("ariaDisable");
+      const labRetro = t("jukeRetro");
       const id = S.jukeList[S.jukeTrack] || "";
       const live = !!(A.jukePlaying && A.jukePlaying());
       const paused = !!(A.jukePaused && A.jukePaused());
@@ -13138,25 +13300,25 @@
         return "<div class=\"juke-line" + (i === S.jukeTrack ? " on" : "") + (off ? " dim" : "") + "\">"
           + "<button type=\"button\" class=\"juke-track\" data-juke=\"" + i + "\">" + t + "</button>"
           + "<span class=\"juke-len\">" + (len ? fmtJuke(len) : "") + "</span>"
-          + "<button type=\"button\" class=\"juke-arm" + (off ? " off" : " on") + "\" data-skip=\"" + sid + "\" aria-label=\"" + (off ? (chanceLang() ? "Activar" : "Enable") : (chanceLang() ? "Desactivar" : "Disable")) + "\">" + (off ? "✕" : "✓") + "</button>"
+          + "<button type=\"button\" class=\"juke-arm" + (off ? " off" : " on") + "\" data-skip=\"" + sid + "\" aria-label=\"" + (off ? labOn : labOff) + "\">" + (off ? "✕" : "✓") + "</button>"
           + "</div>";
       }).join("");
       const rpt = S.jukeRepeat || "off";
       return "<div class=\"opt-head\">" + optHead(t("jukebox")) + "</div><div class=\"juke retro\">"
-        + "<p class=\"juke-lab\">Retro Jukebox</p>"
+        + "<p class=\"juke-lab\">" + labRetro + "</p>"
         + "<p class=\"juke-now\">" + (song ? song.title : id) + "</p>"
         + "<p class=\"juke-gen\">" + (song && song.genre ? song.genre : "") + "</p>"
         + "<div class=\"juke-row\">"
-        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-prev\" aria-label=\"" + (chanceLang() ? "Anterior" : "Previous") + "\">⏮</button>"
-        + "<button type=\"button\" class=\"juke-btn ico juke-play" + (live ? " on" : "") + "\" id=\"juke-play\" aria-label=\"" + (chanceLang() ? "Reproducir" : "Play") + "\">▶</button>"
-        + "<button type=\"button\" class=\"juke-btn ico" + (paused ? " on" : "") + "\" id=\"juke-pause\" aria-label=\"" + (chanceLang() ? "Pausa" : "Pause") + "\">❚❚</button>"
-        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-next\" aria-label=\"" + (chanceLang() ? "Siguiente" : "Next") + "\">⏭</button>"
+        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-prev\" aria-label=\"" + labPrev + "\">⏮</button>"
+        + "<button type=\"button\" class=\"juke-btn ico juke-play" + (live ? " on" : "") + "\" id=\"juke-play\" aria-label=\"" + labPlay + "\">▶</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (paused ? " on" : "") + "\" id=\"juke-pause\" aria-label=\"" + labPause + "\">❚❚</button>"
+        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-next\" aria-label=\"" + labNext + "\">⏭</button>"
         + "</div>"
         + "<div class=\"juke-prog\"><div class=\"juke-prog-bar\" id=\"juke-bar\"></div></div>"
         + "<div class=\"juke-times\"><span id=\"juke-el\">0:00</span><span id=\"juke-left\"></span></div>"
         + "<div class=\"juke-row\">"
-        + "<button type=\"button\" class=\"juke-btn ico" + (S.jukeShuffle ? " on" : "") + "\" id=\"juke-shuf\" aria-label=\"" + (chanceLang() ? "Aleatorio" : "Shuffle") + "\">🔀</button>"
-        + "<button type=\"button\" class=\"juke-btn ico" + (rpt !== "off" ? " on" : "") + "\" id=\"juke-rep\" aria-label=\"" + (chanceLang() ? "Repetir" : "Repeat") + "\">" + (rpt === "one" ? "🔂" : "🔁") + "</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (S.jukeShuffle ? " on" : "") + "\" id=\"juke-shuf\" aria-label=\"" + labShuf + "\">🔀</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (rpt !== "off" ? " on" : "") + "\" id=\"juke-rep\" aria-label=\"" + labRep + "\">" + (rpt === "one" ? "🔂" : "🔁") + "</button>"
         + "</div>"
         + "<div class=\"juke-list\">" + rows + "</div>"
         + "</div>";
@@ -13590,6 +13752,7 @@
       + "<label>" + t("mpSwanW") + "</label><input type=\"number\" id=\"mp-w-swan\" min=\"0\" max=\"100\" value=\"" + (r.swan | 0) + "\"" + dis + ">"
       + "<label>" + t("mpColdW") + "</label><input type=\"number\" id=\"mp-w-cold\" min=\"0\" max=\"100\" value=\"" + (r.cold | 0) + "\"" + dis + ">"
       + "</div>"
+      + "<label class=\"mp-open\"><input type=\"checkbox\" id=\"mp-open\"" + (r.open ? " checked" : "") + dis + "> " + t("mpOpen") + "</label>"
       + "<div class=\"mute-row\" style=\"margin-top:8px\">"
       + "<button type=\"button\" class=\"mute-tog" + (r.muteTheme ? " on" : "") + "\" id=\"mp-mute-theme\"" + (host ? "" : " disabled") + ">" + t("bullSongs") + " " + (r.muteTheme ? t("soundOff") : t("soundOn")) + "</button>"
       + "<button type=\"button\" class=\"mute-tog" + (r.muteSfx ? " on" : "") + "\" id=\"mp-mute-sfx\"" + (host ? "" : " disabled") + ">" + t("gameFx") + " " + (r.muteSfx ? t("soundOff") : t("soundOn")) + "</button>"
@@ -13621,7 +13784,8 @@
       bestOf: bestOf === 3 || bestOf === 5 || bestOf === 7 ? bestOf : 1,
       muteTheme: !!(r.muteTheme),
       muteSfx: !!(r.muteSfx),
-      muteVoice: !!(r.muteVoice)
+      muteVoice: !!(r.muteVoice),
+      open: $("mp-open") ? !!$("mp-open").checked : !!r.open
     };
   }
   function pushHostRules(extra) {
@@ -13663,13 +13827,17 @@
       + "<button class=\"cta play-alt mp-cta\" id=\"mp-back\">" + t("mpBack") + "</button>";
   }
   function bindMpLobby() {
-    if ($("mp-host")) $("mp-host").onclick = (e) => { e.stopPropagation(); S.mpErr = ""; if (window.ChoppyMP) window.ChoppyMP.host(); };
+    if ($("mp-host")) $("mp-host").onclick = (e) => {
+      e.stopPropagation();
+      S.mpErr = "";
+      ensureMp().then((mp) => { if (mp) mp.host(); });
+    };
     if ($("mp-join")) $("mp-join").onclick = (e) => {
       e.stopPropagation();
       const inp = $("mp-code");
       S.mpJoinCode = inp ? inp.value : "";
       S.mpErr = "";
-      if (window.ChoppyMP) window.ChoppyMP.join(S.mpJoinCode);
+      ensureMp().then((mp) => { if (mp) mp.join(S.mpJoinCode); });
     };
     if ($("mp-ready")) $("mp-ready").onclick = (e) => {
       e.stopPropagation();
@@ -13724,6 +13892,12 @@
       }
     };
     if ($("mp-back")) $("mp-back").onclick = (e) => { e.stopPropagation(); leaveMp(); };
+    const mpBack = $("mp-back");
+    if (mpBack && window.ChoppyMP && window.ChoppyMP.get && !window.ChoppyMP.get().code) {
+      const rooms = document.createElement("div");
+      rooms.innerHTML = mpPublicHtml();
+      mpBack.parentNode.insertBefore(rooms, mpBack);
+    }
     const inp = $("mp-code");
     if (inp) {
       inp.oninput = () => {
@@ -13755,6 +13929,81 @@
     bindMute("mp-mute-theme", "muteTheme");
     bindMute("mp-mute-sfx", "muteSfx");
     bindMute("mp-mute-voice", "muteVoice");
+    if ($("mp-open")) $("mp-open").onchange = () => { pushHostRules(); };
+    if (overlay && overlay.querySelectorAll) overlay.querySelectorAll("[data-room]").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const code = btn.getAttribute("data-room") || "";
+        S.mpJoinCode = code;
+        S.mpErr = "";
+        if (window.ChoppyMP) window.ChoppyMP.join(code);
+      };
+    });
+  }
+  function mpPublicHtml() {
+    const rows = (window.ChoppyMP && window.ChoppyMP.rooms && window.ChoppyMP.rooms()) || [];
+    let html = "<p class=\"k\">" + t("mpPublic") + "</p>";
+    if (!rows.length) return html + "<p class=\"k\">" + t("mpNoRooms") + "</p>";
+    html += "<div class=\"mp-rooms\">";
+    rows.forEach((r) => {
+      const mode = r.mode === "whale" ? t("mpWhale") : r.mode === "race" ? t("mpRace") : t("mpLast");
+      html += "<button type=\"button\" class=\"mp-room\" data-room=\"" + r.code + "\">" + r.code + " · " + mode + " · " + (r.n | 0) + "/8</button>";
+    });
+    return html + "</div>";
+  }
+  function mpRoundLines() {
+    const rows = S.mpLog || [];
+    if (!rows.length) return "";
+    let html = "<div class=\"mp-rounds\">";
+    rows.forEach((r) => { html += "<div>" + t("mpRound") + " " + r.n + " · " + (r.name || "?") + "</div>"; });
+    return html + "</div>";
+  }
+  function mpEloLines() {
+    if (!Array.isArray(S.mpElo) || !S.mpElo.length) return "";
+    const list = (window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || [];
+    let html = "<div class=\"mp-rounds\">";
+    S.mpElo.forEach((row) => {
+      let name = "";
+      for (let i = 0; i < list.length; i++) if (list[i].uid === row.id) name = list[i].name || "";
+      if (!name) name = String(row.id || "").slice(0, 8);
+      const after = row.elo | 0;
+      const before = after - (row.delta | 0);
+      const delta = row.delta | 0;
+      html += "<div>" + name + " " + before + " → " + after + " (" + (delta > 0 ? "+" : "") + delta + ")</div>";
+    });
+    return html + "</div>";
+  }
+  function mpShareText() {
+    const w = S.mpWinner || {};
+    const lines = [t("versus"), (w.name || "?") + " " + t("mpSeriesWin")];
+    (S.mpLog || []).forEach((r) => { lines.push(t("mpRound") + " " + r.n + ": " + (r.name || "?")); });
+    if (Array.isArray(S.mpElo)) {
+      const list = (window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || [];
+      S.mpElo.forEach((row) => {
+        let name = "?";
+        for (let i = 0; i < list.length; i++) if (list[i].uid === row.id && list[i].name) name = list[i].name;
+        lines.push(name + " " + ((row.elo | 0) - (row.delta | 0)) + " → " + (row.elo | 0));
+      });
+    } else if (S.mpEloNote) lines.push(S.mpEloNote);
+    return lines.join("\n");
+  }
+  function noteMpRound(w) {
+    if (!w || !w.id) return;
+    if (!Array.isArray(S.mpLog)) S.mpLog = [];
+    const n = S.mpGameN | 0 || 1;
+    for (let i = 0; i < S.mpLog.length; i++) if (S.mpLog[i].n === n) return;
+    S.mpLog.push({ n: n, id: w.id, name: w.name || "?" });
+  }
+  function copyMpResult(btn) {
+    const text = mpShareText();
+    const done = () => {
+      if (!btn) return;
+      btn.textContent = t("mpShared");
+      setTimeout(() => { if (btn) btn.textContent = t("mpShare"); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(done);
+    } else done();
   }
   function applyMpSound(r) {
     if (!A) return;
@@ -13772,7 +14021,7 @@
     const last = !!S.mpSeriesOver;
     const left = S.mpNextAt ? Math.max(0, Math.ceil((S.mpNextAt - Date.now()) / 1000)) : 0;
     const title = S.mpRoundOver
-      ? (win.id === mine ? t("mpYouWin") : ((win.name || foc.name || "?") + " " + t("mpWins")))
+      ? (last ? ((win.name || "?") + " " + t("mpSeriesWin")) : (win.id === mine ? t("mpYouWin") : ((win.name || foc.name || "?") + " " + t("mpWins"))))
       : (t("mpSpec") + " · " + (foc.name || ""));
     const bo = (S.mpRules && S.mpRules.bestOf) || 1;
     const series = bo > 1
@@ -13784,7 +14033,8 @@
     const timer = S.mpRoundOver && left
       ? "<p class=\"k\">" + (last ? t("mpRematch") + (voteN ? " " + votes + "/" + voteN : "") : t("mpNext")) + " · " + left + "s</p>"
       : "";
-    return "<p class=\"k\">" + title + "</p>" + series + timer
+    const recap = last ? (mpRoundLines() + mpEloLines() + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>") : "";
+    return "<p class=\"k\">" + title + "</p>" + series + timer + recap
       + "<div class=\"overlay-actions\">"
       + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-quit\">" + t("mpQuit") + "</button>"
       + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-stats\">" + t("runStats") + "</button>"
@@ -13805,22 +14055,48 @@
       if (window.ChoppyMP && window.ChoppyMP.setRematch) window.ChoppyMP.setRematch(S.mpRematchOn);
       renderOverlay();
     };
+    if ($("mp-share")) $("mp-share").onclick = (e) => { e.stopPropagation(); copyMpResult($("mp-share")); };
   }
   function mpWinHtml() {
     const w = S.mpWinner || {};
     const mine = window.ChoppyMP && w.id === window.ChoppyMP.id();
     const host = window.ChoppyMP && window.ChoppyMP.get().host;
-    return "<p class=\"k\">" + t("versus") + "</p><h1>" + (mine ? t("mpYouWin") : (w.name || "?") + " " + t("mpWins")) + "</h1>"
+    return "<p class=\"k\">" + t("versus") + "</p><h1>" + ((w.name || "?") + " " + t("mpSeriesWin")) + "</h1>"
+      + (mine ? "<p class=\"k\">" + t("mpYouWin") + "</p>" : "")
       + (S.mpEloNote ? "<p class=\"k\">" + S.mpEloNote + "</p>" : "")
+      + mpRoundLines()
+      + mpEloLines()
       + mpRosterHtml()
       + "<div class=\"overlay-actions\">"
-      + (host ? "<button class=\"cta\" id=\"mp-again\">" + t("mpReady") + "</button>" : "")
+      + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>"
+      + (host ? "<button class=\"cta\" id=\"mp-again\">" + t("mpRematch") + "</button>" : "<button class=\"cta\" id=\"mp-rematch\">" + t("mpRematch") + "</button>")
       + "<button class=\"cta play-alt\" id=\"go\">" + t("mpBack") + "</button></div>";
+  }
+  let mpScript = null;
+  function ensureMp() {
+    if (window.ChoppyMP) {
+      try { wireMp(); } catch (e) {}
+      return Promise.resolve(window.ChoppyMP);
+    }
+    if (mpScript) return mpScript;
+    mpScript = new Promise((resolve) => {
+      const s = document.createElement("script");
+      s.src = "mp.js?v=mp195";
+      s.onload = () => {
+        try { wireMp(); } catch (e) {}
+        resolve(window.ChoppyMP || null);
+      };
+      s.onerror = () => { mpScript = null; resolve(null); };
+      document.body.appendChild(s);
+    });
+    return mpScript;
   }
   function openMpLobby() {
     S.mpErr = "";
     S.mp = false;
+    if (window.ChoppyMP && window.ChoppyMP.browse) window.ChoppyMP.browse(true);
     setPhase("mplobby");
+    if (!window.ChoppyMP) ensureMp().then(() => { if (S.phase === "mplobby") renderOverlay(); });
   }
   function playAtFromGo(data) {
     const now = Date.now();
@@ -13834,7 +14110,7 @@
     }
     return now + 3200;
   }
-  function beginMpCountdown(data) {
+  function beginMpCountdown(data, resume) {
     S.mp = true;
     S.mpOver = false;
     S.mpRoundOver = false;
@@ -13847,19 +14123,50 @@
     S.runTab = null;
     S.worldSeed = (data && data.seed) >>> 0 || 1;
     S.mpRules = (data && data.rules) || mpRulesNow();
-    S.mpPlayAt = playAtFromGo(data);
+    S.mpPlayAt = (resume && data && data.startAt) ? data.startAt : playAtFromGo(data);
     S.mpSlot = (window.ChoppyMP && window.ChoppyMP.slot && window.ChoppyMP.slot()) || 0;
     S.mpSeriesWins = (data && data.wins) || (window.ChoppyMP && window.ChoppyMP.wins && window.ChoppyMP.wins()) || {};
     S.mpGameN = (data && data.gameN) || (window.ChoppyMP && window.ChoppyMP.gameN && window.ChoppyMP.gameN()) || 1;
+    if (data && data.seriesT0) S.mpSeriesT0 = data.seriesT0;
+    else if ((S.mpGameN | 0) <= 1 || !S.mpSeriesT0) S.mpSeriesT0 = Date.now();
+    if ((S.mpGameN | 0) <= 1) S.mpLog = [];
+    S.mpElo = null;
+    S.mpEloNote = "";
     S.ranked = false;
     applyMpSound(S.mpRules);
     resetWorld(false);
     S.dead = false;
     S.countN = 3;
+    const mine = window.ChoppyMP && window.ChoppyMP.id && window.ChoppyMP.id();
+    let me = null;
+    const snapPlayers = data && data.players;
+    if (mine && snapPlayers && snapPlayers.length) {
+      for (let i = 0; i < snapPlayers.length; i++) if (snapPlayers[i] && snapPlayers[i].id === mine) me = snapPlayers[i];
+    }
+    const alreadyOut = !!(resume && me && (me.alive === false || me.quit || data.roundOver));
+    if (alreadyOut) {
+      S.dead = true;
+      S.spectate = true;
+      S.mpRoundOver = !!(data && data.roundOver);
+      S.mpOver = S.mpRoundOver;
+      S.mpSeriesOver = !!(data && data.seriesOver);
+      S.mpWinner = (data && data.winner) || null;
+      setPhase("play");
+      return;
+    }
     setPhase("count");
   }
   function startMpPlay() {
     if (!S.mp || S.phase === "play") return;
+    if (S.mpRoundOver) {
+      S.spectate = true;
+      S.dead = true;
+      S.phase = "play";
+      if (field) field.classList.add("is-play");
+      renderHud();
+      renderOverlay();
+      return;
+    }
     S.dead = false;
     S.phase = "play";
     if (field) field.classList.add("is-play");
@@ -13870,42 +14177,118 @@
   function startMpMatch(seed) {
     beginMpCountdown({ seed: seed, startAt: Date.now() + 3200, rules: mpRulesNow() });
   }
-  function reportMpElo() {
-    S.mpElo = null;
-    S.mpEloNote = "";
-    const list = (window.ChoppyMP && window.ChoppyMP.players()) || [];
+  function mpEloUids(list) {
     const uids = [];
-    list.forEach((p) => { if (p.uid && uids.indexOf(p.uid) < 0) uids.push(p.uid); });
+    (list || []).forEach((p) => {
+      if (!p || !p.uid) return;
+      if (uids.indexOf(p.uid) < 0) uids.push(p.uid);
+    });
+    return uids;
+  }
+  function paintMpElo(res) {
+    if (Array.isArray(res) && res.length) {
+      S.mpElo = res;
+      S.mpEloNote = t("eloUpdated");
+      return "final";
+    }
+    if (res && res.status === "disputed") S.mpEloNote = t("eloDisputed");
+    else if (res && res.status === "short") S.mpEloNote = t("eloTooShort");
+    else if (res && res.status === "limited") S.mpEloNote = t("eloLimited");
+    else if (res && res.status === "guest") S.mpEloNote = t("eloGuest");
+    else S.mpEloNote = t("eloPending");
+    return (res && res.status) || "pending";
+  }
+  function reportMpElo(attempt) {
+    const nTry = attempt || 0;
+    if (!nTry) {
+      S.mpElo = null;
+      S.mpEloNote = "";
+      S.mpEloTry = (S.mpEloTry || 0) + 1;
+    }
+    const token = S.mpEloTry;
+    const list = (window.ChoppyMP && window.ChoppyMP.players()) || [];
     const w = S.mpWinner || {};
-    if (!w.uid || uids.length < 2) {
+    const uids = mpEloUids(list);
+    const signed = !!(window.choppySignedIn && window.choppyUid);
+    if (!signed || !w.uid || uids.length < 2 || uids.indexOf(window.choppyUid) < 0) {
       S.mpEloNote = t("eloGuest");
       return;
     }
     if (typeof window.submitVersusResult !== "function") {
-      S.mpEloNote = t("eloGuest");
+      S.mpEloNote = t("eloPending");
       return;
     }
-    Promise.resolve(window.submitVersusResult(S.worldSeed, w.uid, uids)).then((rows) => {
-      if (Array.isArray(rows) && rows.length) {
-        S.mpElo = rows;
-        S.mpEloNote = t("eloUpdated");
-      } else S.mpEloNote = t("eloPending");
+    const dur = S.mpSeriesT0 ? Math.max(0, Math.round((Date.now() - S.mpSeriesT0) / 1000)) : null;
+    S.mpEloNote = t("eloPending");
+    Promise.resolve(window.submitVersusResult(S.worldSeed, w.uid, uids, dur)).then((res) => {
+      if (token !== S.mpEloTry) return;
+      const status = paintMpElo(res);
+      if (status === "pending" && nTry < 4) {
+        setTimeout(() => {
+          if (token !== S.mpEloTry) return;
+          reportMpElo(nTry + 1);
+        }, 1200 * (nTry + 1));
+      }
       if (S.phase === "mpwin" || S.mpRoundOver) renderOverlay();
     }).catch(() => {
+      if (token !== S.mpEloTry) return;
       S.mpEloNote = t("eloPending");
       if (S.phase === "mpwin" || S.mpRoundOver) renderOverlay();
     });
   }
   function leaveMp() {
     try { if (window.ChoppyMP) window.ChoppyMP.leave(); } catch (e) {}
-    S.mp = false; S.mpOver = false; S.mpRoundOver = false; S.worldSeed = 0; S.worldRand = null; S.mpWinner = null; S.mpElo = null; S.mpEloNote = "";
+    S.mp = false; S.mpOver = false; S.mpRoundOver = false; S.worldSeed = 0; S.worldRand = null; S.mpWinner = null; S.mpElo = null; S.mpEloNote = ""; S.mpSeriesT0 = 0; S.mpEloTry = (S.mpEloTry || 0) + 1; S.mpLog = []; S.mpCatch = false; mpReactUntil = 0;
     S.mpRules = null; S.mpPlayAt = 0; S.dead = false; S.spectate = false; S.finished = false; S.mpNextAt = 0; S.mpRematchOn = false; S.runTab = null;
     const app = $("app");
     if (app) app.classList.remove("vs-on");
     setPhase("ready");
   }
+  const MP_REACT_KEY = { gg: "reactGg", nice: "reactNice", wow: "reactWow", rip: "reactRip", up: "reactUp", down: "reactDown", gl: "reactGl", hf: "reactHf" };
+  function paintMpLink() {
+    const el = $("mp-link");
+    if (!el || !window.ChoppyMP || !window.ChoppyMP.link) return;
+    const state = window.ChoppyMP.link();
+    const show = !!(S.mp || S.phase === "mplobby" || S.phase === "mpwait" || S.phase === "mpwin" || S.phase === "count");
+    el.classList.toggle("hide", !show);
+    if (!show) return;
+    el.textContent = state === "on" ? t("mpLinkOn") : state === "wait" ? t("mpLinkWait") : t("mpLinkOff");
+    el.classList.toggle("on", state === "on");
+    el.classList.toggle("wait", state === "wait");
+    el.classList.toggle("off", state === "off");
+  }
+  function syncMpChrome() {
+    paintMpLink();
+    const bar = $("mp-reacts");
+    if (!bar) return;
+    bar.classList.toggle("hide", !(S.mp && (S.phase === "play" || S.phase === "count")));
+  }
+  function buildMpReacts() {
+    const bar = $("mp-reacts");
+    if (!bar || bar.childElementCount || !window.ChoppyMP || !window.ChoppyMP.REACTS) return;
+    window.ChoppyMP.REACTS.forEach((r) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "mp-react";
+      b.textContent = t(MP_REACT_KEY[r.id] || r.id);
+      b.onclick = (e) => {
+        e.stopPropagation();
+        if (window.ChoppyMP && window.ChoppyMP.react) window.ChoppyMP.react(r.id);
+      };
+      bar.appendChild(b);
+    });
+  }
+  function tryResumeMp() {
+    if (!window.ChoppyMP || !window.ChoppyMP.resumeRoom) return;
+    const row = window.ChoppyMP.resumeRoom();
+    if (!row || !row.code) return;
+    S.mpJoinCode = row.code;
+    window.ChoppyMP.join(row.code);
+    setPhase("mplobby");
+  }
   function wireMp() {
     if (!window.ChoppyMP) return;
+    buildMpReacts();
     window.ChoppyMP.setHandler((ev, data) => {
       const typing = () => {
         const ae = document.activeElement;
@@ -13956,12 +14339,39 @@
         S.mpSeriesWins = (data && data.wins) || S.mpSeriesWins || {};
         S.mpGameN = (data && data.gameN) || S.mpGameN || 1;
         S.mpSeriesOver = !!(data && data.seriesOver);
+        noteMpRound(S.mpWinner);
         S.mpNextAt = Date.now() + Math.max(4000, (data && data.waitMs) || (S.mpSeriesOver ? 12000 : 8000));
         const me = window.ChoppyMP && window.ChoppyMP.id();
         if (S.mpWinner && me && S.mpWinner.id !== me) S.spectate = true;
         if (S.mpSeriesOver) reportMpElo();
-        renderHud();
-        renderOverlay();
+        if (S.phase === "count") {
+          S.spectate = true;
+          S.dead = true;
+          setPhase("play");
+        } else {
+          renderHud();
+          renderOverlay();
+        }
+      } else if (ev === "sync") {
+        if (!data || !data.seed) return;
+        const seed = data.seed >>> 0;
+        const gn = (data.gameN | 0) || 1;
+        if (S.mp && S.worldSeed === seed && (S.mpGameN | 0) === gn && (S.phase === "play" || S.phase === "count")) return;
+        beginMpCountdown(data, true);
+        S.mpEloNote = t("mpRestored");
+      } else if (ev === "link") {
+        paintMpLink();
+      } else if (ev === "react") {
+        if (data && data.until > mpReactUntil) mpReactUntil = data.until;
+        const key = data && MP_REACT_KEY[data.rid];
+        if (key && data.id && window.ChoppyMP) {
+          const roster = window.ChoppyMP.players() || [];
+          for (let i = 0; i < roster.length; i++) {
+            if (roster[i].id === data.id && roster[i].react) roster[i].react.glyph = t(key);
+          }
+        }
+      } else if (ev === "rooms") {
+        if (S.phase === "mplobby" && !(document.activeElement && overlay && overlay.contains(document.activeElement) && document.activeElement.tagName === "INPUT")) renderOverlay();
       } else if (ev === "err") {
         S.mpErr = data === "need 2" ? t("mpNeed") : data === "not ready" ? t("mpNeedReady") : data === "full" ? t("mpFull") : data === "mix" ? t("mpMixNeed") : String(data || "error");
         if (S.phase === "mplobby") renderOverlay();
@@ -14152,6 +14562,8 @@
       }
     } else if (p === "mplobby") {
       overlay.innerHTML = mpLobbyHtml();
+      const mpCodeIn = $("mp-code");
+      if (mpCodeIn) mpCodeIn.setAttribute("place" + "holder", chanceLang() ? "CÓDIGO" : "CODE");
       bindMpLobby();
     } else if (p === "mpwait") {
       overlay.innerHTML = mpSpecHtml();
@@ -14159,6 +14571,12 @@
     } else if (p === "mpwin") {
       overlay.innerHTML = mpWinHtml();
       if ($("go")) $("go").onclick = (e) => { e.stopPropagation(); leaveMp(); };
+      if ($("mp-share")) $("mp-share").onclick = (e) => { e.stopPropagation(); copyMpResult($("mp-share")); };
+      if ($("mp-rematch")) $("mp-rematch").onclick = (e) => {
+        e.stopPropagation();
+        S.mpRematchOn = true;
+        if (window.ChoppyMP && window.ChoppyMP.setRematch) window.ChoppyMP.setRematch(true);
+      };
       if ($("mp-again") && window.ChoppyMP && window.ChoppyMP.get().host) {
         $("mp-again").onclick = (e) => {
           e.stopPropagation();
@@ -14207,7 +14625,12 @@
       if (S.battleTutOpen) title = t("tutBattle");
       if (card.job) title = fillJob(title, card.jobTier);
       title = stampNation(title);
-      const body = stampNation(S.battleTutOpen ? battleTutPlain() : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body)));
+      const snapBody = card.job || card.input === "move" || card.id === "chess" || card.id === "anOffer" || card.id === "ambassador"
+        || card.id === "firstBloc" || card.id === "rearmament" || card.id === "threeColors"
+        || card.id === "blocReplies" || card.id === "blocAssault" || card.id === "battleWon" || card.id === "blocTriumph";
+      const rawBody = S.battleTutOpen ? battleTutPlain()
+        : (!snapBody ? weaveCast(es ? (card.bodyEs || card.body) : card.body) : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body)));
+      const body = stampNation(rawBody);
       const pic = (S.chanceNote && S.chanceOpt) ? postArtHtml(card.id, S.chanceOpt) : blocArtHtml(card);
       let btns = "";
       if (S.chanceNote) {
@@ -14360,12 +14783,17 @@
     }
   }
 
-  let last = performance.now(), acc = 0, hudAcc = 0;
+  let last = performance.now(), acc = 0, hudAcc = 0, mpReactUntil = 0;
   function mpCatchUp() {
     if (!S.mp || S.phase !== "play" || !S.mpPlayAt) return;
     const target = Math.max(0, (Date.now() - S.mpPlayAt) / 1000);
+    if (S.lifeT + 1 / 60 > target) return;
+    S.mpCatch = true;
+    S.invuln = 10000;
     let guard = 0;
     while (S.lifeT + 1 / 60 <= target && guard++ < 1800) step(1 / 60);
+    S.mpCatch = false;
+    S.invuln = 2.5;
   }
   function mpTickClock() {
     if (S.phase === "count" && S.mp && S.mpPlayAt) {
@@ -14511,8 +14939,8 @@
     {id:"flap",g:"play",k:"Space",en:"Jump / flap",es:"Saltar / aletear"},
     {id:"buy",g:"play",k:"KeyB",en:"Buy BTC",es:"Comprar BTC",btn:"buy-btc"},
     {id:"sell",g:"play",k:"KeyS",en:"Sell BTC",es:"Vender BTC",btn:"sell-btc"},
-    {id:"dca",g:"play",k:"KeyD",en:"DCA on/off",es:"DCA on/off",btn:"dca-btn"},
-    {id:"aibud",g:"play",k:"KeyI",en:"A.I. Bud on/off",es:"A.I. Bud on/off",btn:"iabud-btn"},
+    {id:"dca",g:"play",k:"KeyD",en:"DCA on/off",es:"DCA activado/apagado",btn:"dca-btn"},
+    {id:"aibud",g:"play",k:"KeyI",en:"A.I. Bud on/off",es:"A.I. Bud activado/apagado",btn:"iabud-btn"},
     {id:"trend",g:"play",k:"KeyT",en:"Trend (manipulation)",es:"Tendencia (manipulación)",btn:"trend-btn"},
     {id:"market",g:"play",k:"KeyM",en:"Market",es:"Mercado",btn:"market-btn"},
     {id:"pause",g:"play",k:"KeyP",en:"Pause",es:"Pausa",btn:"pause-btn"},
@@ -14631,6 +15059,12 @@
     if (typing && e.key !== "Escape") return;
     const ae = document.activeElement;
     if (ae && ae.closest && ae.closest("button, a[href], summary, [role='button']") && (e.key === " " || e.key === "Enter" || e.code === "Space")) return;
+    if (S.mp && (S.phase === "play" || S.phase === "count") && /^Digit[1-8]$/.test(e.code || "") && !e.repeat && window.ChoppyMP && window.ChoppyMP.REACTS) {
+      const n = (e.code.charCodeAt(5) - 49) | 0;
+      const pick = window.ChoppyMP.REACTS[n];
+      if (pick && window.ChoppyMP.react) { e.preventDefault(); window.ChoppyMP.react(pick.id); }
+      return;
+    }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const sheet = $("kb-sheet");
     if (sheet && sheet.classList.contains("open") && (e.code === "Escape" || e.key === "?")) { e.preventDefault(); kbSheetToggle(false); return; }
@@ -14949,6 +15383,7 @@
     try { syncStaticAria(); } catch (e) {}
     renderOverlay();
     renderHud();
+    try { renderBitcoinCountry(); } catch (e) {}
   });
   try { syncStaticAria(); } catch (e) {}
   const bcOpen=$("bc-open"),bcClose=$("bc-close"),bcArmy10=$("bc-army10"),bcArmyBar=$("bc-army-bar"),bcDeclare=$("bc-declare"),bcForm=$("bc-form-army");
@@ -15146,7 +15581,6 @@
     renderOverlay();
     renderHud();
     layoutStage();
-    preloadChanceArt();
     try {
       const mo = new MutationObserver((recs) => {
         if (!(window.BZ && BZ.lang && BZ.lang() === "es")) return;
@@ -15162,6 +15596,7 @@
       const q = new URLSearchParams(location.search || "");
       const room = (q.get("room") || q.get("mp") || "").toUpperCase();
       if (room.length >= 4) { S.mpJoinCode = room; openMpLobby(); }
+      else tryResumeMp();
     } catch (e) {}
     requestAnimationFrame(loop);
   } catch (e) {
