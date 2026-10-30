@@ -193,7 +193,21 @@
     return new Date(t + 30 * 24 * 3600 * 1000).toLocaleDateString();
   }
 
+  function clearAuthPending() {
+    window.choppyAuthPending = false;
+    try { document.documentElement.classList.remove("auth-pending"); } catch (e) {}
+  }
+  // Safety net: if the saved session never resolves (network hang), reveal the sign-in buttons.
+  if (window.choppyAuthPending) {
+    setTimeout(() => {
+      if (!window.choppyAuthPending) return;
+      clearAuthPending();
+      if (typeof window.refreshChoppyAuth === "function") window.refreshChoppyAuth();
+    }, 8000);
+  }
+
   function updateAuthUI(profile) {
+    clearAuthPending();
     const btn = $("btn-show-auth");
     const tag = $("user-profile-tag");
     const localAlias = (function () {

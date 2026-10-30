@@ -42,6 +42,9 @@ jobs:
       - name: Persisted awards
         run: node tests/persist-awards.js
 
+      - name: Military aid offer
+        run: node tests/aid-offer.js
+
       - name: i18n audit
         run: node tools/i18n-audit.js
 
