@@ -9,9 +9,8 @@
  * Usage: node tests/mp-sim.js
  * Writes tests/out/mp-sim-report.json and tests/out/mp-sim-report.md
  *
- * Hard scenarios must agree on the winner. Probes record protocol gaps
- * without changing mp.js. A later patch can turn a resolved probe into a
- * hard check by setting EXPECT on that probe.
+ * Hard scenarios must agree on the winner. The checks at the bottom lock
+ * the host handoff, a repeated go, race order, and a return inside 20s.
  */
 
 const fs = require("fs");
@@ -108,6 +107,8 @@ function makeBus(clock, opts) {
       try { msg = JSON.parse(raw); } catch (e) { return; }
       if (!msg || msg.topic === "phoenix" || msg.event === "heartbeat") return;
       if (msg.event === "phx_join") {
+        if (!ws.topics) ws.topics = {};
+        ws.topics[msg.topic] = 1;
         ws.topic = msg.topic;
         this.deliver(ws, { event: "phx_reply", payload: { status: "ok" }, ref: msg.ref, topic: msg.topic }, 0);
         return;
@@ -117,7 +118,7 @@ function makeBus(clock, opts) {
       if (this.drop(ev, msg)) return;
       const base = this.latency + (this.extra(ev, msg) || 0);
       const jitter = this.reorder ? Math.floor(this.rand() * this.reorder) : 0;
-      const targets = sockets.filter((s) => s.readyState === 1 && s.topic === msg.topic);
+      const targets = sockets.filter((s) => s.readyState === 1 && s.topics && s.topics[msg.topic]);
       targets.forEach((s) => {
         this.deliver(s, msg, base + jitter);
         if (this.dup) this.deliver(s, msg, base + jitter + this.dupGap);
@@ -130,6 +131,7 @@ function FakeSocket(url, bus, clock) {
   this.url = url;
   this.readyState = 0;
   this.topic = "";
+  this.topics = {};
   this.onopen = null;
   this.onmessage = null;
   this.onerror = null;
@@ -315,7 +317,16 @@ function silence(c) {
 
 const report = {
   generatedAt: new Date().toISOString(),
-  transport: "In-memory bus. Each player loads mp.js in its own vm. WebSocket, Date.now and timers are stubs. No edit to mp.js was required for the harness.",
+  transport: "In-memory bus. Each player loads mp.js in its own vm. WebSocket, Date.now and timers are stubs. A socket can join more than one topic, so the public-room board does not replace the room channel.",
+  resolved: [
+    "Host handoff elects only players who are not gone, including when the leaver had the lowest id.",
+    "A second go with the same seed and game number does not revive a finished round.",
+    "A death or finish that arrives before go is kept and replayed after go.",
+    "Race mode keeps the earliest finishT, even if the host finished first locally.",
+    "A silent player stays in the round at 16s and is dropped after 20s.",
+    "A socket drop reconnects with backoff and keeps the local seed.",
+    "Silence under 20s plus the same session id receives a sync snapshot. An explicit quit does not."
+  ],
   scenarios: [],
   findings: []
 };
@@ -442,12 +453,9 @@ scenario("room-full-at-8", () => {
   return { roster: lobby[0].players().length, err: extraErr };
 });
 
-scenario("probe-host-leave", () => {
+scenario("host-leave-adopts-and-finishes", () => {
   let adopted = 0;
-  let stuck = 0;
-  let hostWasMinStuck = 0;
   let hostWasMinOk = 0;
-  const samples = [];
   for (let t = 0; t < 24; t++) {
     const env = fresh({ seedBase: 9000 + t * 17 });
     const clients = boot(env, 4, { mode: "last", bestOf: 1 });
@@ -458,52 +466,35 @@ scenario("probe-host-leave", () => {
     env.clock.advance(500);
     const rest = clients.slice(1);
     const hosts = rest.filter((c) => c.get().host);
-    const row = { hostIsMin, hosts: hosts.length };
-    samples.push(row);
-    if (hosts.length === 1) {
-      adopted++;
-      if (hostIsMin) hostWasMinOk++;
-      const end = playLast(env, rest, 0);
-      row.finished = !!end.ok;
-      if (!end.ok) row.finish = end;
-    } else {
-      stuck++;
-      if (hostIsMin) hostWasMinStuck++;
-      row.finished = false;
-    }
+    if (hosts.length !== 1) throw new Error("room " + t + " hosts " + hosts.length + " min " + hostIsMin);
+    adopted++;
+    if (hostIsMin) hostWasMinOk++;
+    const end = playLast(env, rest, 0);
+    if (!end.ok) throw new Error("room " + t + " did not finish " + JSON.stringify(end));
   }
-  finding(
-    "host-adopt",
-    "tryAdoptHost keeps the departed host in the election",
-    "markGone clears the host flag but leaves that player in the list. Election sorts every id, including the player who left. When that id is first, every remaining client sees the leaver as the candidate and adopts nobody. The round then has no host, so considerOver never declares a winner. Across 24 rooms: adopted " + adopted + ", stuck " + stuck + ", stuck while the leaver had the lowest id " + hostWasMinStuck + ", adopted while the leaver had the lowest id " + hostWasMinOk + "."
-  );
-  if (!stuck) finding("host-adopt-sample", "This run did not stick a hostless room", "Random ids did not put the leaver first. The code path is still present.");
-  return { adopted, stuck, hostWasMinStuck, hostWasMinOk };
+  if (hostWasMinOk < 1) throw new Error("sample missed a leaver with the lowest id");
+  return { adopted, hostWasMinOk };
 });
 
-scenario("probe-socket-rejoin", () => {
+scenario("socket-drop-keeps-the-round", () => {
   const env = fresh({ seedBase: 11000 });
   const clients = boot(env, 3, { mode: "last", bestOf: 1 });
   const seed = clients[1].get().seed;
   const ws = clients[1].get().ws;
   ws.close();
-  env.clock.advance(2000);
+  env.clock.advance(500);
+  if (clients[1].link() === "on") throw new Error("link stayed on during the gap");
+  env.clock.advance(1500);
   const back = clients[1].get();
   const same = back.started && back.seed === seed && back.code === clients[0].code();
-  const rejoinAt = back.rejoinAt || 0;
-  finding(
-    "rejoin-at",
-    "Socket drop auto-reconnects after 1.2s and keeps the local round",
-    "After close(), onclose waits 1200ms and calls joinSocket because the room code is still set. started and seed stayed " + String(same) + ". rejoinAt after settle is " + rejoinAt + ". handle('host') sets rejoinAt back to 0, so the 800ms considerOver grace usually ends as soon as the host beacon arrives, which is well under 800ms on a live socket."
-  );
   if (!same) throw new Error("in-tab reconnect lost the round");
-  return { same, rejoinAt };
+  if (clients[1].link() !== "on") throw new Error("link did not return, got " + clients[1].link());
+  return { same, link: clients[1].link() };
 });
 
-scenario("probe-leave-and-rejoin", () => {
+scenario("quit-does-not-restore", () => {
   const env = fresh({ seedBase: 12000 });
   const clients = boot(env, 3, { mode: "last", bestOf: 1 });
-  const seed = clients[1].get().seed;
   const code = clients[0].code();
   const id = clients[1].id();
   const storage = clients[1]._storage;
@@ -515,16 +506,37 @@ scenario("probe-leave-and-rejoin", () => {
     uid: "00000000-0000-4000-8000-000000000002",
     storage
   });
+  if (twin.id() !== id) throw new Error("session id changed");
   twin.join(code);
   env.clock.advance(800);
-  const restored = twin.get().started && twin.get().seed === seed;
-  const known = clients[0].players().some((p) => p.id === id);
-  finding(
-    "rejoin-page",
-    "leave() plus join() does not restore the round",
-    "The same session id is still known to the host (" + known + ") because a mid-round left marks the player gone instead of deleting them. The returning client sets started to false and never receives the seed. started restored: " + restored + ". A refresh that does not call leave() is only a silent socket: the player is removed from contention after the 12s stale window, and nothing replays the round."
-  );
-  return { restored, known, seed: twin.get().seed || 0 };
+  if (twin.get().started) throw new Error("quit received a round snapshot");
+  const row = clients[0].players().find((p) => p.id === id);
+  if (!row || !row.quit || row.alive !== false) throw new Error("quit did not stick " + JSON.stringify(row && { quit: row.quit, alive: row.alive }));
+  return { quit: true };
+});
+
+scenario("silence-rejoin-restores-round", () => {
+  const env = fresh({ seedBase: 12200 });
+  const clients = boot(env, 3, { mode: "last", bestOf: 1 });
+  const seed = clients[1].get().seed;
+  const code = clients[0].code();
+  const id = clients[1].id();
+  const storage = clients[1]._storage;
+  silence(clients[1]);
+  env.clock.advance(500);
+  const twin = makeClient(env.clock, env.bus, {
+    seed: 12211,
+    name: "P2",
+    uid: "00000000-0000-4000-8000-000000000002",
+    storage
+  });
+  if (twin.id() !== id) throw new Error("session id was not kept");
+  twin.join(code);
+  env.clock.advance(1200);
+  if (!twin.get().started || twin.get().seed !== seed) throw new Error("sync missed the seed");
+  const me = twin.players().find((p) => p.id === id);
+  if (!me || me.alive === false) throw new Error("player was dropped inside 20s");
+  return { seed };
 });
 
 scenario("probe-duplicate-go", () => {
@@ -557,12 +569,9 @@ scenario("probe-duplicate-go", () => {
   env.clock.advance(200);
   const after = clients[0].players().find((p) => p.id === clients[1].id());
   const revived = !!(wasDead && after && after.alive !== false);
-  finding(
-    "dup-go",
-    "A second go for the same seed resets the round",
-    "handle('go') always marks every player alive and clears the round. After the guest was dead (" + wasDead + ", round over " + overBefore + "), the same go payload was delivered again. That player is alive afterwards: " + revived + ", roundOver " + !!clients[0].get().roundOver + "."
-  );
-  return { wasDead, overBefore, revived, roundOverAfter: !!clients[0].get().roundOver };
+  if (!wasDead || !overBefore) throw new Error("round was not over before the duplicate go");
+  if (revived || !clients[0].get().roundOver) throw new Error("duplicate go reopened the round");
+  return { revived: false, roundOverAfter: true };
 });
 
 scenario("probe-dead-before-go", () => {
@@ -582,12 +591,11 @@ scenario("probe-dead-before-go", () => {
   const overMid = !!clients[0].get().roundOver;
   env.clock.advance(900);
   const late = clients[0].players().find((p) => p.id === clients[1].id());
-  finding(
-    "reorder-go",
-    "go overwrites a death that was applied first",
-    "go is held 700ms. The guest sends dead before that copy arrives. Host saw the player dead at 200ms: " + deadMid + " (round already over: " + overMid + "). After the delayed go, alive is " + (late ? late.alive !== false : "missing") + " and roundOver is " + !!clients[0].get().roundOver + ". handle('go') forces every player alive and clears the round, so a death that arrived first is lost."
-  );
-  return { deadMid, overMid, aliveAfter: late ? late.alive !== false : null, roundOverAfter: !!clients[0].get().roundOver };
+  const guest = clients[1].players().find((p) => p.id === clients[1].id());
+  if (!deadMid || !overMid) throw new Error("host missed the early death");
+  if (!late || late.alive !== false || !clients[0].get().roundOver) throw new Error("delayed go wiped the death");
+  if (!guest || guest.alive !== false || !clients[1].get().roundOver) throw new Error("guest did not keep the death");
+  return { deadMid, roundOverAfter: true };
 });
 
 scenario("probe-race-locks-first-claim", () => {
@@ -598,34 +606,24 @@ scenario("probe-race-locks-first-claim", () => {
   clients[2].dead(50, 4, { btc: 1 });
   env.clock.advance(500);
   const end = agreeWinners(clients);
-  const fair = end.ids && end.ids[0] === clients[1].id();
-  finding(
-    "race-lock",
-    "Race mode keeps the first finish the host applies, not the earliest finishT",
-    "considerOver uses `winner || fins[0]`, and the host applies their own finish() before the network is pumped. The host finished at 40s and a guest at 8s, but the guest message was still queued. Agreed winner is the guest: " + fair + ". Winner id " + (end.ids && end.ids[0]) + ", guest id " + clients[1].id() + ", host id " + clients[0].id() + "."
-  );
-  return { fair, ids: end.ids, ok: end.ok };
+  if (!end.ok || !end.ids || end.ids[0] !== clients[1].id()) {
+    throw new Error("race kept the wrong finish " + JSON.stringify(end.ids));
+  }
+  return { winner: end.ids[0] };
 });
 
-scenario("probe-stale-window", () => {
+scenario("silence-survives-16s-and-drops-after-20s", () => {
   const env = fresh({ seedBase: 15000 });
   const clients = boot(env, 3, { mode: "last", bestOf: 1 });
   const watch = clients[2].id();
   silence(clients[2]);
-  const marks = [];
-  for (let s = 2; s <= 16; s += 2) {
-    env.clock.advance(2000);
-    const p = clients[0].players().find((row) => row.id === watch);
-    const age = p && p.last ? env.clock.now - p.last : null;
-    marks.push({ s, dead: !!(p && p.alive === false), age });
-  }
-  const firstDead = marks.find((m) => m.dead);
-  finding(
-    "stale-12s",
-    "A silent player is marked dead about 12s after the last packet",
-    "pruneStale cuts at Date.now() - 12000 and runs on the 2s heartbeat. First sample with alive false: " + (firstDead ? (firstDead.s + "s of silence, last packet age " + firstDead.age + "ms") : "none") + ". Samples: " + marks.map((m) => m.s + "s dead=" + m.dead + " age=" + m.age).join("; ") + ". That window is shorter than 20s, so a reload cannot resume the round. Explicit leave() marks them dead immediately, with no snapshot to restore seed or score."
-  );
-  return { marks };
+  env.clock.advance(16000);
+  const mid = clients[0].players().find((row) => row.id === watch);
+  if (!mid || mid.alive === false) throw new Error("silent player was dropped at 16s");
+  env.clock.advance(8000);
+  const late = clients[0].players().find((row) => row.id === watch);
+  if (!late || late.alive !== false || !late.gone) throw new Error("silent player still counted at 24s");
+  return { age: env.clock.now - late.last };
 });
 
 scenario("probe-out-of-order-over", () => {
@@ -639,13 +637,42 @@ scenario("probe-out-of-order-over", () => {
   const hostOverEarly = !!clients[0].get().roundOver;
   env.clock.advance(800);
   const end = agreeWinners(clients);
-  finding(
-    "over-delay",
-    "The host applies over locally before guests see the delayed copy",
-    "declareOver updates the host at once and broadcasts over. With over delayed 500ms, the host was already round-over at 200ms (" + hostOverEarly + "). Guests agreed after the delay: " + end.ok + ". A late over still replaces seriesWins from the payload, so it does not add a second point."
-  );
+  if (!hostOverEarly) throw new Error("host did not close the round locally");
   if (!end.ok) throw new Error("delayed over never agreed " + JSON.stringify(end));
-  return { hostOverEarly, agreed: end.ok, wins: end.wins };
+  if ((end.wins[clients[0].id()] || 0) !== 1) throw new Error("series score changed " + JSON.stringify(end.wins));
+  return { hostOverEarly, wins: end.wins };
+});
+
+scenario("open-room-lists-and-expires", () => {
+  const env = fresh({ seedBase: 17000 });
+  const host = makeClient(env.clock, env.bus, { seed: 17001, name: "Host", uid: null });
+  const guest = makeClient(env.clock, env.bus, { seed: 17002, name: "Guest", uid: null });
+  host.host();
+  env.clock.advance(500);
+  host.setRules(Object.assign({}, RULES.last, { open: true }));
+  guest.browse(true);
+  env.clock.advance(2600);
+  const code = host.code();
+  const rows = guest.rooms();
+  if (!rows.some((r) => r.code === code && r.mode === "last")) throw new Error("open room missing " + JSON.stringify(rows));
+  host.setRules(Object.assign({}, RULES.last, { open: false }));
+  env.clock.advance(8000);
+  if (guest.rooms().some((r) => r.code === code)) throw new Error("closed room stayed on the board");
+  return { code };
+});
+
+scenario("reaction-is-rate-limited", () => {
+  const env = fresh({ seedBase: 18000 });
+  const clients = boot(env, 2, { mode: "last", bestOf: 1 });
+  if (clients[1].react("nope")) throw new Error("unknown reaction was accepted");
+  if (!clients[1].react("gg")) throw new Error("first reaction was rejected");
+  if (clients[1].react("wow")) throw new Error("second reaction ignored the limit");
+  env.clock.advance(1300);
+  if (!clients[1].react("rip")) throw new Error("reaction stayed blocked after 1.2s");
+  env.clock.advance(300);
+  const row = clients[0].players().find((p) => p.id === clients[1].id());
+  if (!row || !row.react || row.react.rid !== "rip") throw new Error("peer missed the reaction");
+  return { rid: row.react.rid };
 });
 
 function writeReport() {
@@ -670,8 +697,13 @@ function writeReport() {
     lines.push("- " + (s.ok ? "PASS" : "FAIL") + " " + s.name + (s.ok ? "" : " — " + String(s.error || "").split("\n")[0]));
   });
   lines.push("");
+  lines.push("## Resolved");
+  lines.push("");
+  (report.resolved || []).forEach((line) => { lines.push("- " + line); });
+  lines.push("");
   lines.push("## Findings");
   lines.push("");
+  if (!report.findings.length) lines.push("No open protocol findings in this run.");
   report.findings.forEach((f) => {
     lines.push("### " + f.id);
     lines.push("");
@@ -680,9 +712,11 @@ function writeReport() {
     lines.push(f.detail);
     lines.push("");
   });
-  lines.push("## What this run does not claim");
+  lines.push("## Limits");
   lines.push("");
-  lines.push("The bus is not Supabase. It delivers broadcasts to every socket on the topic, including the sender, because the client joins with broadcast self turned on. It does not model presence, packet loss beyond the probes, or the game loop in game.js.");
+  lines.push("A client can still lie about BTC, candles, or finish time. Nothing on the server replays the match. The ELO vote only checks that enough signed-in players name the same winner. Catch-up after a sync snapshot does not replay flap presses. An explicit quit stays out of the round.");
+  lines.push("");
+  lines.push("The bus is not Supabase. It delivers broadcasts to every socket on the topic, including the sender, because the room channel joins with broadcast self turned on. It does not model presence or the game loop in game.js.");
   fs.writeFileSync(path.join(OUT_DIR, "mp-sim-report.md"), lines.join("\n"));
   return failed.length;
 }

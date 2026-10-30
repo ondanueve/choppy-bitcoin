@@ -3,6 +3,18 @@
   const DB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZXdkcmhmb2Z3cHpmb2d0aGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MDM0OTMsImV4cCI6MjEwMjk3OTQ5M30.zch7bpyq2kaYaQeW4wMrQhkSPxyzzKKiD6jRLTWYidY";
   const ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const MAX = 8;
+  const STALE_MS = 20000;
+  const BOARD = "realtime:mp-board";
+  const REACTS = [
+    { id: "gg", glyph: "GG" },
+    { id: "nice", glyph: "Nice" },
+    { id: "wow", glyph: "Wow" },
+    { id: "rip", glyph: "RIP" },
+    { id: "up", glyph: "UP" },
+    { id: "down", glyph: "DOWN" },
+    { id: "gl", glyph: "GL" },
+    { id: "hf", glyph: "HF" }
+  ];
   const DEFAULT_RULES = {
     startCold: 0,
     msig: 0,
@@ -16,13 +28,25 @@
     bestOf: 1,
     muteTheme: false,
     muteSfx: false,
-    muteVoice: false
+    muteVoice: false,
+    open: false
   };
 
   function rid(n) {
     let s = "";
     for (let i = 0; i < (n || 8); i++) s += ABC[(Math.random() * ABC.length) | 0];
     return s;
+  }
+  function storedId() {
+    try {
+      const prev = sessionStorage.getItem("choppy-mp-id");
+      if (prev && /^[A-Z0-9]{8}$/.test(prev)) return prev;
+      const id = rid(8);
+      sessionStorage.setItem("choppy-mp-id", id);
+      return id;
+    } catch (e) {
+      return rid(8);
+    }
   }
   function myName() {
     try {
@@ -51,6 +75,7 @@
     r.muteTheme = !!r.muteTheme;
     r.muteSfx = !!r.muteSfx;
     r.muteVoice = !!r.muteVoice;
+    r.open = !!r.open;
     return r;
   }
   function compact(p) {
@@ -62,7 +87,7 @@
   }
 
   const MP = {
-    id: rid(8),
+    id: storedId(),
     name: "P",
     code: "",
     host: false,
@@ -79,18 +104,35 @@
     roundOver: false,
     roundWinner: null,
     seriesOver: false,
+    seriesT0: 0,
     ws: null,
     joinRef: "1",
     refN: 1,
     beat: 0,
     hb: 0,
-    on: null
+    on: null,
+    backoff: 1000,
+    link: "off",
+    browsing: false,
+    boardOn: false,
+    rooms: {},
+    reactAt: 0,
+    early: []
   };
 
   function emit(ev, data) {
     if (typeof MP.on === "function") try { MP.on(ev, data); } catch (e) {}
   }
+  function setLink(state) {
+    if (MP.link === state) return;
+    MP.link = state;
+    emit("link", state);
+  }
   function topic() { return "realtime:mp-" + MP.code; }
+  function reactGlyph(id) {
+    for (let i = 0; i < REACTS.length; i++) if (REACTS[i].id === id) return REACTS[i].glyph;
+    return "";
+  }
   function push(msg) {
     if (!MP.ws || MP.ws.readyState !== 1) return;
     msg.ref = String(++MP.refN);
@@ -198,13 +240,14 @@
   function tryAdoptHost() {
     if (!MP.code || !MP.players.length) return false;
     const cur = hostPlayer();
-    if (cur) {
+    if (cur && !cur.gone) {
       MP.host = cur.id === MP.id;
       const me = MP.players.find((p) => p.id === MP.id);
       if (me) me.host = MP.host;
       return false;
     }
-    const next = MP.players.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))[0];
+    if (cur) cur.host = false;
+    const next = MP.players.filter((p) => !p.gone).sort((a, b) => String(a.id).localeCompare(String(b.id)))[0];
     if (!next) return false;
     if (next.id !== MP.id) {
       MP.host = false;
@@ -214,17 +257,184 @@
     MP.players.forEach((p) => { p.host = p.id === MP.id; });
     assignSlots();
     send("host", { id: MP.id, name: MP.name });
+    if (MP.started && MP.seed) send("sync", roundSnap());
     emit("roster", MP.players);
     if (MP.started && !MP.roundOver) considerOver();
     return true;
   }
-  function markGone(id) {
+  function markGone(id, quit) {
     const p = MP.players.find((x) => x.id === id);
     if (!p) return;
-    p.alive = false;
     p.gone = true;
+    p.goneAt = p.last || Date.now();
+    if (quit) {
+      p.quit = true;
+      p.alive = false;
+    }
     if (p.host) p.host = false;
     if (p.id === MP.id) MP.host = false;
+  }
+  function roundSnap() {
+    return {
+      seed: MP.seed,
+      startAt: MP.startAt,
+      sentAt: MP.sentAt || MP.startAt || Date.now(),
+      rules: MP.rules,
+      gameN: MP.gameN || 1,
+      wins: Object.assign({}, MP.seriesWins || {}),
+      seriesOver: !!MP.seriesOver,
+      seriesT0: MP.seriesT0 || 0,
+      roundOver: !!MP.roundOver,
+      winner: MP.roundWinner ? compact(MP.roundWinner) : null,
+      players: MP.players.map((p) => ({
+        id: p.id, name: p.name, uid: p.uid || null, slot: p.slot, host: !!p.host,
+        alive: p.alive !== false, finished: !!p.finished, gone: !!p.gone, quit: !!p.quit,
+        btc: p.btc || 0, candles: p.candles || 0, lifeT: p.lifeT || 0,
+        x: p.x, y: p.y, v: p.v, finishT: p.finishT || 0
+      }))
+    };
+  }
+  function replayEarly() {
+    const early = MP.early || [];
+    MP.early = [];
+    early.forEach((e) => handle(e.ev, e.pl));
+  }
+  function applySync(pl) {
+    if (!pl || !pl.seed) return;
+    const seed = pl.seed >>> 0;
+    const gn = (pl.gameN | 0) || 1;
+    const same = MP.started && (MP.seed >>> 0) === seed && (MP.gameN | 0) === gn;
+    MP.seed = seed;
+    MP.startAt = pl.startAt || MP.startAt;
+    MP.sentAt = pl.sentAt || MP.sentAt || 0;
+    if (pl.rules) MP.rules = copyRules(pl.rules);
+    MP.gameN = gn;
+    if (pl.wins) MP.seriesWins = Object.assign({}, pl.wins);
+    MP.seriesOver = !!pl.seriesOver;
+    MP.seriesT0 = pl.seriesT0 || MP.seriesT0 || 0;
+    MP.roundOver = !!pl.roundOver;
+    MP.roundWinner = pl.winner || null;
+    MP.started = true;
+    if (Array.isArray(pl.players)) pl.players.forEach(upsert);
+    const me = MP.players.find((p) => p.id === MP.id);
+    if (me) { MP.slot = me.slot || 0; MP.host = !!me.host; }
+    assignSlots();
+    if (same) { emit("roster", MP.players); return; }
+    emit("sync", pl);
+  }
+  function rememberRoom() {
+    try {
+      if (!MP.code) {
+        sessionStorage.removeItem("choppy-mp-room");
+        return;
+      }
+      sessionStorage.setItem("choppy-mp-room", JSON.stringify({
+        code: MP.code, host: !!MP.host, at: Date.now()
+      }));
+    } catch (e) {}
+  }
+  function resumeRoom() {
+    try {
+      const raw = sessionStorage.getItem("choppy-mp-room");
+      if (!raw) return null;
+      const row = JSON.parse(raw);
+      if (!row || !row.code || !row.at) return null;
+      if (Date.now() - Number(row.at) > STALE_MS) {
+        sessionStorage.removeItem("choppy-mp-room");
+        return null;
+      }
+      return { code: String(row.code).slice(0, 6), host: !!row.host, at: Number(row.at) };
+    } catch (e) { return null; }
+  }
+  function joinRoomChannel() {
+    MP.joinRef = String(++MP.refN);
+    push({
+      topic: topic(),
+      event: "phx_join",
+      payload: {
+        config: {
+          broadcast: { ack: false, self: true },
+          presence: { key: MP.id },
+          postgres_changes: [],
+          private: false
+        },
+        access_token: DB_KEY
+      },
+      ref: MP.joinRef,
+      join_ref: MP.joinRef
+    });
+  }
+  function joinBoard() {
+    if (!MP.ws || MP.ws.readyState !== 1 || MP.boardOn) return;
+    const ref = String(++MP.refN);
+    MP.boardRef = ref;
+    try {
+      MP.ws.send(JSON.stringify({
+        topic: BOARD,
+        event: "phx_join",
+        payload: {
+          config: {
+            broadcast: { ack: false, self: false },
+            presence: { key: MP.id },
+            postgres_changes: [],
+            private: false
+          },
+          access_token: DB_KEY
+        },
+        ref: ref,
+        join_ref: ref
+      }));
+      MP.boardOn = true;
+    } catch (e) {}
+  }
+  function publishRoom() {
+    if (!MP.code || !MP.host || MP.started || !MP.rules || !MP.rules.open) return;
+    if (!MP.ws || MP.ws.readyState !== 1) return;
+    if (!MP.boardOn) joinBoard();
+    const ref = String(++MP.refN);
+    try {
+      MP.ws.send(JSON.stringify({
+        topic: BOARD,
+        event: "broadcast",
+        payload: {
+          type: "broadcast",
+          event: "pub",
+          payload: {
+            code: MP.code,
+            mode: MP.rules.mode,
+            bestOf: MP.rules.bestOf | 0,
+            n: MP.players.length,
+            name: MP.name
+          }
+        },
+        ref: ref,
+        join_ref: MP.boardRef || ref
+      }));
+    } catch (e) {}
+  }
+  function browse(on) {
+    MP.browsing = on !== false;
+    if (!MP.browsing) {
+      MP.rooms = {};
+      emit("rooms", []);
+      return;
+    }
+    if (MP.ws && MP.ws.readyState === 1) joinBoard();
+    else joinSocket();
+  }
+  function react(id) {
+    if (!MP.code || !MP.started) return false;
+    const now = Date.now();
+    if (MP.reactAt && now - MP.reactAt < 1200) return false;
+    if (!reactGlyph(id)) return false;
+    MP.reactAt = now;
+    showReact(MP.id, id, now);
+    send("react", ident({ g: id }));
+    return true;
+  }
+  function queueEarly(ev, pl) {
+    MP.early = MP.early || [];
+    if (MP.early.length < 40) MP.early.push({ ev: ev, pl: pl });
   }
 
   function considerOver() {
@@ -246,14 +456,14 @@
     } else if (mode === "race") {
       const fins = MP.players.filter((p) => p.finished)
         .sort((a, b) => (Number(a.finishT) || 1e15) - (Number(b.finishT) || 1e15));
-      if (fins[0]) winner = winner || fins[0];
+      if (fins[0]) winner = fins[0];
       allDone = MP.players.every((p) => p.alive === false || p.finished);
     } else {
       const live = aliveList();
       if (live.length === 1) { winner = winner || live[0]; allDone = true; }
       else if (live.length === 0) { winner = winner || bestBy("lifeT", "btc"); allDone = true; }
     }
-    if (winner && !MP.roundWinner) {
+    if (winner && !MP.roundOver && (!MP.roundWinner || MP.roundWinner.id !== winner.id)) {
       MP.roundWinner = winner;
       const lead = { winner: compact(winner) };
       send("lead", lead);
@@ -295,8 +505,47 @@
     if (m.event === "broadcast") {
       const ev = (m.payload && (m.payload.event || (m.payload.payload && m.payload.payload.t))) || "";
       const pl = (m.payload && m.payload.payload) || {};
+      if (m.topic === BOARD) { handleBoard(ev, pl); return; }
       handle(ev, pl);
     }
+  }
+  function roomList() {
+    const now = Date.now();
+    const rows = [];
+    const bag = MP.rooms || {};
+    Object.keys(bag).forEach((code) => {
+      const row = bag[code];
+      if (!row || now - row.at > 7000) delete bag[code];
+      else rows.push(row);
+    });
+    rows.sort((a, b) => String(a.code).localeCompare(String(b.code)));
+    return rows;
+  }
+  function handleBoard(ev, pl) {
+    if (ev !== "pub" || !pl || !pl.code || pl.code === MP.code) return;
+    MP.rooms[pl.code] = {
+      code: String(pl.code).slice(0, 6),
+      mode: pl.mode === "whale" || pl.mode === "race" ? pl.mode : "last",
+      bestOf: pl.bestOf | 0 || 1,
+      n: Math.max(0, Math.min(MAX, pl.n | 0)),
+      name: String(pl.name || "").slice(0, 16),
+      at: Date.now()
+    };
+    emit("rooms", roomList());
+  }
+  function showReact(pid, id, at) {
+    const glyph = reactGlyph(id);
+    if (!glyph) return;
+    const p = MP.players.find((x) => x.id === pid);
+    if (!p) return;
+    const now = Date.now();
+    if (p.react && p.react.at && pid !== MP.id && now - p.react.at < 700) return;
+    if (!p.react) p.react = { glyph: "", until: 0, at: 0 };
+    p.react.glyph = glyph;
+    p.react.rid = id;
+    p.react.until = now + 1600;
+    p.react.at = at || now;
+    emit("react", { id: pid, glyph: glyph, until: p.react.until });
   }
   function handle(ev, pl) {
     if (!pl) return;
@@ -315,13 +564,31 @@
       }
       const bag = Object.assign({}, pl);
       if (MP.started) delete bag.host;
+      if (MP.started && known) {
+        const cur = MP.players.find((p) => p.id === pl.id);
+        if (cur && (cur.quit || (cur.alive === false && !cur.gone))) bag.alive = false;
+        else if (cur && cur.gone && cur.goneAt && Date.now() - cur.goneAt > STALE_MS) bag.alive = false;
+      }
       upsert(bag);
       emit("roster", MP.players);
       if (MP.host && !MP.started) {
         send("roster", { players: MP.players, host: MP.id, code: MP.code, rules: MP.rules });
       }
       if (MP.host && ev === "hello") send("host", { id: MP.id, name: MP.name });
+      if (ev === "hello" && MP.started && MP.seed && pl.id !== MP.id) {
+        const curp = MP.players.find((p) => p.id === pl.id);
+        if (!curp || !curp.quit) send("sync", roundSnap());
+      }
       if (ev === "rematch" && MP.host) maybeEarlyNext();
+      return;
+    }
+    if (ev === "react") {
+      if (!pl || !pl.id || pl.id === MP.id) return;
+      showReact(pl.id, pl.g, 0);
+      return;
+    }
+    if (ev === "sync") {
+      applySync(pl);
       return;
     }
     if (ev === "full") {
@@ -361,7 +628,14 @@
       }
       return;
     }
+    if (!MP.started && (ev === "dead" || ev === "finish" || ev === "over" || ev === "lead")) {
+      if (pl) queueEarly(ev, pl);
+      return;
+    }
     if (ev === "go") {
+      const seed = pl.seed >>> 0;
+      const gn = (pl.gameN | 0) || 1;
+      if (MP.started && (MP.seed >>> 0) === seed && (MP.gameN | 0) === gn) return;
       MP.started = true;
       MP.roundOver = false;
       MP.roundWinner = null;
@@ -372,6 +646,7 @@
       if (pl.rules) MP.rules = copyRules(pl.rules);
       if (pl.gameN) MP.gameN = pl.gameN;
       if (pl.wins) MP.seriesWins = Object.assign({}, pl.wins);
+      if (pl.seriesT0) MP.seriesT0 = pl.seriesT0;
       if (pl.seriesOver != null) MP.seriesOver = !!pl.seriesOver;
       if (Array.isArray(pl.players)) {
         const ids = {};
@@ -381,14 +656,17 @@
       MP.players.forEach((p) => {
         p.alive = true; p.lifeT = 0; p.finished = false; p.rematch = false; p.btc = 0;
         p.candles = 0; p.x = 72; p.y = 280; p.v = 0; p._gx = 72; p._gy = 280;
+        p.gone = false; p.quit = false;
       });
       assignSlots();
       const hp = hostPlayer();
       if (hp) MP.host = hp.id === MP.id;
       emit("go", {
         seed: MP.seed, startAt: MP.startAt, sentAt: MP.sentAt, rules: MP.rules,
-        players: MP.players, gameN: MP.gameN, wins: MP.seriesWins, seriesOver: MP.seriesOver
+        players: MP.players, gameN: MP.gameN, wins: MP.seriesWins, seriesOver: MP.seriesOver,
+        seriesT0: MP.seriesT0 || 0
       });
+      replayEarly();
       return;
     }
     if (ev === "reset") {
@@ -401,6 +679,8 @@
       MP.seriesOver = false;
       MP.gameN = 1;
       MP.seriesWins = {};
+      MP.seriesT0 = 0;
+      MP.early = [];
       MP.players.forEach((p) => {
         p.ready = false; p.alive = true; p.lifeT = 0; p.finished = false; p.rematch = false;
       });
@@ -458,7 +738,7 @@
     }
     if (ev === "left") {
       if (MP.started) {
-        markGone(pl.id);
+        markGone(pl.id, pl.quit !== false);
         tryAdoptHost();
         emit("roster", MP.players);
         considerOver();
@@ -472,20 +752,16 @@
   }
 
   function pruneStale() {
-    const cut = Date.now() - 12000;
+    const cut = Date.now() - STALE_MS;
     let changed = false;
     if (MP.started) {
       MP.players.forEach((p) => {
-        if (p.id === MP.id || !p.last || p.last >= cut) return;
-        if (p.alive !== false && !p.finished) {
-          p.alive = false;
-          changed = true;
-        }
-        if (p.host) {
-          p.host = false;
-          changed = true;
-        }
+        if (p.id === MP.id || !p.last || p.last >= cut || p.gone) return;
         p.gone = true;
+        p.goneAt = p.last;
+        if (p.alive !== false && !p.finished) p.alive = false;
+        if (p.host) p.host = false;
+        changed = true;
       });
     } else {
       const keep = MP.players.filter((p) => p.id === MP.id || !p.last || p.last >= cut);
@@ -502,28 +778,19 @@
 
   function joinSocket() {
     closeSocket();
+    setLink("wait");
     const url = DB_URL.replace(/^https:/, "wss:") + "/realtime/v1/websocket?apikey=" + encodeURIComponent(DB_KEY) + "&vsn=1.0.0";
     let ws;
-    try { ws = new WebSocket(url); } catch (e) { emit("err", "no socket"); return; }
+    try { ws = new WebSocket(url); } catch (e) { setLink("off"); emit("err", "no socket"); return; }
     MP.ws = ws;
-    MP.joinRef = String(++MP.refN);
+    MP.boardOn = false;
     ws.onopen = () => {
-      push({
-        topic: topic(),
-        event: "phx_join",
-        payload: {
-          config: {
-            broadcast: { ack: false, self: true },
-            presence: { key: MP.id },
-            postgres_changes: [],
-            private: false
-          },
-          access_token: DB_KEY
-        },
-        ref: MP.joinRef,
-        join_ref: MP.joinRef
-      });
+      MP.backoff = 1000;
+      setLink("on");
+      if (MP.code) joinRoomChannel();
+      if (MP.browsing || (MP.host && MP.rules && MP.rules.open)) joinBoard();
       setTimeout(() => {
+        if (!MP.code) return;
         if (MP.started) MP.rejoinAt = Date.now();
         const st = myPlayState();
         upsert(Object.assign({ id: MP.id, name: MP.name, host: MP.host }, st));
@@ -532,28 +799,47 @@
           send("rules", MP.rules);
           send("host", { id: MP.id, name: MP.name });
         }
+        rememberRoom();
         emit("roster", MP.players);
       }, 180);
       clearInterval(MP.beat);
       MP.beat = setInterval(() => {
         push({ topic: "phoenix", event: "heartbeat", payload: {}, ref: String(++MP.refN) });
+        if (!MP.code) return;
         const st = myPlayState();
         if (MP.started) send("pulse", ident(st));
         else send("hello", ident(st));
         pruneStale();
+        if (MP.host && !MP.started && MP.rules && MP.rules.open) publishRoom();
+        rememberRoom();
       }, 2000);
     };
     ws.onmessage = (e) => onMsg(e.data);
     ws.onerror = () => emit("err", "socket error");
     ws.onclose = () => {
-      if (MP.code) setTimeout(() => { if (MP.code && (!MP.ws || MP.ws.readyState > 1)) joinSocket(); }, 1200);
+      if (MP.ws !== ws) return;
+      MP.ws = null;
+      MP.boardOn = false;
+      if (!MP.code && !MP.browsing) { setLink("off"); return; }
+      setLink("wait");
+      const wait = MP.backoff || 1000;
+      MP.backoff = Math.min(15000, wait * 2);
+      setTimeout(() => {
+        if ((MP.code || MP.browsing) && (!MP.ws || MP.ws.readyState > 1)) joinSocket();
+      }, wait);
     };
   }
   function closeSocket() {
     clearInterval(MP.beat);
     MP.beat = 0;
-    try { if (MP.ws) MP.ws.close(); } catch (e) {}
+    const ws = MP.ws;
     MP.ws = null;
+    MP.boardOn = false;
+    if (!ws) return;
+    ws.onclose = null;
+    ws.onmessage = null;
+    ws.onerror = null;
+    try { ws.close(); } catch (e) {}
   }
 
   function host() {
@@ -615,6 +901,7 @@
     MP.rules = copyRules(next);
     send("rules", MP.rules);
     emit("rules", MP.rules);
+    if (MP.rules.open && MP.ws && MP.ws.readyState === 1) joinBoard();
   }
   function launchGo() {
     MP.seed = (Math.floor(Math.random() * 0x7fffffff) ^ Date.now()) >>> 0;
@@ -625,9 +912,12 @@
     MP.rematch = false;
     MP.startAt = Date.now() + 3200;
     const sentAt = Date.now();
+    MP.sentAt = sentAt;
+    if ((MP.gameN | 0) <= 1 || !MP.seriesT0) MP.seriesT0 = sentAt;
     MP.players.forEach((p) => {
       p.alive = true; p.lifeT = 0; p.finished = false; p.rematch = false; p.btc = 0; p.candles = 0;
       p.x = 72; p.y = 280; p.v = 0; p._gx = 72; p._gy = 280;
+      p.gone = false; p.quit = false;
     });
     assignSlots();
     const payload = {
@@ -638,12 +928,14 @@
       gameN: MP.gameN || 1,
       wins: Object.assign({}, MP.seriesWins || {}),
       seriesOver: false,
+      seriesT0: MP.seriesT0 || sentAt,
       players: MP.players.map((p) => ({
         id: p.id, name: p.name, uid: p.uid || null, slot: p.slot, host: !!p.host
       }))
     };
     send("go", payload);
     emit("go", Object.assign({}, payload, { players: MP.players }));
+    replayEarly();
   }
   function start(opts) {
     if (!MP.host || MP.started) return;
@@ -686,6 +978,7 @@
       MP.seriesWins = {};
       MP.gameN = 1;
       MP.seriesOver = false;
+      MP.seriesT0 = 0;
     } else {
       MP.gameN = (MP.gameN || 1) + 1;
     }
@@ -710,18 +1003,22 @@
     const info = Object.assign({
       alive: false, lifeT: lifeT || 0, candles: candles || 0
     }, extra || {});
-    upsert(ident(info));
-    send("dead", ident(info));
-    considerOver();
+    const pl = ident(info);
+    if (!MP.started) queueEarly("dead", pl);
+    else upsert(pl);
+    send("dead", pl);
+    if (MP.started) considerOver();
   }
   function finish(info) {
     const bag = Object.assign({
       finished: true, finishT: (info && info.finishT) || (info && info.lifeT) || 0,
       alive: true
     }, info || {});
-    upsert(ident(bag));
-    send("finish", ident(bag));
-    considerOver();
+    const pl = ident(bag);
+    if (!MP.started) queueEarly("finish", pl);
+    else upsert(pl);
+    send("finish", pl);
+    if (MP.started) considerOver();
   }
   function resetLobby() {
     MP.started = false;
@@ -733,6 +1030,8 @@
     MP.seriesOver = false;
     MP.gameN = 1;
     MP.seriesWins = {};
+    MP.seriesT0 = 0;
+    MP.early = [];
     MP.players.forEach((p) => {
       p.ready = false; p.alive = true; p.lifeT = 0; p.finished = false; p.rematch = false;
     });
@@ -741,22 +1040,32 @@
     emit("roster", MP.players);
   }
   function leave() {
-    if (MP.code) send("left", { id: MP.id });
+    if (MP.code) send("left", ident({ quit: true }));
     MP.code = "";
+    MP.browsing = false;
     MP.started = false;
     MP.host = false;
     MP.ready = false;
     MP.rematch = false;
     MP.players = [];
+    MP.rooms = {};
     MP.rules = copyRules();
     MP.roundOver = false;
+    MP.seriesT0 = 0;
+    MP.early = [];
+    MP.backoff = 1000;
+    try { sessionStorage.removeItem("choppy-mp-room"); } catch (e) {}
     closeSocket();
+    setLink("off");
     emit("left");
   }
 
   window.ChoppyMP = {
     host, join, start, pulse, dead, finish, leave, setReady, setRematch, setRules,
-    resetLobby, nextRound,
+    resetLobby, nextRound, react, browse, resumeRoom,
+    rooms: roomList,
+    link: () => MP.link,
+    REACTS,
     get: () => MP,
     setHandler: (fn) => { MP.on = fn; },
     players: () => MP.players.slice(),
