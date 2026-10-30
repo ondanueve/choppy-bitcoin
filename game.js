@@ -259,9 +259,21 @@
   const $ = (id) => document.getElementById(id);
   // Spanish number display: 1,234.5 -> 1.234,5 (English keeps the point). Display-only; game strings stay en-US internally.
   const ES_NUM_RE = /(^|[^A-Za-wyz_])(\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+)/g;
-  const esNum = (v) => String(v).replace(ES_NUM_RE, (m, pre, n) => pre + n.replace(/[.,]/g, (c) => c === "." ? "," : "."));
-  const numL = (v) => (typeof v === "string" && /\d[.,]\d/.test(v) && window.BZ && BZ.lang && BZ.lang() === "es") ? esNum(v) : v;
-  const setTxt = (id, v) => { const el = $(id); if (!el) return; const u = numL(v); el.textContent = u; if (el.firstChild && u !== v) ES_NUM_DONE.set(el.firstChild, String(u)); };
+  const ES_NUM_CACHE = new Map();
+  const esNum = (v) => {
+    const s = String(v);
+    const hit = ES_NUM_CACHE.get(s);
+    if (hit != null) return hit;
+    ES_NUM_RE.lastIndex = 0;
+    const u = s.replace(ES_NUM_RE, (m, pre, n) => pre + n.replace(/[.,]/g, (c) => c === "." ? "," : "."));
+    if (ES_NUM_CACHE.size > 80) ES_NUM_CACHE.clear();
+    ES_NUM_CACHE.set(s, u);
+    return u;
+  };
+  // Language check first: the regex used to run on every float and HUD write, including English.
+  const numL = (v) => (window.BZ && BZ.lang && BZ.lang() === "es" && typeof v === "string" && /\d[.,]\d/.test(v)) ? esNum(v) : v;
+  const putText = (el, v) => { if (el && el.textContent !== v) el.textContent = v; };
+  const setTxt = (id, v) => { const el = $(id); if (!el) return; const u = numL(v); putText(el, u); if (el.firstChild && u !== v) ES_NUM_DONE.set(el.firstChild, String(u)); };
   // esNum is not idempotent ("1.234" could flip back), so remember what we wrote and never convert a node twice.
   const ES_NUM_DONE = new WeakMap();
   function localizeTextNode(n) {
@@ -1011,18 +1023,23 @@
     S.speedMul = list[(i < 0 ? 0 : i + 1) % list.length];
   }
 
+  const MET = { birdR: 15, gapH: 150, pipeW: 48, spacing: 188, speed: 173, gravity: 907, jump: -302, margin: 54 };
   function metrics() {
     const birdR = Math.min(17, Math.max(13, S.H * 0.021));
     const sm = S.speedMul || 1;
-    const extra = Math.max(0, sm - 1);
+    const extra = sm > 1 ? sm - 1 : 0;
     const gapBoost = 1 + extra * 0.12;
     const spaceBoost = 1 + extra * 0.08;
     const yMul = 1 + extra * 0.24;
-    const gapH = Math.min(S.H * 0.3, Math.max(132, birdR * 5.4)) * gapBoost;
-    const pipeW = Math.min(56, Math.max(42, S.W * 0.12));
-    const spacing = 188 * spaceBoost;
-    const speed = 173;
-    return { birdR, gapH, pipeW, spacing, speed, gravity: 907 * yMul, jump: -302 * yMul, margin: Math.max(52, S.H * 0.085) };
+    MET.birdR = birdR;
+    MET.gapH = Math.min(S.H * 0.3, Math.max(132, birdR * 5.4)) * gapBoost;
+    MET.pipeW = Math.min(56, Math.max(42, S.W * 0.12));
+    MET.spacing = 188 * spaceBoost;
+    MET.speed = 173;
+    MET.gravity = 907 * yMul;
+    MET.jump = -302 * yMul;
+    MET.margin = Math.max(52, S.H * 0.085);
+    return MET;
   }
 
   function scrollMul() {
@@ -3202,65 +3219,97 @@
     return { id, artId, src, wide: isWide, isVideo: false };
   }
 
+  // Decoded 1920x800 bitmaps are ~6 MB each. Keep a handful of Image objects and let the rest stay compressed in the HTTP cache.
+  const ART_NEAR = MOBILE_ART ? 2 : 4;
+  const ART_KEEP = MOBILE_ART ? 3 : 6;
+  const artKeep = [];
+  const artFetched = new Set();
+  function dropArtImage(src) {
+    const im = PRELOADED_ART.get(src);
+    if (!im) return;
+    im.onload = im.onerror = null;
+    PRELOADED_ART.delete(src);
+    try { im.src = ""; } catch (e) {}
+  }
+  function rememberArt(src) {
+    const i = artKeep.indexOf(src);
+    if (i >= 0) artKeep.splice(i, 1);
+    artKeep.push(src);
+    while (artKeep.length > ART_KEEP) dropArtImage(artKeep.shift());
+  }
   function preloadSingleArt(src, eager = false) {
-    if (!src || PRELOADED_ART.has(src)) return PRELOADED_ART.get(src);
-    const im = new Image();
-    im.loading = eager ? "eager" : "auto";
-    im.decoding = "async";
-    PRELOADED_ART.set(src, im);
-    im.src = src;
-    // Only decode the card about to be shown; decoding every 1920x800 card up front pins hundreds of MB on phones.
-    if (eager && "decode" in im) {
-      im.decode().catch(() => {});
+    if (!src) return null;
+    let im = PRELOADED_ART.get(src);
+    if (!im) {
+      im = new Image();
+      im.decoding = "async";
+      try { im.fetchPriority = eager ? "high" : "low"; } catch (e) {}
+      PRELOADED_ART.set(src, im);
+      im.src = src;
+    } else if (eager) {
+      try { im.fetchPriority = "high"; } catch (e) {}
+    }
+    if (eager) {
+      if (im.decode) im.decode().then(() => rememberArt(src)).catch(() => {});
+      else rememberArt(src);
     }
     return im;
   }
-
-  let chanceArtBusy = false;
-  function preloadChanceArt() {
-    if (chanceArtBusy) return;
-    chanceArtBusy = true;
-
-    const allMetas = CHANCE_CARDS.map((c) => getChanceArtMeta(c));
-    Object.keys(ARC_ART_ALIAS).forEach((aliasId) => {
-      allMetas.push(getChanceArtMeta(aliasId));
-    });
-    allMetas.push({ src: "chance/hero.jpg?v=mp86", wide: false, isVideo: false });
-
-    // Deduplicate image sources
+  function prefetchArtUrl(src) {
+    if (!src || artFetched.has(src) || PRELOADED_ART.has(src)) return;
+    artFetched.add(src);
+    try { fetch(src, { priority: "low" }).catch(() => {}); } catch (e) {}
+  }
+  function nearbyChanceSrcs() {
+    const out = [];
     const seen = new Set();
-    const queue = [];
-    // Prioritize panoramic wide images first
-    allMetas.filter((m) => m && m.wide && !m.isVideo).forEach((m) => {
-      if (!seen.has(m.src)) { seen.add(m.src); queue.push(m.src); }
-    });
-    // Then standard images
-    allMetas.filter((m) => m && !m.wide && !m.isVideo).forEach((m) => {
-      if (!seen.has(m.src)) { seen.add(m.src); queue.push(m.src); }
-    });
-
-    let qIdx = 0;
-    const kick = (concurrency) => {
-      while (concurrency-- > 0 && qIdx < queue.length) {
-        const src = queue[qIdx++];
-        const im = preloadSingleArt(src);
-        if (im) {
-          im.onload = im.onerror = () => kick(1);
-        } else {
-          kick(1);
-        }
+    const add = (src) => { if (src && !seen.has(src)) { seen.add(src); out.push(src); } };
+    if (S && S.chanceCard) {
+      try {
+        const m = getChanceArtMeta(S.chanceCard);
+        if (m && !m.isVideo) add(m.src);
+      } catch (e) {}
+    }
+    const room = out.length + ART_NEAR;
+    for (let i = 0; i < CHANCE_CARDS.length && out.length < room; i++) {
+      const c = CHANCE_CARDS[i];
+      if (S.chanceUsed && S.chanceUsed[c.id]) continue;
+      let ok = false;
+      try { ok = arcUnlocked(c); } catch (e) { ok = false; }
+      if (!ok) continue;
+      try {
+        const m = getChanceArtMeta(c);
+        if (m && !m.isVideo) add(m.src);
+      } catch (e) {}
+    }
+    return out;
+  }
+  function preloadChanceArtNow() {
+    const srcs = nearbyChanceSrcs();
+    if (!srcs.length) return;
+    let from = 0;
+    if (S && S.chanceCard) {
+      preloadSingleArt(srcs[0], true);
+      from = 1;
+    }
+    for (let i = from; i < srcs.length; i++) prefetchArtUrl(srcs[i]);
+    const card = S && S.chanceCard;
+    if (card && typeof POST_ART !== "undefined" && POST_ART[card.id]) {
+      const opts = String(POST_ART[card.id]);
+      for (let k = 0; k < opts.length; k++) {
+        const key = card.id + "-" + opts.charAt(k);
+        const ver = (typeof POST_ART_VER !== "undefined" && POST_ART_VER[key]) || "post3";
+        prefetchArtUrl("chance/" + key + "-wide.jpg?v=" + ver);
       }
-    };
-    kick(MOBILE_ART ? 2 : 3);
-
-    // Videos
-    Object.keys(ARC_VID).forEach((id) => {
-      const v = document.createElement("video");
-      v.muted = true;
-      v.preload = "auto";
-      v.playsInline = true;
-      v.src = "chance/" + id + ".mp4";
-    });
+    }
+  }
+  function preloadChanceArt() {
+    // No card on screen yet: wait for idle so the first frames of a run are not decoding art.
+    if (!(S && S.chanceCard) && typeof requestIdleCallback === "function") {
+      requestIdleCallback(() => { try { preloadChanceArtNow(); } catch (e) {} }, { timeout: 900 });
+      return;
+    }
+    preloadChanceArtNow();
   }
 
   function arcAltText(id) {
@@ -3348,7 +3397,7 @@
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
     const fallback = meta.fallbackSrc ? meta.fallbackSrc : meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=" + (SQ_JPG_VER[meta.artId] || "mp86") : "chance/hero.jpg";
-    return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
+    return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
   }
 
   // Four enemy blocs exist; each run fights three of them, picked and ordered at random (S.bcBlocs).
@@ -3837,7 +3886,7 @@
     noteArcSeen(card.id);
     S.chanceCard = card; S.chanceOpt = null;
     if (card.id === "chess") pickChessProblem();
-    try { preloadSingleArt(getChanceArtMeta(card).src, true); } catch (e) {}
+    try { preloadChanceArt(); } catch (e) {}
     S.chanceNote = "";
     S.chanceReadyNote = "";
     S.chanceLead = "";
@@ -7138,6 +7187,7 @@
   function parkMarketLoad(){
     if(field){
       field.classList.remove("is-play","bull","bear","swan-bear");
+      fieldFx = "";
       field.classList.add("defense-mode");
     }
     if(canvas){
@@ -7221,6 +7271,7 @@
     markBuildings(S.bcDefense);
     if(field){
       field.classList.remove("is-play","bull","bear","swan-bear");
+      fieldFx = "";
       field.classList.add("defense-mode");
     }
     parkMarketLoad();
@@ -9933,6 +9984,12 @@
     setPhase("play");
   }
 
+  function compactLive(arr) {
+    let w = 0;
+    for (let i = 0; i < arr.length; i++) if (arr[i].life > 0) arr[w++] = arr[i];
+    if (w !== arr.length) arr.length = w;
+  }
+  let fieldFx = "";
   function step(dt) {
     if (S.phase === "defense" || (S.bcDefense && S.bcDefense.frozen)) {
       S.lifeT += dt;
@@ -9956,9 +10013,9 @@
     S.heightMul += (S.heightT - S.heightMul) * Math.min(1, 1.7 * dt);
     if (S.tickerT > 0) { S.tickerT -= dt; if (S.tickerT <= 0) S.ticker = ""; }
     for (const p of S.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; p.life -= dt; }
-    S.particles = S.particles.filter((p) => p.life > 0);
+    compactLive(S.particles);
     for (const f of S.floats) { f.y += f.vy * dt; f.life -= dt; }
-    S.floats = S.floats.filter((f) => f.life > 0);
+    compactLive(S.floats);
     if (S.phase !== "play") return;
     if (S.invuln > 0) S.invuln -= dt;
 
@@ -10105,9 +10162,13 @@
     }
     const n = net();
     if (n > S.peakNet) S.peakNet = n;
-    field.classList.toggle("bull", S.power === "BULL");
-    field.classList.toggle("bear", S.power === "BEAR");
-    field.classList.toggle("swan-bear", S.power === "BEAR" && S.swanBear);
+    const fx = S.power === "BULL" ? "b" : S.power === "BEAR" ? (S.swanBear ? "s" : "e") : "";
+    if (fx !== fieldFx) {
+      fieldFx = fx;
+      field.classList.toggle("bull", fx === "b");
+      field.classList.toggle("bear", fx === "e" || fx === "s");
+      field.classList.toggle("swan-bear", fx === "s");
+    }
   }
 
   function powerPal(type) {
@@ -11639,7 +11700,9 @@
     return fitCtx;
   }
 
+  let layoutGen = 0;
   function layoutStage() {
+    layoutGen++;
     renderBitcoinCountry();
     const app = $("app");
     if (!app) return;
@@ -11740,7 +11803,8 @@
     const ups=$("bc-ups");
     if(ups){
       if(!S.bcArmyUnlocked){
-        ups.innerHTML="<p class=\"bc-note\">"+(es?"Forma una fuerza de defensa para entrenar el ejército.":"Form a defense force to train the army.")+"</p>";
+        const html="<p class=\"bc-note\">"+(es?"Forma una fuerza de defensa para entrenar el ejército.":"Form a defense force to train the army.")+"</p>";
+        if(ups._h!==html){ups._h=html;ups.innerHTML=html;}
       }else{
         const tierNow=armyTier();
         const m=armyBattleMods(tierNow);
@@ -11757,7 +11821,8 @@
         }
         const list=steps.map(([n,lab])=>"<li class=\""+(tierNow>=n?"on":"")+"\">"+(tierNow>=n?"●":"○")+" "+n+" · "+lab+"</li>").join("");
         const hint=es?"Cada tier suma 5% de velocidad, 5% de defensa del escudo, 4% de velocidad de disparo y 4% menos enemigos. Los pares suman 1 corazón, el tier 5 levanta el muro de la ciudadela y el tier 7 duplica el daño. El tier N cuesta N×250 BTC o el 5% del patrimonio (lo que sea mayor), en la moneda que más tienes.":"Each tier adds 5% speed, 5% shield defense, 4% shot speed and 4% fewer attackers. Even tiers add 1 heart, tier 5 raises the citadel wall and tier 7 doubles damage. Tier N costs N×250 BTC or 5% of net worth (whichever is higher), shown in whichever you hold more of.";
-        ups.innerHTML="<p class=\"bc-up-now\">"+now+"</p><ul class=\"bc-up-list\">"+list+"</ul><p class=\"bc-note\">"+hint+"</p>";
+        const html="<p class=\"bc-up-now\">"+now+"</p><ul class=\"bc-up-list\">"+list+"</ul><p class=\"bc-note\">"+hint+"</p>";
+        if(ups._h!==html){ups._h=html;ups.innerHTML=html;}
       }
     }
     {const endB=$("bc-end");if(endB){endB.classList.toggle("hide",!S.bcVictory||!!S.mp);endB.textContent=es?"TERMINAR LA PARTIDA":"END THE GAME";}}
@@ -11781,11 +11846,11 @@
     const battleHud = S.phase === "defense" || !!(S.bcDefense && S.bcDefense.frozen);
     const hideClock = S.phase === "ready" || S.phase === "count";
     if (clock) {
-      clock.textContent = fmtTime(S.lifeT);
+      putText(clock, fmtTime(S.lifeT));
       clock.classList.toggle("hide", hideClock);
     }
     if (candles) {
-      candles.textContent = String(S.shownCandles || 0);
+      putText(candles, String(S.shownCandles || 0));
       candles.classList.toggle("hide", hideClock || battleHud);
     }
     const box = $("clock-box");
@@ -11832,7 +11897,7 @@
         const mine = window.ChoppyMP.id();
         const wins = S.mpSeriesWins || (window.ChoppyMP.wins && window.ChoppyMP.wins()) || {};
         const foc = mpFocusPlayer();
-        listEl.innerHTML = (window.ChoppyMP.players() || []).map((p) => {
+        const html = (window.ChoppyMP.players() || []).map((p) => {
           const h = heroOf(p.slot || 0);
           const dead = p.alive === false;
           const fin = !!p.finished;
@@ -11845,10 +11910,12 @@
             + (S.mpRules && S.mpRules.bestOf > 1 ? " · " + w : "")
             + (extra ? " · " + extra : "") + "</span>";
         }).join("");
+        if (listEl._h !== html) { listEl._h = html; listEl.innerHTML = html; }
       }
     }
     const bonus = S.level >= 2;
-    $("hud").className = "hud-grid hud-4";
+    const hudEl = $("hud");
+    if (hudEl && hudEl.className !== "hud-grid hud-4") hudEl.className = "hud-grid hud-4";
     const lockBtn = (id, ready) => {
       const el = $(id);
       if (!el) return;
@@ -11861,7 +11928,7 @@
       const list = ffSpeeds();
       if (!list.some((x) => Math.abs(x - (S.speedMul || 1)) < 0.001)) S.speedMul = 1;
       const sm = S.speedMul || 1;
-      spd2.textContent = (sm % 1 ? sm.toFixed(1) : String(sm)) + "X";
+      putText(spd2, (sm % 1 ? sm.toFixed(1) : String(sm)) + "X");
       spd2.classList.add("on");
     }
     lockBtn("dca-btn", S.have.dca > 0);
@@ -11875,20 +11942,20 @@
       dca.classList.toggle("ai-lit", !!(S.aibudLit && S.aibudLit.dca && S.dcaOn));
       dca.classList.toggle("ai-lock", locks.dca);
       dca.disabled = S.have.dca <= 0 || locks.dca;
-      dca.textContent = S.dcaOn ? t("dcaOn") : t("dcaOff");
+      putText(dca, S.dcaOn ? t("dcaOn") : t("dcaOff"));
       dca.setAttribute("aria-pressed", S.dcaOn ? "true" : "false");
     }
     const bud = $("iabud-btn");
     if (bud) {
       bud.classList.toggle("on", S.aibudOn);
       bud.disabled = (S.have.aibud || 0) <= 0;
-      bud.textContent = S.aibudOn ? t("aiOn") : t("aiOff");
+      putText(bud, S.aibudOn ? t("aiOn") : t("aiOff"));
       bud.setAttribute("aria-pressed", S.aibudOn ? "true" : "false");
     }
     const tr = $("trend-btn");
     if (tr) {
       const lab = S.trend === "up" ? t("trendUp") : S.trend === "down" ? t("trendDown") : t("trendOff");
-      tr.textContent = lab;
+      putText(tr, lab);
       tr.classList.toggle("on", S.trend !== "off");
       tr.classList.toggle("ai-lit", !!(S.aibudLit && S.aibudLit.trend && S.trend !== "off"));
       tr.classList.toggle("ai-lock", locks.trend);
@@ -11900,14 +11967,14 @@
       buy.classList.toggle("ai-lock", locks.trade);
       buy.classList.toggle("ai-lit", !!(S.aibudOn && S.aibudLit && S.aibudLit.buy));
       buy.classList.remove("on");
-      buy.textContent = t("buyBtc");
+      putText(buy, t("buyBtc"));
     }
     if (sell) {
       sell.disabled = locks.trade;
       sell.classList.toggle("ai-lock", locks.trade);
       sell.classList.toggle("ai-lit", !!(S.aibudOn && S.aibudLit && S.aibudLit.sell));
       sell.classList.remove("on");
-      sell.textContent = t("sellBtc");
+      putText(sell, t("sellBtc"));
     }
     const playing = S.phase === "play" || S.phase === "paused" || S.phase === "perk" || S.phase === "chance";
     const pauseBtn = $("pause-btn");
@@ -11940,15 +12007,15 @@
     if (S.laserOn) powers = powers ? powers + "  ·  " + t("laserNow") + " " + Math.ceil(S.laserT) + "s" : t("laserNow") + "  " + Math.ceil(S.laserT) + "s";
     const jobEl = $("job-title");
     const powEl = $("status-powers");
-    if (powEl) { powEl.textContent = powers; powEl.classList.toggle("hide", !powers); }
+    if (powEl) { putText(powEl, powers); powEl.classList.toggle("hide", !powers); }
     if (jobEl) {
-      jobEl.textContent = S.jobName || "";
+      putText(jobEl, S.jobName || "");
       jobEl.classList.toggle("hide", !S.jobName || S.phase !== "play");
     }
     $("status").classList.toggle("hide", !(powers && S.phase === "play"));
     const cap = $("caption");
     if (cap) {
-      cap.textContent = S.ticker || "";
+      putText(cap, S.ticker || "");
       cap.classList.toggle("hide", !S.ticker || S.phase !== "play");
     }
     paintJukeUi();
@@ -11986,21 +12053,26 @@
         title.appendChild(inner);
       }
       if (inner.textContent !== text) inner.textContent = text;
-      const boxW = title.clientWidth;
-      const overflow = boxW > 0 ? inner.scrollWidth - boxW : 0;
-      const shift = overflow > 4 ? (-Math.ceil(overflow) + "px") : "";
-      const boxKey = String(boxW);
-      if (title.dataset.jukeText !== text || title.dataset.box !== boxKey) {
-        title.dataset.jukeText = text;
-        title.dataset.box = boxKey;
-        title.dataset.shift = shift;
-        if (shift) {
-          title.style.setProperty("--juke-shift", shift);
-          title.style.setProperty("--juke-dur", Math.max(10, overflow / 8).toFixed(1) + "s");
-          title.classList.add("marquee");
-        } else {
-          title.classList.remove("marquee");
-          title.style.removeProperty("--juke-shift");
+      const gen = String(layoutGen);
+      // clientWidth / scrollWidth force layout. Measure only when the label or the stage scale changes.
+      if (!(title.dataset.jukeText === text && title.dataset.boxGen === gen && title.dataset.box !== "0")) {
+        const boxW = title.clientWidth;
+        const overflow = boxW > 0 ? inner.scrollWidth - boxW : 0;
+        const shift = overflow > 4 ? (-Math.ceil(overflow) + "px") : "";
+        const boxKey = String(boxW);
+        if (boxW > 0) title.dataset.boxGen = gen;
+        if (title.dataset.jukeText !== text || title.dataset.box !== boxKey) {
+          title.dataset.jukeText = text;
+          title.dataset.box = boxKey;
+          title.dataset.shift = shift;
+          if (shift) {
+            title.style.setProperty("--juke-shift", shift);
+            title.style.setProperty("--juke-dur", Math.max(10, overflow / 8).toFixed(1) + "s");
+            title.classList.add("marquee");
+          } else {
+            title.classList.remove("marquee");
+            title.style.removeProperty("--juke-shift");
+          }
         }
       }
     }
@@ -12067,7 +12139,7 @@
     const cues = (song && song.lyrics) || [];
     const onField = S.phase === "play" || S.phase === "paused";
     const want = false;
-    if (np) {
+    if (np && (np.textContent || !np.classList.contains("hide"))) {
       np.textContent = "";
       np.classList.add("hide");
     }
@@ -13061,6 +13133,13 @@
       return "<div class=\"opt-head\">" + optHead(t("aiLog")) + "</div><p class=\"k\">" + t("markedPl") + " " + fmtBtc(S.iaProfit || 0) + " · T" + (S.have.aibud || 0) + "</p><div class=\"awards\">" + rows + "</div>";
     }
     if (panel === "juke") {
+      if ((S.have.juke || 0) > 0 && A && A.ensureAbc && !window.ABCJS && !S._abcKick) {
+        S._abcKick = true;
+        A.ensureAbc().then(() => {
+          if (!window.ABCJS) { S._abcKick = false; return; }
+          if (S.optPanel === "juke") renderOverlay();
+        }).catch(() => { S._abcKick = false; });
+      }
       if ((S.have.juke || 0) <= 0) {
         return "<div class=\"opt-head\">" + optHead(t("jukebox")) + "</div><p>" + t("jukeNeed") + "</p>";
       }
@@ -13591,13 +13670,17 @@
       + "<button class=\"cta play-alt mp-cta\" id=\"mp-back\">" + t("mpBack") + "</button>";
   }
   function bindMpLobby() {
-    if ($("mp-host")) $("mp-host").onclick = (e) => { e.stopPropagation(); S.mpErr = ""; if (window.ChoppyMP) window.ChoppyMP.host(); };
+    if ($("mp-host")) $("mp-host").onclick = (e) => {
+      e.stopPropagation();
+      S.mpErr = "";
+      ensureMp().then((mp) => { if (mp) mp.host(); });
+    };
     if ($("mp-join")) $("mp-join").onclick = (e) => {
       e.stopPropagation();
       const inp = $("mp-code");
       S.mpJoinCode = inp ? inp.value : "";
       S.mpErr = "";
-      if (window.ChoppyMP) window.ChoppyMP.join(S.mpJoinCode);
+      ensureMp().then((mp) => { if (mp) mp.join(S.mpJoinCode); });
     };
     if ($("mp-ready")) $("mp-ready").onclick = (e) => {
       e.stopPropagation();
@@ -13745,10 +13828,30 @@
       + (host ? "<button class=\"cta\" id=\"mp-again\">" + t("mpReady") + "</button>" : "")
       + "<button class=\"cta play-alt\" id=\"go\">" + t("mpBack") + "</button></div>";
   }
+  let mpScript = null;
+  function ensureMp() {
+    if (window.ChoppyMP) {
+      try { wireMp(); } catch (e) {}
+      return Promise.resolve(window.ChoppyMP);
+    }
+    if (mpScript) return mpScript;
+    mpScript = new Promise((resolve) => {
+      const s = document.createElement("script");
+      s.src = "mp.js?v=mp8";
+      s.onload = () => {
+        try { wireMp(); } catch (e) {}
+        resolve(window.ChoppyMP || null);
+      };
+      s.onerror = () => { mpScript = null; resolve(null); };
+      document.body.appendChild(s);
+    });
+    return mpScript;
+  }
   function openMpLobby() {
     S.mpErr = "";
     S.mp = false;
     setPhase("mplobby");
+    if (!window.ChoppyMP) ensureMp().then(() => { if (S.phase === "mplobby") renderOverlay(); });
   }
   function playAtFromGo(data) {
     const now = Date.now();
@@ -14865,7 +14968,6 @@
     renderOverlay();
     renderHud();
     layoutStage();
-    preloadChanceArt();
     try {
       const mo = new MutationObserver((recs) => {
         if (!(window.BZ && BZ.lang && BZ.lang() === "es")) return;
