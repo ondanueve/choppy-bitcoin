@@ -27,8 +27,8 @@
   <meta name="twitter:title" content="Play Choppy Bitcoin">
   <meta name="twitter:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
   <meta name="twitter:image:alt" content="Choppy Bitcoin hero">
-  <link rel="stylesheet" href="style.css?v=mp194">
-  <script src="nozoom.js?v=mp142"></script>
+  <link rel="stylesheet" href="style.css?v=mp195">
+  <script src="nozoom.js?v=mp195"></script>
 </head>
 <body>
   <div id="app">
@@ -80,7 +80,7 @@
       <button type="button" id="bc-army-bar" class="bc-open hide">TIER</button>
     </div>
     <div id="field" class="field">
-      <canvas id="c"></canvas>
+      <canvas id="c" role="img" aria-label="Choppy Bitcoin playfield"></canvas>
       <div id="flap-layer" aria-hidden="true"></div>
       <div id="def-pad" class="def-pad hide" aria-hidden="true">
         <button type="button" id="def-rev" class="def-rev" data-i18n-aria="ariaReverse" aria-label="Reverse">REV</button>
@@ -124,7 +124,7 @@
       </div>
       <button id="pause-btn" class="pause hide" data-i18n-aria="ariaPause" aria-label="Pause">||</button>
       <div id="bc-panel" class="bc-panel hide">
-        <div class="bc-head"><b>BITCOIN COUNTRY</b><button type="button" id="bc-close">×</button></div>
+        <div class="bc-head"><b>BITCOIN COUNTRY</b><button type="button" id="bc-close" aria-label="Close">×</button></div>
         <div class="bc-grid">
           <div><span>LIBERTY NODES</span><b id="bc-nodes">0 / 100</b></div>
           <div><span>ARMY</span><b id="bc-army">0 / 7</b></div>
@@ -148,7 +148,7 @@
       </div>
     </div>
   </div>
-  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-labelledby="modal-auth-title">
+  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-modal="true" aria-labelledby="modal-auth-title">
     <div class="auth-card">
       <h2 id="modal-auth-title" data-i18n="signIn">Sign in</h2>
       <label class="hide" id="group-alias"><span data-i18n="alias">Alias</span><input id="auth-username" autocomplete="username" maxlength="16"></label>
@@ -163,9 +163,9 @@
       <button type="button" class="text-btn" id="btn-close-auth" data-i18n="close">Close</button>
     </div>
   </div>
-  <div id="profile-modal" class="auth-modal hide" role="dialog">
+  <div id="profile-modal" class="auth-modal hide" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="auth-card">
-      <h2 data-i18n="profile">Profile</h2>
+      <h2 id="profile-modal-title" data-i18n="profile">Profile</h2>
       <p id="profile-score-info"></p>
       <label><span data-i18n="alias">Alias</span><input id="profile-alias" maxlength="16" autocomplete="username"></label>
       <p id="alias-hint" class="auth-msg"></p>
@@ -178,12 +178,13 @@
       <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
+  <div id="a11y-live" class="a11y-live" role="status" aria-live="polite" aria-atomic="true"></div>
   <!-- abcjs loads when the jukebox opens (audio.js). mp.js loads when Versus opens. -->
-  <script src="/choppy-bitcoin/i18n.js?v=mp194" defer></script>
+  <script src="/choppy-bitcoin/i18n.js?v=mp195" defer></script>
   <script src="supabase-lib.js" defer></script>
-  <script src="auth.js?v=mp194" defer></script>
-  <script src="run-stats.js?v=mp194" defer></script>
-  <script src="audio.js?v=mp194" defer></script>
-  <script src="game.js?v=mp194" defer></script>
+  <script src="auth.js?v=mp195" defer></script>
+  <script src="run-stats.js?v=mp195" defer></script>
+  <script src="audio.js?v=mp195" defer></script>
+  <script src="game.js?v=mp195" defer></script>
 </body>
 </html>

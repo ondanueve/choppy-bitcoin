@@ -258,6 +258,11 @@
       soundOff: "OFF",
       noAiCalls: "No calls yet. Toggle A.I. bud ON in the HUD.",
       markedPl: "Marked P/L",
+      reduceMotion: "REDUCE MOTION",
+      liveSum: "MATCH ANNOUNCEMENTS",
+      allowZoom: "PAGE ZOOM",
+      a11yNote: "Reduce motion stops shakes and blinks. Announcements read the match every few seconds and start off. Page zoom starts off and is allowed only in menus.",
+      a11yKeys: "KEYBOARD",
       ariaPlayPause: "Play/Pause",
       ariaVolume: "Volume",
       ariaCountry: "Bitcoin Country",
@@ -531,6 +536,11 @@
       soundOff: "OFF",
       noAiCalls: "Todavía no hay llamadas. Activa A.I. bud en el HUD.",
       markedPl: "P/L marcado",
+      reduceMotion: "MENOS MOVIMIENTO",
+      liveSum: "ANUNCIOS DE LA PARTIDA",
+      allowZoom: "ZOOM DE PÁGINA",
+      a11yNote: "Menos movimiento apaga sacudidas y parpadeos. Los anuncios leen la partida cada pocos segundos y empiezan apagados. El zoom de página empieza apagado y solo se permite en los menús.",
+      a11yKeys: "TECLADO",
       ariaPlayPause: "Reproducir/Pausa",
       ariaVolume: "Volumen",
       ariaCountry: "Bitcoin Country",
@@ -583,7 +593,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp194";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp195";
     document.head.appendChild(s);
   }
 
@@ -600,6 +610,9 @@
     box.querySelectorAll("[data-i18n-aria]").forEach((el) => {
       const k = el.getAttribute("data-i18n-aria");
       if (has(k)) el.setAttribute("aria-label", t(k));
+    });
+    box.querySelectorAll("[data-i18n-label]").forEach((el) => {
+      el.setAttribute("aria-label", t(el.getAttribute("data-i18n-label")));
     });
     document.documentElement.lang = lang === "es" ? "es" : "en";
     document.querySelectorAll("[data-lang]").forEach((btn) => {

@@ -236,6 +236,61 @@
   loadTextPrefs();
   loadHero();
   loadArcTldr();
+  let REDUCE_MOTION = false;
+  let LIVE_SUM = false;
+  let ALLOW_ZOOM = false;
+  let zoomLockSent = "";
+  function loadA11yPrefs() {
+    try {
+      REDUCE_MOTION = localStorage.getItem("choppy-reduce-motion") === "1";
+      LIVE_SUM = localStorage.getItem("choppy-live-sum") === "1";
+      ALLOW_ZOOM = localStorage.getItem("choppy-allow-zoom") === "1";
+    } catch (e) {}
+    const root = document.documentElement;
+    if (REDUCE_MOTION) root.setAttribute("data-reduce-motion", "1");
+    else root.removeAttribute("data-reduce-motion");
+    if (window.ChoppyZoom && window.ChoppyZoom.set) window.ChoppyZoom.set(ALLOW_ZOOM, false);
+    zoomLockSent = (ALLOW_ZOOM ? "1" : "0") + "0";
+  }
+  function setReduceMotion(on) {
+    REDUCE_MOTION = !!on;
+    try { localStorage.setItem("choppy-reduce-motion", REDUCE_MOTION ? "1" : "0"); } catch (e) {}
+    if (REDUCE_MOTION) document.documentElement.setAttribute("data-reduce-motion", "1");
+    else document.documentElement.removeAttribute("data-reduce-motion");
+  }
+  function setLiveSum(on) {
+    LIVE_SUM = !!on;
+    try { localStorage.setItem("choppy-live-sum", LIVE_SUM ? "1" : "0"); } catch (e) {}
+    if (!LIVE_SUM) {
+      const el = document.getElementById("a11y-live");
+      if (el) el.textContent = "";
+    }
+  }
+  function setAllowZoom(on) {
+    ALLOW_ZOOM = !!on;
+    try { localStorage.setItem("choppy-allow-zoom", ALLOW_ZOOM ? "1" : "0"); } catch (e) {}
+    zoomLockSent = "";
+    syncZoomLock();
+  }
+  function syncZoomLock() {
+    let playing = false;
+    try { playing = !!(S && (S.phase === "play" || S.phase === "defense")); } catch (e) { playing = false; }
+    const playLock = !!(ALLOW_ZOOM && playing);
+    const sig = (ALLOW_ZOOM ? "1" : "0") + (playLock ? "1" : "0");
+    if (sig === zoomLockSent) return;
+    zoomLockSent = sig;
+    if (window.ChoppyZoom && window.ChoppyZoom.set) window.ChoppyZoom.set(ALLOW_ZOOM, playLock);
+  }
+  function a11ySay(msg) {
+    const el = document.getElementById("a11y-live");
+    if (!el || !msg) return;
+    el.textContent = "";
+    setTimeout(() => {
+      const box = document.getElementById("a11y-live");
+      if (box) box.textContent = msg;
+    }, 40);
+  }
+  loadA11yPrefs();
   const PX_MIN = 1;
   const DRIFT0 = 0.0006;
   const PHI = (1 + Math.sqrt(5)) / 2;
@@ -524,6 +579,9 @@
     testArmy: "YOUR ARMY",
     testWorld: "ENEMY",
     howPlay: "HOW TO PLAY", market: "MARKETPLACE",
+    reduceMotion: "REDUCE MOTION", liveSum: "MATCH ANNOUNCEMENTS", allowZoom: "PAGE ZOOM",
+    a11yKeys: "KEYBOARD",
+    a11yNote: "Reduce motion stops shakes and blinks. Announcements read the match every few seconds and start off. Page zoom starts off and is allowed only in menus.",
     runStats: "STATS", runChart: "CHART", runRecap: "RUN TAPE",
     graphics: "GRAPHICS",
     palClassic: "Classic", palMidnight: "Midnight", palTerminal: "Terminal",
@@ -1444,6 +1502,7 @@
     if (S.halveLeft === 0) {
       spawnHalve();
       S.halveLeft = HALVE_GAP;
+      try { a11ySay(chanceLang() ? "Halving en el campo." : "Halving on the field."); } catch (e) {}
     }
   }
 
@@ -1818,6 +1877,7 @@
   function die() {
     if (S.dead) return;
     S.dead = true;
+    try { a11ySay(chanceLang() ? "Liquidado. Fin de la partida." : "Liquidated. Run over."); } catch (e) {}
     S.phase = "over";
     try { applyLaser(false); } catch (e) {}
     S.power = "NONE"; S.powerT = 0;
@@ -2634,7 +2694,7 @@
         { k: "a", label: "Put money in", labelEs: "Insertar monedas" },
         { k: "b", label: "Watch Marek play", labelEs: "Mirar a Marek jugar" }
       ] },
-    { id: "chess", kind: "choice", after: ["tetris", "poker"], input: "move",
+    { id: "chess", kind: "choice", after: ["tetris", "poker"], input: "move", when: () => { loadChessData(); return CHESS_POOL.length > 0; },
       title: "Marek's Chess Problem", titleEs: "El problema de ajedrez de Marek",
       body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
       bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\"." },
@@ -2689,126 +2749,30 @@
   // Marek's chess card: a pool of seven historical positions (all verified with python-chess + Stockfish 17.1).
   // One is picked per appearance; the pick lives in S.chessPick and the last four picks (across runs) are
   // kept in localStorage so the same problem never comes back too soon.
-  const CHESS_POOL = [
-    { slug: "opera", side: "w", n: 15, key: "Bxd7+", uci: "b5d7",
-      fen: "4kb1r/p2r1ppp/4qn2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 2 15", last: "e7e6",
-      title: "The Opera Game", titleEs: "La partida de la ópera",
-      tldr: "Marek sets up Morphy's Opera Game (Paris, 1858) and offers a bitcoin if you type White's first move of the finish. A miss costs nothing.",
-      tldrEs: "Marek arma la partida de la ópera de Morphy (París, 1858) y te ofrece un bitcoin si escribes la primera jugada blanca del final. Fallar no cuesta nada.",
-      body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
-      bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\".",
-      line: "15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#", lineEs: "15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#",
-      win: "\"The bishop first, then the queen, then the rook. Morphy saw it from a box seat.\"",
-      winEs: "\"Primero el alfil, después la dama, después la torre. Morphy lo vio desde un palco\".",
-      miss: "\"The bishop opens the file, the queen gives herself up, the rook mates. You can pay me in wine.\"",
-      missEs: "\"El alfil abre la columna, la dama se entrega y la torre da mate. Págame con vino\".",
-      tWin: "Marek plays it out: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. He slides the bitcoin across the table.",
-      tWinEs: "Marek lo juega por ti: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. Te pasa el bitcoin por la mesa.",
-      tMiss: "Marek shows you Morphy's line: 15. Bxd7+ Nxd7 16. Qb8+!! Nxb8 17. Rd8#. “You can pay me in wine.”",
-      tMissEs: "Marek te muestra la línea de Morphy: 15. Axd7+ Cxd7 16. Db8+!! Cxb8 17. Td8#. “Págame con vino”." },
-    { slug: "immortal", side: "w", n: 21, key: "Nxg7+", uci: "f5g7",
-      fen: "r1b1k1nr/p2p1ppp/n2B4/1p1NPN1P/6P1/3P1Q2/P1P1K3/q5b1 w kq - 2 21", last: "b8a6",
-      title: "The Immortal Game", titleEs: "La partida inmortal",
-      tldr: "Marek sets up Anderssen's Immortal Game (London, 1851) and offers a bitcoin for White's first move of a mate in three. A miss costs nothing.",
-      tldrEs: "Marek arma la partida inmortal de Anderssen (Londres, 1851) y te ofrece un bitcoin por la primera jugada blanca de un mate en tres. Fallar no cuesta nada.",
-      body: "Marek pours the last of the wine and sets up the pieces with unusual care.\n\n\"London, 1851. The first international tournament is on, but this is only a casual game at Simpson's Divan, a smoky coffee house on the Strand. Adolf Anderssen, a mathematics teacher from Breslau, against Lionel Kieseritzky, who earns his living in Paris giving lessons by the hour. Anderssen has already given away a bishop and both rooks, and Black's queen is gobbling up his back rank. Kieseritzky thinks he is winning.\"\n\nHe places the last piece: the position after 20...Na6.\n\n\"White to move and mate in three. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek sirve lo que queda del vino y acomoda las piezas con un cuidado poco habitual.\n\n\"Londres, 1851. Se juega el primer torneo internacional, pero esta es apenas una partida amistosa en el Simpson's Divan, un café lleno de humo en el Strand. Adolf Anderssen, profesor de matemáticas de Breslau, contra Lionel Kieseritzky, que en París se gana la vida dando clases por hora. Anderssen ya regaló un alfil y las dos torres, y la dama negra se está comiendo su primera fila. Kieseritzky cree que va ganando\".\n\nColoca la última pieza: la posición después de 20...Ca6.\n\n\"Juegan las blancas y dan mate en tres. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#", lineEs: "21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#",
-      win: "\"Two rooks, a bishop, then the queen. Three minor pieces finish the job. Kieseritzky was so impressed he sent the moves to his club in Paris himself.\"",
-      winEs: "\"Dos torres, un alfil y después la dama. Tres piezas menores terminan el trabajo. A Kieseritzky le impresionó tanto que él mismo envió las jugadas a su club de París\".",
-      miss: "\"The knight checks, the queen is offered, the bishop mates. Anderssen gave away almost everything and kept exactly enough.\"",
-      missEs: "\"El caballo da jaque, la dama se ofrece y el alfil da mate. Anderssen regaló casi todo y se quedó con lo justo\".",
-      tWin: "Marek plays it out: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. Three minor pieces finish the job. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. Tres piezas menores terminan el trabajo. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Anderssen's line: 21. Nxg7+ Kd8 22. Qf6+!! Nxf6 23. Be7#. “He gave away almost everything and kept exactly enough.”",
-      tMissEs: "Marek te muestra la línea de Anderssen: 21. Cxg7+ Rd8 22. Df6+!! Cxf6 23. Ae7#. “Regaló casi todo y se quedó con lo justo”." },
-    { slug: "evergreen", side: "w", n: 21, key: "Qxd7+", uci: "a4d7",
-      fen: "1r2k1r1/pbppnp1p/1b3P2/8/Q7/B1PB1q2/P4PPP/3R2K1 w - - 0 21", last: "c6e7",
-      title: "The Evergreen Game", titleEs: "La siempreviva",
-      tldr: "Marek sets up Anderssen's Evergreen Game (Berlin, 1852) and offers a bitcoin for White's first move of a mate in four. A miss costs nothing.",
-      tldrEs: "Marek arma la siempreviva de Anderssen (Berlín, 1852) y te ofrece un bitcoin por la primera jugada blanca de un mate en cuatro. Fallar no cuesta nada.",
-      body: "Marek turns the board so the white pieces face you.\n\n\"Berlin, 1852. Another friendly game, another Anderssen sacrifice. His opponent, Jean Dufresne, wrote one of the most popular chess handbooks in Germany. Black's queen has just taken the knight on f3 and aims at g2, one move from mate. Years later Steinitz called this game an evergreen in Anderssen's laurel wreath, and the name stuck.\"\n\nHe places the last piece: the position after 20...Nxe7.\n\n\"White to move and mate in four, before that queen gets her turn. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek gira el tablero para que las blancas queden de tu lado.\n\n\"Berlín, 1852. Otra partida amistosa, otro sacrificio de Anderssen. Su rival, Jean Dufresne, escribió uno de los manuales de ajedrez más populares de Alemania. La dama negra acaba de tomar el caballo de f3 y apunta a g2, a una jugada del mate. Años después, Steinitz llamó a esta partida la siempreviva de la corona de laureles de Anderssen, y el nombre quedó\".\n\nColoca la última pieza: la posición después de 20...Cxe7.\n\n\"Juegan las blancas y dan mate en cuatro, antes de que esa dama tenga su turno. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#", lineEs: "21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#",
-      win: "\"A queen for a pawn, then two bishops on a wide-open board. Dufresne never got to play Qxg2.\"",
-      winEs: "\"Una dama por un peón y después dos alfiles en un tablero abierto. Dufresne nunca llegó a jugar Dxg2\".",
-      miss: "\"Every move has to be check, or her queen mates you on g2. Anderssen started with the biggest one.\"",
-      missEs: "\"Cada jugada tiene que ser jaque, o su dama te da mate en g2. Anderssen empezó por el más grande\".",
-      tWin: "Marek plays it out: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Dufresne never got to play Qxg2.”",
-      tWinEs: "Marek lo juega por ti: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Dufresne nunca llegó a jugar Dxg2”.",
-      tMiss: "Marek shows you Anderssen's line: 21. Qxd7+!! Kxd7 22. Bf5+ Ke8 23. Bd7+ Kf8 24. Bxe7#. “Every move has to be check.”",
-      tMissEs: "Marek te muestra la línea de Anderssen: 21. Dxd7+!! Rxd7 22. Af5+ Re8 23. Ad7+ Rf8 24. Axe7#. “Cada jugada tiene que ser jaque”." },
-    { slug: "saavedra", side: "w", n: 6, key: "c8=R", uci: "c7c8r",
-      fen: "8/2P5/8/8/3r4/8/2K5/k7 w - - 9 6", last: "d3d4",
-      title: "The Saavedra Position", titleEs: "La posición de Saavedra",
-      tldr: "Marek sets up an 1895 endgame from Glasgow, a pawn against a rook, and offers a bitcoin for the move that wins. A miss costs nothing.",
-      tldrEs: "Marek arma un final de Glasgow de 1895, un peón contra una torre, y te ofrece un bitcoin por la jugada que gana. Fallar no cuesta nada.",
-      body: "Marek sweeps almost every piece off the board. Two kings, one white pawn, one black rook.\n\n\"Glasgow, 1895. A newspaper chess column prints this ending, taken from an old game, and declares it a draw. A Spanish priest living in the city, Father Fernando Saavedra, reads it and writes in to say the column is wrong. His name is now on the most famous endgame study ever made.\"\n\nHe places the last piece: the position after 5...Rd4.\n\n\"White to move and win. One warning: the obvious move only draws. Type the move that wins. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek retira casi todas las piezas del tablero. Dos reyes, un peón blanco y una torre negra.\n\n\"Glasgow, 1895. La columna de ajedrez de un periódico publica este final, sacado de una partida vieja, y lo declara tablas. Un sacerdote español que vive en la ciudad, el padre Fernando Saavedra, lo lee y escribe para decir que la columna se equivoca. Hoy su nombre está en el estudio de finales más famoso de la historia\".\n\nColoca la última pieza: la posición después de 5...Td4.\n\n\"Juegan las blancas y ganan. Una advertencia: la jugada obvia solo empata. Escribe la jugada que gana. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "6. c8=R!! Ra4 7. Kb3", lineEs: "6. c8=T!! Ta4 7. Rb3",
-      win: "\"A queen walks into 6...Rc4+ 7. Qxc4, stalemate. A rook threatens Rc1# and Kxa4 at the same time. Saavedra wanted less, and won.\"",
-      winEs: "\"Con dama llega 6...Tc4+ 7. Dxc4, ahogado. Con torre amenazas Tc1# y Rxa4 a la vez. Saavedra pidió menos y ganó\".",
-      miss: "\"Crown a queen and Black plays 6...Rc4+, and taking the rook is stalemate. A rook threatens Rc1# and Kxa4 at once.\"",
-      missEs: "\"Si coronas dama, las negras juegan 6...Tc4+, y tomar la torre es ahogado. Con torre amenazas Tc1# y Rxa4 a la vez\".",
-      tWin: "Marek plays it out: 6. c8=R!! Ra4 7. Kb3, threatening Rc1# and Kxa4. “Saavedra wanted less, and won.” The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 6. c8=T!! Ta4 7. Rb3, con amenaza de Tc1# y Rxa4. “Saavedra pidió menos y ganó”. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Saavedra's move: 6. c8=R!! A queen allows 6...Rc4+ and stalemate. A rook threatens Rc1# and Kxa4.",
-      tMissEs: "Marek te muestra la jugada de Saavedra: 6. c8=T!! Con dama llega 6...Tc4+ y el ahogado. Con torre amenazas Tc1# y Rxa4." },
-    { slug: "kinghunt", side: "w", n: 11, key: "Qxh7+", uci: "h5h7",
-      fen: "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R w KQ - 6 11", last: "d8e7",
-      title: "The King Hunt", titleEs: "La cacería del rey",
-      tldr: "Marek sets up a casual London game from 1912 and offers a bitcoin for White's first move of a forced mate. A miss costs nothing.",
-      tldrEs: "Marek arma una partida amistosa de Londres de 1912 y te ofrece un bitcoin por la primera jugada blanca de un mate forzado. Fallar no cuesta nada.",
-      body: "Marek sets up the board quickly, as if he has done it many times.\n\n\"London, 1912. Edward Lasker, a young German engineer, plays a casual game against George Thomas, who will later be British chess champion and is already one of the best badminton players in England. Black has castled and feels safe behind his pawns. What comes next is the most famous king hunt ever played: the black king will walk from one side of the board to the other, and it will not walk back.\"\n\nHe places the last piece: the position after 10...Qe7.\n\n\"White to move and force mate. Type the first move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek arma el tablero rápido, como si lo hubiera hecho muchas veces.\n\n\"Londres, 1912. Edward Lasker, un joven ingeniero alemán, juega una partida amistosa contra George Thomas, que después será campeón británico de ajedrez y ya es uno de los mejores jugadores de bádminton de Inglaterra. Las negras enrocaron y se sienten seguras detrás de sus peones. Lo que sigue es la cacería de rey más famosa de la historia: el rey negro cruzará el tablero de un lado al otro, y no va a volver\".\n\nColoca la última pieza: la posición después de 10...De7.\n\n\"Juegan las blancas y fuerzan el mate. Escribe la primera jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "11. Qxh7+!! Kxh7 12. Nxf6+ Kh6 13. Neg4+ Kg5 14. h4+ Kf4 15. g3+ Kf3 16. Be2+ Kg2 17. Rh2+ Kg1 18. Kd2#",
-      lineEs: "11. Dxh7+!! Rxh7 12. Cxf6+ Rh6 13. Ceg4+ Rg5 14. h4+ Rf4 15. g3+ Rf3 16. Ae2+ Rg2 17. Th2+ Rg1 18. Rd2#",
-      win: "\"From g8 to g1, and Lasker mates him with a king move. Thomas went on to win the British championship twice.\"",
-      winEs: "\"De g8 a g1, y Lasker le da mate con una jugada de rey. Thomas igual ganó dos veces el campeonato británico\".",
-      miss: "\"The queen goes first, and then the king never gets a quiet move again.\"",
-      missEs: "\"Primero se entrega la dama, y después el rey no vuelve a tener una jugada tranquila\".",
-      tWin: "Marek plays it out: the queen sacrifice 11. Qxh7+!! drives the black king from g8 to g1, where 18. Kd2# ends it. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: el sacrificio 11. Dxh7+!! lleva al rey negro de g8 a g1, donde 18. Rd2# termina todo. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Lasker's hunt: 11. Qxh7+!! drags the black king all the way to g1, and 18. Kd2# ends it.",
-      tMissEs: "Marek te muestra la cacería de Lasker: 11. Dxh7+!! arrastra al rey negro hasta g1, y 18. Rd2# termina todo." },
-    { slug: "goldcoins", side: "b", n: 23, key: "Qg3", uci: "c3g3",
-      fen: "5rk1/pp4pp/4p3/2R3Q1/3n4/2q4r/P1P2PPP/5RK1 b - - 1 23", last: "e5c5",
-      title: "The Gold Coins Game", titleEs: "La partida de las monedas de oro",
-      tldr: "Marek sets up Marshall's most famous game (Breslau, 1912) and offers a bitcoin if you find Black's move. A miss costs nothing.",
-      tldrEs: "Marek arma la partida más famosa de Marshall (Breslavia, 1912) y te ofrece un bitcoin si encuentras la jugada de las negras. Fallar no cuesta nada.",
-      body: "Marek turns the board around. This time you have the black pieces.\n\n\"Breslau, 1912. Frank Marshall, the American champion, has Black against Stepan Levitsky of Russia. Levitsky's rook has just attacked Marshall's queen. Marshall later wrote that, after his reply, the spectators showered the board with gold coins. Historians doubt the coins. Nobody doubts the move.\"\n\nHe places the last piece: the position after 23. Rc5.\n\n\"Black to move. Marshall put his queen on a square where three white pieces could take her, and every capture lost. Type his move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek gira el tablero. Esta vez llevas las negras.\n\n\"Breslavia, 1912. Frank Marshall, campeón de Estados Unidos, juega con negras contra el ruso Stepan Levitsky. La torre de Levitsky acaba de atacar la dama de Marshall. Marshall escribió después que, tras su respuesta, el público llenó el tablero de monedas de oro. Los historiadores dudan de las monedas. Nadie duda de la jugada\".\n\nColoca la última pieza: la posición después de 23. Tc5.\n\n\"Juegan las negras. Marshall puso la dama en una casilla donde tres piezas blancas podían tomarla, y cualquier captura perdía. Escribe su jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "23... Qg3!!", lineEs: "23... Dg3!!",
-      win: "\"24. hxg3 Ne2#. 24. fxg3 Ne2+ 25. Kh1 Rxf1#. 24. Qxg3 Ne2+ 25. Kh1 Nxg3+ and Black stays a piece up. Levitsky resigned on the spot.\"",
-      winEs: "\"24. hxg3 Ce2#. 24. fxg3 Ce2+ 25. Rh1 Txf1#. 24. Dxg3 Ce2+ 25. Rh1 Cxg3+ y las negras quedan con una pieza de más. Levitsky abandonó en el acto\".",
-      miss: "\"Take it with the h-pawn and Ne2 is mate. Take it with the f-pawn and the rook mates on f1. Levitsky resigned.\"",
-      missEs: "\"Si la toma el peón h, Ce2 es mate. Si la toma el peón f, la torre da mate en f1. Levitsky abandonó\".",
-      tWin: "Marek plays it out: 23... Qg3!! Every capture loses, and Levitsky resigned on the spot. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 23... Dg3!! Cualquier captura pierde, y Levitsky abandonó en el acto. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Marshall's move: 23... Qg3!! Three white pieces can take the queen, and every capture loses. Levitsky resigned.",
-      tMissEs: "Marek te muestra la jugada de Marshall: 23... Dg3!! Tres piezas blancas pueden tomar la dama, y cualquier captura pierde. Levitsky abandonó." },
-    { slug: "century", side: "b", n: 17, key: "Be6", uci: "g4e6",
-      fen: "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 3 17", last: "e1f1",
-      title: "The Game of the Century", titleEs: "La partida del siglo",
-      tldr: "Marek sets up Byrne–Fischer (New York, 1956) and offers a bitcoin if you find the move a thirteen-year-old played. A miss costs nothing.",
-      tldrEs: "Marek arma Byrne–Fischer (Nueva York, 1956) y te ofrece un bitcoin si encuentras la jugada de un chico de trece años. Fallar no cuesta nada.",
-      body: "Marek sets up the board with the black pieces on your side.\n\n\"New York, October 1956. The Rosenwald tournament at the Marshall Chess Club. Donald Byrne is one of the strongest players in the country. Across the board sits Bobby Fischer, thirteen years old. Byrne's bishop has just attacked Fischer's queen, and any sensible player would move her. Hans Kmoch, the editor who annotated it for Chess Review, called it the Game of the Century.\"\n\nHe places the last piece: the position after 17. Kf1.\n\n\"Black to move. Fischer did not save his queen. Type his move. Find it and the bitcoin is yours. Miss it and it costs you nothing.\"",
-      bodyEs: "Marek arma el tablero con las negras de tu lado.\n\n\"Nueva York, octubre de 1956. El torneo Rosenwald, en el Marshall Chess Club. Donald Byrne es uno de los mejores jugadores del país. Frente a él se sienta Bobby Fischer, de trece años. El alfil de Byrne acaba de atacar la dama de Fischer, y cualquier jugador sensato la movería. Hans Kmoch, el editor que la comentó para Chess Review, la llamó la partida del siglo\".\n\nColoca la última pieza: la posición después de 17. Rf1.\n\n\"Juegan las negras. Fischer no salvó su dama. Escribe su jugada. Si la encuentras, el bitcoin es tuyo. Si fallas, no te cuesta nada\".",
-      line: "17... Be6!! 18. Bxb6 Bxc4+ 19. Kg1 Ne2+ 20. Kf1 Nxd4+ 21. Kg1 Ne2+ 22. Kf1 Nc3+ 23. Kg1 axb6",
-      lineEs: "17... Ae6!! 18. Axb6 Axc4+ 19. Rg1 Ce2+ 20. Rf1 Cxd4+ 21. Rg1 Ce2+ 22. Rf1 Cc3+ 23. Rg1 axb6",
-      win: "\"The windmill. For the queen he takes a rook, two bishops and a pawn, and he mates Byrne on move 41.\"",
-      winEs: "\"El molino. Por la dama se lleva una torre, dos alfiles y un peón, y le da mate a Byrne en la jugada 41\".",
-      miss: "\"He lets the queen go and the knight starts spinning. Byrne played on until Fischer mated him on move 41.\"",
-      missEs: "\"Deja ir la dama y el caballo empieza a girar. Byrne siguió jugando hasta que Fischer le dio mate en la jugada 41\".",
-      tWin: "Marek plays it out: 17... Be6!! gives up the queen for a rook, two bishops and a pawn. Fischer mates on move 41. The bitcoin is yours.",
-      tWinEs: "Marek lo juega por ti: 17... Ae6!! entrega la dama por una torre, dos alfiles y un peón. Fischer da mate en la jugada 41. El bitcoin es tuyo.",
-      tMiss: "Marek shows you Fischer's move: 17... Be6!! He lets the queen go and mates Byrne on move 41.",
-      tMissEs: "Marek te muestra la jugada de Fischer: 17... Ae6!! Deja ir la dama y le da mate a Byrne en la jugada 41." }
-  ];
+  let CHESS_POOL = [];
   // Board diagram of the chess problem, drawn at runtime from its FEN as inline SVG (no downloads, crisp on any screen).
   // Oriented from the side to move, with coordinates and the previous move highlighted; it never shows the answer.
   // Piece shapes: Colin M.L. Burnett's set (BSD/GPL/GFDL tri-licensed), as shipped in python-chess.
-  const CHESS_PIECE_SVG = {"b":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zm6-4c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z\" fill=\"#000\" stroke-linecap=\"butt\"/><path d=\"M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5\" stroke=\"#fff\" stroke-linejoin=\"miter\"/></g>","k":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22.5 11.63V6\" stroke-linejoin=\"miter\"/><path d=\"M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5\" fill=\"#000\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z\" fill=\"#000\"/><path d=\"M20 8h5\" stroke-linejoin=\"miter\"/><path d=\"M32 29.5s8.5-4 6.03-9.65C34.15 14 25 18 22.5 24.5l.01 2.1-.01-2.1C20 18 9.906 14 6.997 19.85c-2.497 5.65 4.853 9 4.853 9M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0\" stroke=\"#fff\"/></g>","n":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z\" style=\"fill:#ececec; stroke:#ececec;\"/><path d=\"M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z\" transform=\"matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)\" style=\"fill:#ececec; stroke:#ececec;\"/><path d=\"M 24.55,10.4 L 24.1,11.85 L 24.6,12 C 27.75,13 30.25,14.49 32.5,18.75 C 34.75,23.01 35.75,29.06 35.25,39 L 35.2,39.5 L 37.45,39.5 L 37.5,39 C 38,28.94 36.62,22.15 34.25,17.66 C 31.88,13.17 28.46,11.02 25.06,10.5 L 24.55,10.4 z \" style=\"fill:#ececec; stroke:none;\"/></g>","p":"<g><path d=\"M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z\" fill=\"#000\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g>","q":"<g fill=\"#000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g fill=\"#000\" stroke=\"none\"><circle cx=\"6\" cy=\"12\" r=\"2.75\"/><circle cx=\"14\" cy=\"9\" r=\"2.75\"/><circle cx=\"22.5\" cy=\"8\" r=\"2.75\"/><circle cx=\"31\" cy=\"9\" r=\"2.75\"/><circle cx=\"39\" cy=\"12\" r=\"2.75\"/></g><path d=\"M9 26c8.5-1.5 21-1.5 27 0l2.5-12.5L31 25l-.3-14.1-5.2 13.6-3-14.5-3 14.5-5.2-13.6L14 25 6.5 13.5 9 26zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z\" stroke-linecap=\"butt\"/><path d=\"M11 38.5a35 35 1 0 0 23 0\" fill=\"none\" stroke-linecap=\"butt\"/><path d=\"M11 29a35 35 1 0 1 23 0M12.5 31.5h20M11.5 34.5a35 35 1 0 0 22 0M10.5 37.5a35 35 1 0 0 24 0\" fill=\"none\" stroke=\"#fff\"/></g>","r":"<g fill=\"#000\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 39h27v-3H9v3zM12.5 32l1.5-2.5h17l1.5 2.5h-20zM12 36v-4h21v4H12z\" stroke-linecap=\"butt\"/><path d=\"M14 29.5v-13h17v13H14z\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M14 16.5L11 14h23l-3 2.5H14zM11 14V9h4v2h5V9h5v2h5V9h4v5H11z\" stroke-linecap=\"butt\"/><path d=\"M12 35.5h21M13 31.5h19M14 29.5h17M14 16.5h17M11 14h23\" fill=\"none\" stroke=\"#fff\" stroke-width=\"1\" stroke-linejoin=\"miter\"/></g>","B":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g fill=\"#fff\" stroke-linecap=\"butt\"><path d=\"M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.354.49-2.323.47-3-.5 1.354-1.94 3-2 3-2zM15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2zM25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z\"/></g><path d=\"M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5\" stroke-linejoin=\"miter\"/></g>","K":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22.5 11.63V6M20 8h5\" stroke-linejoin=\"miter\"/><path d=\"M22.5 25s4.5-7.5 3-10.5c0 0-1-2.5-3-2.5s-3 2.5-3 2.5c-1.5 3 3 10.5 3 10.5\" fill=\"#fff\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-6.5-13.5-3.5-16 4V27v-3.5c-3.5-7.5-13-10.5-16-4-3 6 5 10 5 10V37z\" fill=\"#fff\"/><path d=\"M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0\"/></g>","N":"<g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18\" style=\"fill:#ffffff; stroke:#000000;\"/><path d=\"M 24,18 C 24.38,20.91 18.45,25.37 16,27 C 13,29 13.18,31.34 11,31 C 9.958,30.06 12.41,27.96 11,28 C 10,28 11.19,29.23 10,30 C 9,30 5.997,31 6,26 C 6,24 12,14 12,14 C 12,14 13.89,12.1 14,10.5 C 13.27,9.506 13.5,8.5 13.5,7.5 C 14.5,6.5 16.5,10 16.5,10 L 18.5,10 C 18.5,10 19.28,8.008 21,7 C 22,7 22,10 22,10\" style=\"fill:#ffffff; stroke:#000000;\"/><path d=\"M 9.5 25.5 A 0.5 0.5 0 1 1 8.5,25.5 A 0.5 0.5 0 1 1 9.5 25.5 z\" style=\"fill:#000000; stroke:#000000;\"/><path d=\"M 15 15.5 A 0.5 1.5 0 1 1 14,15.5 A 0.5 1.5 0 1 1 15 15.5 z\" transform=\"matrix(0.866,0.5,-0.5,0.866,9.693,-5.173)\" style=\"fill:#000000; stroke:#000000;\"/></g>","P":"<g><path d=\"M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z\" fill=\"#fff\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></g>","Q":"<g fill=\"#fff\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM16 8.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM33 9a2 2 0 1 1-4 0 2 2 0 1 1 4 0z\"/><path d=\"M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-14V25L7 14l2 12zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4-8.5-1.5-18.5-1.5-27 0z\" stroke-linecap=\"butt\"/><path d=\"M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0\" fill=\"none\"/></g>","R":"<g fill=\"#fff\" fill-rule=\"evenodd\" stroke=\"#000\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5\" stroke-linecap=\"butt\"/><path d=\"M34 14l-3 3H14l-3-3\"/><path d=\"M31 17v12.5H14V17\" stroke-linecap=\"butt\" stroke-linejoin=\"miter\"/><path d=\"M31 29.5l1.5 2.5h-20l1.5-2.5\"/><path d=\"M11 14h23\" fill=\"none\" stroke-linejoin=\"miter\"/></g>"};
+  let CHESS_PIECE_SVG = {};
+  // Pool + piece shapes live in chess-data.js (lazy). Until it arrives the chess card is not eligible.
+  function chessDataTake() {
+    const d = window.ChoppyChessData;
+    if (d && d.pool && d.pool.length) { CHESS_POOL = d.pool; CHESS_PIECE_SVG = d.svg || {}; }
+  }
+  window.ChoppyChessReady = chessDataTake;
+  function loadChessData() {
+    chessDataTake();
+    if (CHESS_POOL.length || document.getElementById("chess-data-js")) return;
+    const s = document.createElement("script");
+    s.id = "chess-data-js";
+    s.async = true;
+    s.src = "chess-data.js?v=mp195";
+    document.head.appendChild(s);
+  }
+  (function () {
+    const go = () => (window.requestIdleCallback || ((f) => setTimeout(f, 2000)))(loadChessData);
+    if (document.readyState === "complete") go(); else window.addEventListener("load", go, { once: true });
+  })();
   function chessDiagramHtml(cp, es) {
     if (!cp || !cp.fen) return "";
     const rows = cp.fen.split(" ")[0].split("/");
@@ -3492,7 +3456,7 @@
   function chanceArtHtml(id) {
     const meta = getChanceArtMeta(id);
     if (meta.isVideo) {
-      return "<video class=\"chance-art\" src=\"" + meta.src + "\" poster=\"" + meta.poster + "\" autoplay muted loop playsinline preload=\"auto\"></video>";
+      return "<video class=\"chance-art\" aria-label=\"" + arcAltText(id) + "\" src=\"" + meta.src + "\" poster=\"" + meta.poster + "\" autoplay muted loop playsinline preload=\"auto\"></video>";
     }
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
@@ -9481,7 +9445,7 @@
     }
     drawCitadelShield(ctx,d,t);
     drawWarFx(ctx,d,t);
-    const blink=(d.playerInv>0||d.god>0)&&Math.floor(t*12)%2===0;
+    const blink=!REDUCE_MOTION&&(d.playerInv>0||d.god>0)&&Math.floor(t*12)%2===0;
     const heroOrange="#c9843a";
     const ecol=(warBloc(d.bloc|0).paint)||"#4a5340";
     const pcol=d.god>0?"#ffe14a":heroOrange;
@@ -11716,7 +11680,7 @@
 
     const m = metrics();
     const pw = pipePw();
-    const endingFlash = S.power === "BULL" && S.powerT < 1.15 && Math.floor(S.powerT * 9) % 2 === 0;
+    const endingFlash = !REDUCE_MOTION && S.power === "BULL" && S.powerT < 1.15 && Math.floor(S.powerT * 9) % 2 === 0;
     const edge = (PALETTE_ID === "simple" && wash) ? "#ffffff" : (wash || (S.laserOn ? "#e8902a" : palRgba(PAL.fg, 0.85)));
     for (const p of S.pipes) {
       const col = endingFlash ? RED : wash || (p.green ? GREEN : RED);
@@ -11751,7 +11715,7 @@
       if (p && !it.freeX) it.x = p.wx;
       drawPowerIcon(ctx, it, wash);
     }
-    const blink = S.invuln > 0 && Math.floor(S.invuln * 10) % 2 === 0;
+    const blink = !REDUCE_MOTION && S.invuln > 0 && Math.floor(S.invuln * 10) % 2 === 0;
     const foc = S.mp ? mpFocusPlayer() : null;
     const mineId = window.ChoppyMP && window.ChoppyMP.id ? window.ChoppyMP.id() : null;
     const selfGhost = !!(S.mp && (S.spectate || S.dead || S.finished) && foc && foc.id !== mineId);
@@ -11830,7 +11794,7 @@
     ctx.fillRect(140, 0, 14, 46);
     ctx.fillRect(140, 86, 14, 34);
     const t = performance.now() * 0.001;
-    drawBirdAt(ctx, w * 0.5, h * 0.54, Math.sin(t * 4.2) * 90, 15, myHero(), null, 1, false, HERO_ANIM, HERO_SKIN);
+    drawBirdAt(ctx, w * 0.5, h * 0.54, REDUCE_MOTION ? 0 : Math.sin(t * 4.2) * 90, 15, myHero(), null, 1, false, HERO_ANIM, HERO_SKIN);
     ctx.font = "700 10px \"IBM Plex Mono\", monospace";
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
@@ -12154,6 +12118,7 @@
       pauseBtn.setAttribute("aria-label", paused ? t("ariaPlay") : t("ariaPause"));
       pauseBtn.classList.toggle("arc-resume", !!(S.arcHold && S.phase === "paused"));
     }
+    try { syncZoomLock(); a11yHudTick(); } catch (e) {}
     if (S.have.ff <= 0) S.speedMul = 1;
     const battleFreeze = !!(S.bcDefense && S.bcDefense.frozen);
     $("trades").classList.toggle("hide", !playing || battleFreeze);
@@ -12606,6 +12571,7 @@
       box.id = "award-toasts";
       box.className = "award-toasts";
       box.setAttribute("aria-live", "polite");
+      box.setAttribute("aria-atomic", "true");
       box.setAttribute("role", "status");
       document.body.appendChild(box);
     }
@@ -12723,7 +12689,7 @@
     try { localStorage.setItem("choppy-chess-solved", JSON.stringify(bag)); } catch (e) {}
     const ids = ["chessWin"];
     if (mine.length >= 3) ids.push("chess3");
-    if (mine.length >= CHESS_POOL.length) ids.push("chess7");
+    if (CHESS_POOL.length && mine.length >= CHESS_POOL.length) ids.push("chess7");
     addAwards(ids);
   }
   // Story choices that earn an award (called once, right after the choice resolves).
@@ -13268,12 +13234,12 @@
   }
 
   function optHead(title) {
-    return "<h1>" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"" + t("close") + "\">×</button>";
+    return "<h1 id=\"opt-title\">" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"" + t("close") + "\">×</button>";
   }
   function pauseMarkup() {
     const panel = S.optPanel || "";
     if (panel === "help") {
-      return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody();
+      return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody() + kbHelpHtml();
     }
     if (panel === "market") {
       const mul = S.ranked ? 10 : 1;
@@ -13400,7 +13366,11 @@
       return "<div class=\"opt-head\">" + optHead(t("gameplay")) + "</div>"
         + "<div class=\"opt-menu\">"
         + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-move\">" + t("battleMove") + " · " + (BATTLE_360 ? "360°" : "↑↓←→") + "</button>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-motion\" aria-pressed=\"" + (REDUCE_MOTION ? "true" : "false") + "\">" + t("reduceMotion") + " · " + (REDUCE_MOTION ? t("soundOn") : t("soundOff")) + "</button>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-live\" aria-pressed=\"" + (LIVE_SUM ? "true" : "false") + "\">" + t("liveSum") + " · " + (LIVE_SUM ? t("soundOn") : t("soundOff")) + "</button>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-zoom\" aria-pressed=\"" + (ALLOW_ZOOM ? "true" : "false") + "\">" + t("allowZoom") + " · " + (ALLOW_ZOOM ? t("soundOn") : t("soundOff")) + "</button>"
         + (KB_DESK || /[?&]kb=1/.test(location.search) ? "<button type=\"button\" class=\"cta opt-item\" id=\"opt-keys\">" + (chanceLang() ? "TECLAS (PC)" : "HOTKEYS (PC)") + "</button>" : "")
+        + "<p class=\"k\">" + t("a11yNote") + "</p>"
         + "</div>";
     }
     if (panel === "keys") {
@@ -13557,6 +13527,12 @@
       setBattleMove(BATTLE_360 ? "ortho" : "360");
       renderOverlay();
     };
+    const optMotion = $("opt-motion");
+    if (optMotion) optMotion.onclick = (e) => { e.stopPropagation(); setReduceMotion(!REDUCE_MOTION); renderOverlay(); };
+    const optLive = $("opt-live");
+    if (optLive) optLive.onclick = (e) => { e.stopPropagation(); setLiveSum(!LIVE_SUM); renderOverlay(); };
+    const optZoom = $("opt-zoom");
+    if (optZoom) optZoom.onclick = (e) => { e.stopPropagation(); setAllowZoom(!ALLOW_ZOOM); renderOverlay(); };
     const optTest = $("opt-test");
     if (optTest) optTest.onclick = (e) => {
       e.stopPropagation();
@@ -14105,7 +14081,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp194";
+      s.src = "mp.js?v=mp195";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14403,6 +14379,98 @@
     });
   }
 
+  let a11ySumAt = 0;
+  let a11ySumLast = "";
+  function a11yHudTick() {
+    if (!LIVE_SUM || S.phase !== "play") return;
+    const now = performance.now();
+    if (now - a11ySumAt < 8000) return;
+    a11ySumAt = now;
+    const es = chanceLang();
+    const msg = (es ? "Partida. Efectivo " : "Run. Cash ") + money(S.cash)
+      + ". BTC " + fmtBtcAmt(S.btc)
+      + (es ? ". Precio " : ". Price ") + money(S.price)
+      + (S.power && S.power !== "NONE" ? ". " + S.power : "")
+      + (es ? ". Velas " : ". Candles ") + String(S.shownCandles || 0);
+    if (msg === a11ySumLast) return;
+    a11ySumLast = msg;
+    const el = document.getElementById("a11y-live");
+    if (el) el.textContent = msg;
+  }
+  let a11yDlgKey = "";
+  let a11yModal = false;
+  let a11yOpener = null;
+  let a11yFocusId = "";
+  let a11ySyncQueued = false;
+  function a11yNodes(root) {
+    return Array.prototype.filter.call(root.querySelectorAll("a[href],button:not([disabled]),input:not([disabled]):not([type='hidden']),select:not([disabled]),textarea:not([disabled])"), (el) => {
+      if (el.tabIndex < 0 || el.classList.contains("hp") || (el.closest && el.closest(".hide"))) return false;
+      return el.getClientRects().length > 0;
+    });
+  }
+  function a11yModalPhase() {
+    if (!overlay || overlay.classList.contains("hide") || !overlay.innerHTML.trim()) return false;
+    const p = S.phase;
+    if (p === "defense" || p === "count") return false;
+    if (p === "play" && !(S.mp && (S.spectate || S.mpRoundOver || S.finished))) return false;
+    if (p === "ready" && !S.optPanel) return false;
+    if (p === "paused" && (S.optPanel === "off" || (S.arcHold && !S.optPanel))) return false;
+    return true;
+  }
+  function a11ySyncOverlay() {
+    if (!overlay) return;
+    const open = !overlay.classList.contains("hide") && overlay.innerHTML.trim() !== "";
+    const modal = open && a11yModalPhase();
+    const key = modal ? (S.phase + "|" + (S.optPanel || "") + "|" + ((S.chanceCard && S.chanceCard.id) || "") + "|" + (S.chanceNote ? "1" : "0") + "|" + (S.bcNameAsk ? "n" : "") + "|" + (S.runTab || "")) : "";
+    if (!modal) {
+      overlay.removeAttribute("aria-modal");
+      if (open && S.phase === "ready") {
+        overlay.setAttribute("role", "region");
+        overlay.setAttribute("aria-label", chanceLang() ? "Menú principal" : "Main menu");
+      } else if (!open) {
+        overlay.removeAttribute("role");
+        overlay.removeAttribute("aria-label");
+        overlay.removeAttribute("aria-labelledby");
+      }
+      if (a11yModal) {
+        a11yModal = false;
+        a11yDlgKey = "";
+        const back = a11yOpener;
+        a11yOpener = null;
+        if (back && back.focus && document.contains(back)) { try { back.focus(); } catch (e) {} }
+      }
+      return;
+    }
+    const was = a11yModal;
+    a11yModal = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    const h = overlay.querySelector("h1, h2, .arc-title");
+    if (h) {
+      if (!h.id) h.id = "ov-title";
+      overlay.setAttribute("aria-labelledby", h.id);
+      overlay.removeAttribute("aria-label");
+    }
+    if (!was) {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && !overlay.contains(ae)) a11yOpener = ae;
+      else a11yOpener = $("opt-btn") || a11yOpener;
+    }
+    if (key === a11yDlgKey && a11yFocusId) {
+      const again = document.getElementById(a11yFocusId);
+      if (again && overlay.contains(again)) { try { again.focus(); } catch (e) {} return; }
+    }
+    a11yDlgKey = key;
+    const prefer = overlay.querySelector("#bc-name-in, #arc-move-in, .arc-actions button, .perk-list button, .opt-menu button, #mp-host, #mp-code, button.cta, input:not([type='hidden'])");
+    if (prefer) { try { prefer.focus(); } catch (e) {} }
+  }
+  function queueA11ySync() {
+    const ae = document.activeElement;
+    if (ae && ae.id && overlay && overlay.contains(ae)) a11yFocusId = ae.id;
+    if (a11ySyncQueued) return;
+    a11ySyncQueued = true;
+    setTimeout(() => { a11ySyncQueued = false; try { a11ySyncOverlay(); } catch (e) {} }, 0);
+  }
   function showOverlay() {
     overlay.classList.remove("hide");
     overlay.classList.add("open");
@@ -14415,9 +14483,11 @@
     overlay.style.setProperty("display", "none", "important");
     overlay.style.pointerEvents = "none";
     overlay.innerHTML = "";
+    queueA11ySync();
   }
 
   function renderOverlay() {
+    queueA11ySync();
     costAsBtc = null;
     const p = S.phase;
     if (p === "defense") {
@@ -14818,6 +14888,7 @@
   function guardWindowBtn(e) {
     const btn = windowBtnOf(e.target);
     if (!btn) return;
+    if (e.type === "click" && e.detail === 0) return;
     const now = performance.now();
     if (now < winLockUntil && btn !== winLockEl) {
       e.preventDefault();
@@ -14832,6 +14903,23 @@
   document.addEventListener("pointerdown", guardWindowBtn, true);
   document.addEventListener("pointerup", guardWindowBtn, true);
   document.addEventListener("click", guardWindowBtn, true);
+  overlay.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab" || overlay.getAttribute("aria-modal") !== "true") return;
+    const list = a11yNodes(overlay);
+    if (!list.length) { e.preventDefault(); return; }
+    const first = list[0], last = list[list.length - 1], cur = document.activeElement;
+    if (e.shiftKey && (cur === first || !overlay.contains(cur))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (cur === last || !overlay.contains(cur))) { e.preventDefault(); first.focus(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab" || !overlay || overlay.getAttribute("aria-modal") !== "true") return;
+    if (document.querySelector("#auth-modal.open, #profile-modal.open")) return;
+    if (overlay.contains(document.activeElement)) return;
+    const list = a11yNodes(overlay);
+    if (!list.length) return;
+    e.preventDefault();
+    (e.shiftKey ? list[list.length - 1] : list[0]).focus();
+  }, true);
   overlay.addEventListener("click", (e) => {
     const go = e.target.closest("#go");
     if (!go) return;
@@ -14899,6 +14987,20 @@
       +"<button type=\"button\" class=\"cta opt-item\" id=\"kb-reset\">"+(es?"Restablecer teclas":"Reset to defaults")+"</button>"
       +"<p class=\"kb-note\">"+(es?"Flechas también mueven en batalla; ↑ también salta. Esc cancela la reasignación.":"Arrow keys also move in battle; ↑ also jumps. Esc cancels rebinding.")+"</p>";
   }
+  function kbHelpHtml() {
+    const es = chanceLang();
+    const head = { play: es ? "Juego" : "Run", battle: es ? "Batalla" : "Battle", ui: es ? "Menús y cartas" : "Menus and cards" };
+    let h = "<div class=\"help kb-help\"><p class=\"k\">" + t("a11yKeys") + "</p>";
+    let g = "";
+    KB_DEFS.forEach((d) => {
+      if (d.g !== g) { g = d.g; h += "<p class=\"k\">" + head[g] + "</p>"; }
+      h += "<p><span>" + (es ? d.es : d.en) + "</span> <kbd>" + kbLabel(KB[d.id]) + "</kbd></p>";
+    });
+    h += "<p><span>" + (es
+      ? "También puedes recorrer los botones con Tab y activarlos con Enter o Espacio. ? abre esta lista."
+      : "You can also move through buttons with Tab and activate them with Enter or Space. ? opens this list.") + "</span></p></div>";
+    return h;
+  }
   function kbBind(){
     overlay.querySelectorAll("[data-kb]").forEach(b=>{b.onclick=(e)=>{e.stopPropagation();kbCapture=b.getAttribute("data-kb");kbMsg="";renderOverlay();};});
     const r=$("kb-reset");if(r)r.onclick=(e)=>{e.stopPropagation();kbCapture=null;try{localStorage.removeItem(KB_STORE);}catch(_){}kbLoad();kbMsg=chanceLang()?"Teclas restablecidas.":"Keys reset.";kbHints();renderOverlay();};
@@ -14915,14 +15017,18 @@
     let el=$("kb-sheet");
     const show=force!=null?force:!(el&&el.classList.contains("open"));
     if(!show){if(el)el.classList.remove("open");document.body.classList.remove("kb-sheet-on");return;}
-    if(!el){el=document.createElement("div");el.id="kb-sheet";el.setAttribute("role","dialog");el.onclick=()=>kbSheetToggle(false);document.body.appendChild(el);}
+    if(!el){el=document.createElement("div");el.id="kb-sheet";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.onclick=()=>kbSheetToggle(false);el.addEventListener("keydown",(ev)=>{if(ev.key!=="Tab")return;const list=el.querySelectorAll("button,a[href]");if(!list.length){ev.preventDefault();return;}const first=list[0],last=list[list.length-1];if(ev.shiftKey&&document.activeElement===first){ev.preventDefault();last.focus();}else if(!ev.shiftKey&&document.activeElement===last){ev.preventDefault();first.focus();}});document.body.appendChild(el);}
     const es=chanceLang();
     const head={play:es?"Juego":"Run",battle:es?"Batalla":"Battle",ui:es?"Menús y cartas":"Menus & cards"};
     let h="<div class=\"kb-sheet-box\"><p class=\"k\">"+(es?"ATAJOS DE TECLADO":"KEYBOARD SHORTCUTS")+"</p><div class=\"kb-sheet-cols\">",g="";
     KB_DEFS.forEach(d=>{if(d.g!==g){if(g)h+="</div>";g=d.g;h+="<div><p class=\"kb-sec\">"+head[g]+"</p>";}
       h+="<div class=\"kb-row\"><span>"+(es?d.es:d.en)+"</span><kbd>"+kbLabel(KB[d.id])+"</kbd></div>";});
-    h+="</div></div><p class=\"kb-note\">"+(es?"? o Esc cierra · Cámbialas en Opciones → Juego → Teclas (PC)":"? or Esc closes · Rebind in Options → Gameplay → Keys (PC)")+"</p></div>";
+    h+="</div></div><p class=\"kb-note\">"+(es?"? o Esc cierra · Cámbialas en Opciones → Juego → Teclas (PC)":"? or Esc closes · Rebind in Options → Gameplay → Keys (PC)")+"</p>"
+      +"<button type=\"button\" class=\"cta\" id=\"kb-sheet-x\">"+(es?"Cerrar":"Close")+"</button></div>";
+    el.setAttribute("aria-label", es?"Atajos de teclado":"Keyboard shortcuts");
     el.innerHTML=h;el.classList.add("open");document.body.classList.add("kb-sheet-on");
+    const xBtn=el.querySelector("#kb-sheet-x");
+    if(xBtn){xBtn.onclick=(ev)=>{ev.stopPropagation();kbSheetToggle(false);};setTimeout(()=>{try{xBtn.focus();}catch(err){}},0);}
     if(S.phase==="play"&&!S.mp)togglePause();
   }
   function kbClickFirst(sel){const el=overlay.querySelector(sel);if(el&&!el.disabled&&el.offsetParent!==null){el.click();return true;}return false;}
@@ -14950,7 +15056,9 @@
     }
     const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || (e.target && e.target.isContentEditable);
-    if (typing) return;
+    if (typing && e.key !== "Escape") return;
+    const ae = document.activeElement;
+    if (ae && ae.closest && ae.closest("button, a[href], summary, [role='button']") && (e.key === " " || e.key === "Enter" || e.code === "Space")) return;
     if (S.mp && (S.phase === "play" || S.phase === "count") && /^Digit[1-8]$/.test(e.code || "") && !e.repeat && window.ChoppyMP && window.ChoppyMP.REACTS) {
       const n = (e.code.charCodeAt(5) - 49) | 0;
       const pick = window.ChoppyMP.REACTS[n];
@@ -15193,14 +15301,91 @@
       renderHud();
     };
   });
+  function onKeyClick(el, fn) {
+    if (!el || el.dataset.keyClick) return;
+    el.dataset.keyClick = "1";
+    el.addEventListener("click", (e) => {
+      if (e.detail !== 0) return;
+      e.stopPropagation();
+      fn(e);
+    });
+  }
+  onKeyClick($("pause-btn"), () => { if (!S.mp) togglePause(); });
+  onKeyClick($("opt-btn"), () => toggleOptions());
+  onKeyClick($("buy-btc"), () => {
+    if (aiLocks().trade) return;
+    buyBtc();
+    clearManualTradePaint();
+    renderHud();
+  });
+  onKeyClick($("sell-btc"), () => {
+    if (aiLocks().trade) return;
+    sellBtc();
+    clearManualTradePaint();
+    renderHud();
+  });
+  onKeyClick($("dca-btn"), () => {
+    if (S.have.dca <= 0 || aiLocks().dca) return;
+    S.dcaOn = !S.dcaOn;
+    if (S.aibudLit) S.aibudLit.dca = false;
+    renderHud();
+  });
+  onKeyClick($("iabud-btn"), () => {
+    if ((S.have.aibud || 0) <= 0) return;
+    S.aibudOn = !S.aibudOn;
+    if (!S.aibudOn) { S.aibudLit = {}; S.aibudLitAt = {}; }
+    renderHud();
+  });
+  onKeyClick($("trend-btn"), () => {
+    if (S.have.manip <= 0 || aiLocks().trend) return;
+    S.trend = S.trend === "off" ? "up" : S.trend === "up" ? "down" : "off";
+    if (S.aibudLit) S.aibudLit.trend = false;
+    renderHud();
+  });
+  onKeyClick($("market-btn"), () => {
+    if ((S.have.market || 0) <= 0 || S.mp) return;
+    S.optBack = S.phase === "play" ? "play" : (S.optBack || "ready");
+    S.optPanel = "market";
+    if (S.phase === "play") setPhase("paused");
+    else renderOverlay();
+    armWindowLock();
+  });
+  document.querySelectorAll(".spd").forEach((btn) => {
+    onKeyClick(btn, () => {
+      if (S.have.ff <= 0) return;
+      cycleSpeed();
+      renderHud();
+    });
+  });
+  onKeyClick($("juke-hud-play"), () => {
+    if ((S.have.juke || 0) <= 0) return;
+    if ((A.jukePlaying && A.jukePlaying()) || (A.jukePaused && A.jukePaused())) jukePause();
+    else jukePlay();
+    paintJukeHud();
+  });
 
+  function syncStaticAria() {
+    const es = chanceLang();
+    const set = (id, en, sp) => { const el = $(id); if (el) el.setAttribute("aria-label", es ? sp : en); };
+    set("juke-hud-play", "Play or pause", "Reproducir o pausar");
+    set("juke-hud-vol", "Volume", "Volumen");
+    set("def-rev", "Reverse", "Reversa");
+    set("def-arc", "Shot spread", "Dispersión del disparo");
+    set("def-aa", "Fury strike", "Golpe de furia");
+    set("bc-close", "Close", "Cerrar");
+    set("bc-open", "Bitcoin Country", "Bitcoin Country");
+    const canvasEl = $("c");
+    if (canvasEl) canvasEl.setAttribute("aria-label", es ? "Campo de juego de Choppy Bitcoin" : "Choppy Bitcoin playfield");
+  }
   window.addEventListener("bz-lang", () => {
     if (window.BZ) BZ.apply(document);
     if (A && A.setLang && window.BZ && BZ.lang) A.setLang(BZ.lang());
+    try { syncStaticAria(); } catch (e) {}
     renderOverlay();
     renderHud();
     try { renderBitcoinCountry(); } catch (e) {}
   });
+  try { syncStaticAria(); } catch (e) {}
   const bcOpen=$("bc-open"),bcClose=$("bc-close"),bcArmy10=$("bc-army10"),bcArmyBar=$("bc-army-bar"),bcDeclare=$("bc-declare"),bcForm=$("bc-form-army");
   if(bcOpen)bcOpen.addEventListener("click",()=>{const p=$("bc-panel");if(p)p.classList.remove("hide");renderBitcoinCountry();});
   if(bcClose)bcClose.addEventListener("click",()=>{const p=$("bc-panel");if(p)p.classList.add("hide");});

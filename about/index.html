@@ -127,7 +127,7 @@
     .brand-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 28px; }
     .brand { margin-bottom: 0; }
     .lang-sw { display: flex; gap: 4px; margin-right: 8px; }
-    .lang-sw button { min-width: 36px; min-height: 32px; border: 1px solid #3a3a40; background: transparent; color: var(--paper); font: inherit; font-size: 11px; cursor: pointer; }
+    .lang-sw button { min-width: 44px; min-height: 44px; border: 1px solid #3a3a40; background: transparent; color: var(--paper); font: inherit; font-size: 11px; cursor: pointer; }
     .lang-sw button.on { border-color: var(--gold); color: var(--gold); }
     .auth-chip {
       min-height: 32px; padding: 0 12px;
@@ -163,22 +163,23 @@
       #profile-modal .auth-card { width: min(320px, 96vw); max-height: 68dvh; padding: 8px 10px; gap: 5px; }
       #profile-modal .auth-card h2 { font-size: 15px; margin: 0; }
       #profile-modal .auth-card label { font-size: 12px; }
-      #profile-modal .auth-card input { min-height: 28px; }
-      #profile-modal .auth-card .cta { min-height: 32px; font-size: 13px; }
+      #profile-modal .auth-card input { min-height: 44px; }
+      #profile-modal .auth-card .cta { min-height: 44px; font-size: 13px; }
       #profile-score-info { font-size: 13px; margin: 0; }
       #profile-awards { max-height: 22vh; overflow-y: auto; }
     }
     .aw-on { color: #f3efe6; }
-    .aw-off { color: #6a6660; }
+    .aw-off { color: #b7b3ac; }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     .board-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .stats-mini {
       display: inline-block; font: inherit; font-size: 10px; letter-spacing: 0.08em;
-      padding: 2px 8px; min-height: 22px; cursor: pointer;
+      padding: 10px 12px; min-height: 44px; cursor: pointer;
       background: transparent; color: #f3efe6; border: 1px solid #F2A900;
     }
     @media (min-width: 640px) { .chips { grid-template-columns: repeat(4, 1fr); } }
   </style>
-  <script src="/choppy-bitcoin/nozoom.js"></script>
+  <script src="/choppy-bitcoin/nozoom.js?v=mp195"></script>
 </head>
 <body>
   <main class="wrap">
@@ -191,7 +192,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-        <div class="lang-sw" role="group" aria-label="Language">
+        <div class="lang-sw" role="group" aria-label="Language" data-i18n-label="language">
           <button type="button" data-lang="en">EN</button>
           <button type="button" data-lang="es">ES</button>
         </div>
@@ -252,7 +253,7 @@
     </section>
     <footer>© Bitcoinizate · <a href="/privacy.html" data-i18n="privacy">Privacy</a> · <a href="https://discord.gg/HkS8epr8mE" target="_blank" rel="noopener noreferrer">Discord</a> · <a href="mailto:hello@bitcoinizate.com">hello@bitcoinizate.com</a> · <a href="https://bitcoinizate.com/choppy-bitcoin/" data-i18n="playLink">play Choppy Bitcoin</a></footer>
   </main>
-  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-labelledby="modal-auth-title">
+  <div id="auth-modal" class="auth-modal hide" role="dialog" aria-modal="true" aria-labelledby="modal-auth-title">
     <div class="auth-card">
       <h2 id="modal-auth-title" data-i18n="signIn">Sign in</h2>
       <label class="hide" id="group-alias"><span data-i18n="alias">Alias</span><input id="auth-username" autocomplete="username" maxlength="16"></label>
@@ -267,9 +268,9 @@
       <button type="button" class="text-btn" id="btn-close-auth" data-i18n="close">Close</button>
     </div>
   </div>
-  <div id="profile-modal" class="auth-modal hide" role="dialog">
+  <div id="profile-modal" class="auth-modal hide" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
     <div class="auth-card">
-      <h2 data-i18n="profile">Profile</h2>
+      <h2 id="profile-modal-title" data-i18n="profile">Profile</h2>
       <p id="profile-score-info"></p>
       <label><span data-i18n="alias">Alias</span><input id="profile-alias" maxlength="16" autocomplete="username"></label>
       <p id="alias-hint" class="auth-msg"></p>
@@ -282,10 +283,10 @@
       <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp194"></script>
-  <script src="/choppy-bitcoin/i18n-extra.js?v=mp194"></script>
+  <script src="/choppy-bitcoin/i18n.js?v=mp195"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp195"></script>
   <script src="/choppy-bitcoin/supabase-lib.js"></script>
-  <script src="/choppy-bitcoin/auth.js?v=mp194"></script>
+  <script src="/choppy-bitcoin/auth.js?v=mp195"></script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
     (function () {

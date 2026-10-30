@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("choppy-allow-zoom") !== "1") return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, viewport-fit=cover");
+      } catch (e) {}
+    })();
+  </script>
   <title>Edit profile | Bitcoinizate</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
@@ -14,14 +23,15 @@
     input[type=text] { width: min(360px, 100%); padding: 8px; background: #1a1a1a; color: #eee; border: 1px solid #444; }
     input[type=file] { display: block; margin-top: 6px; }
     img { width: 96px; height: 96px; object-fit: cover; border: 1px solid #444; background: #222; margin-top: 8px; }
-    button { margin-top: 16px; padding: 8px 14px; }
+    button { margin-top: 16px; padding: 10px 14px; min-height: 44px; }
+    :focus-visible { outline: 2px solid #F2A900; outline-offset: 2px; }
     .msg { margin-top: 10px; min-height: 18px; color: #8f8; font-size: 13px; }
     .msg.bad { color: #f88; }
     .hide { display: none !important; }
     a { color: #F2A900; }
     .stats-mini {
       display: inline-block; font: inherit; font-size: 11px; margin-left: 8px;
-      padding: 4px 10px; cursor: pointer; background: transparent; color: #eee; border: 1px solid #F2A900;
+      padding: 10px 12px; min-height: 44px; cursor: pointer; background: transparent; color: #eee; border: 1px solid #F2A900;
     }
   </style>
 </head>
@@ -43,7 +53,7 @@
   </form>
   <p><a id="public-link" href="/" data-i18n="profilePublic">Public profile</a></p>
   <script src="/choppy-bitcoin/i18n.js"></script>
-  <script src="/choppy-bitcoin/i18n-extra.js?v=mp194"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp195"></script>
   <script src="/choppy-bitcoin/supabase-lib.js"></script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
@@ -55,6 +65,8 @@
       var es = window.BZ && BZ.lang && BZ.lang() === "es";
       syncProfileChrome();
       window.addEventListener("bz-lang", syncProfileChrome);
+      var prevImg = document.getElementById("preview");
+      if (prevImg) prevImg.alt = "";
       var sb = window.supabase && window.supabase.createClient && window.supabase.createClient();
       var form = document.getElementById("form");
       var need = document.getElementById("need");
@@ -93,6 +105,7 @@
           if (!data) { setMsg(es ? "No se pudo leer la imagen." : "Could not read image.", true); return; }
           pendingAvatar = data;
           preview.src = data;
+          preview.alt = es ? "Vista previa del avatar" : "Avatar preview";
         });
       };
       if (!sb) {
@@ -125,7 +138,7 @@
           aliasEl.value = profile.username || guess || "";
           try {
             var localAv = localStorage.getItem("choppy-avatar-" + uid);
-            if (localAv) preview.src = localAv;
+            if (localAv) { preview.src = localAv; preview.alt = es ? "Vista previa del avatar" : "Avatar preview"; }
           } catch (err) {}
           document.getElementById("public-link").href = "/choppy-bitcoin/u/?u=" + encodeURIComponent(aliasEl.value || "");
           var sc = document.getElementById("dash-score");
@@ -196,7 +209,7 @@
       try { on = new URLSearchParams(location.search).get("nftpreview") === "1"; } catch (e) { on = false; }
       if (!on) return;
       var s = document.createElement("script");
-      s.src = "/choppy-bitcoin/nft-preview.js?v=mp194";
+      s.src = "/choppy-bitcoin/nft-preview.js?v=mp195";
       s.defer = true;
       document.body.appendChild(s);
     })();

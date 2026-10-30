@@ -20,6 +20,7 @@ const OUT = path.join(ROOT, "tests", "out", "i18n-report.md");
 const FILES = [
   "i18n.js",
   "i18n-extra.js",
+  "chess-data.js",
   "game.js",
   "auth.js",
   "audio.js",

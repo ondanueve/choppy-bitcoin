@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("choppy-allow-zoom") !== "1") return;
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) m.setAttribute("content", "width=device-width, initial-scale=1, viewport-fit=cover");
+      } catch (e) {}
+    })();
+  </script>
   <title>Player profile | Bitcoinizate</title>
   <meta name="robots" content="index,follow">
   <link rel="icon" type="image/png" sizes="48x48" href="/choppy-bitcoin/favicon-48.png">
@@ -44,15 +53,16 @@
     }
     .stats-mini {
       display: inline-block; font: inherit; font-size: 11px; letter-spacing: 0.08em;
-      padding: 4px 10px; margin-left: 8px; cursor: pointer;
+      padding: 10px 12px; min-height: 44px; margin-left: 8px; cursor: pointer;
       background: transparent; color: var(--paper); border: 1px solid var(--gold);
     }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="brand">
-      <a href="/"><img src="/choppy-bitcoin/favicon-192.png" alt=""></a>
+      <a href="/"><img src="/choppy-bitcoin/favicon-192.png" alt="Bitcoinizate"></a>
       <p><a href="/">BITCOINIZATE</a></p>
     </div>
     <p class="k" id="k-profile">Profile</p>
@@ -73,7 +83,7 @@
     <a class="play" href="/choppy-bitcoin/" data-i18n="play">Play Choppy Bitcoin</a>
   </div>
   <script src="/choppy-bitcoin/i18n.js"></script>
-  <script src="/choppy-bitcoin/i18n-extra.js?v=mp194"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp195"></script>
   <script src="/choppy-bitcoin/supabase-lib.js"></script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
@@ -184,7 +194,7 @@
         if (!pic) {
           try { pic = localStorage.getItem("choppy-avatar-" + row.id) || ""; } catch (e) {}
         }
-        if (pic) { av.src = pic; av.classList.remove("hide"); }
+        if (pic) { av.src = pic; av.alt = (es ? "Avatar de @" : "Avatar of @") + name; av.classList.remove("hide"); }
         var owned = {};
         (row.awards || []).forEach(function (id) { owned[id] = true; });
         var html = CATALOG.filter(function (a) { return owned[a.id]; }).map(function (a) {
