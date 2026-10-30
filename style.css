@@ -270,6 +270,30 @@ body {
   color: #ffe7a0; background: rgba(10,10,12,0.72);
   border: 1px solid var(--gold); padding: 3px 8px; pointer-events: none;
 }
+.mp-link {
+  position: absolute; top: 8px; left: 8px; z-index: 8;
+  font-size: 10px; letter-spacing: 0.08em; font-weight: 700;
+  color: #d7ffd0; background: rgba(10,10,12,0.72);
+  border: 1px solid #1f8a4c; padding: 3px 8px; pointer-events: none;
+}
+.mp-link.wait { color: #ffe7a0; border-color: var(--gold); }
+.mp-link.off { color: #ffb4ae; border-color: #a33a32; }
+.mp-link.hide { display: none !important; }
+.mp-reacts { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 8px 4px; }
+.mp-reacts.hide { display: none !important; }
+.mp-react {
+  min-height: 28px; padding: 0 8px; font: inherit; font-size: 10px; letter-spacing: 0.06em;
+  font-weight: 700; text-transform: uppercase; background: transparent; color: var(--fg);
+  border: 1px solid var(--line);
+}
+.mp-rounds { width: min(280px, 92%); margin: 4px auto; text-align: left; font-size: 12px; }
+.mp-rounds div { padding: 2px 0; border-bottom: 1px solid var(--line); }
+.mp-rooms { width: 220px; max-width: 72%; margin: 6px auto; display: flex; flex-direction: column; gap: 4px; }
+.mp-room {
+  min-height: 36px; font: inherit; font-size: 11px; letter-spacing: 0.04em;
+  background: transparent; color: var(--fg); border: 1px solid var(--gold); text-align: left; padding: 0 8px;
+}
+.mp-open { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #c4c0b8; margin: 6px 0; }
 .mp-list { list-style: none; width: 220px; max-width: 72%; margin: 8px auto; text-align: left; font-size: 12px; }
 .mp-list li { padding: 6px 8px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; min-height: 32px; }
 .mp-list li.out { color: var(--muted); text-decoration: line-through; }

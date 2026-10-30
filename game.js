@@ -472,6 +472,12 @@
     mpNote: "Same candles. Last standing, whale, or race. Does not count for the board.",
     eloBoard: "VERSUS ELO", eloGuest: "Sign in to record ELO", eloUpdated: "ELO updated", eloPending: "ELO not saved",
     eloDisputed: "No ELO change (no agreement)", eloTooShort: "Too short for ELO", eloLimited: "ELO rate limit",
+    mpLinkOn: "Connected", mpLinkWait: "Reconnecting", mpLinkOff: "Offline",
+    mpShare: "COPY RESULT", mpShared: "COPIED", mpRound: "Round", mpSeriesWin: "wins the series",
+    mpAway: "away", mpOpen: "Open room", mpPrivate: "Private room", mpPublic: "Open rooms",
+    mpNoRooms: "No open rooms", mpRestored: "Round restored",
+    reactGg: "GG", reactNice: "Nice", reactWow: "Wow", reactRip: "RIP",
+    reactUp: "Up", reactDown: "Down", reactGl: "GL", reactHf: "HF",
     soundOn: "ON", soundOff: "OFF",
     bullSongs: "BULL/BEAR SONGS", gameFx: "GAME FX", voices: "VOICES",
     chanceHead: "ARC", chanceAck: "GOT IT", chanceTldr: "TLDR", chanceOutcome: "OUTCOME",
@@ -946,7 +952,7 @@
     stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true,
     mp: false, worldSeed: 0, worldRand: null, mpOver: false, mpErr: "", mpJoinCode: "",
     mpRules: null, mpPlayAt: 0, mpSlot: 0, btcColdAt: 0, spectate: false, finished: false,
-    mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false, mpSeriesT0: 0, mpEloTry: 0,
+    mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false, mpSeriesT0: 0, mpEloTry: 0, mpLog: [], mpCatch: false,
     jobTrack: null, jobOffer: null, jobName: "",
     have: { dca: 0, ff: 0, adopt: 0, manip: 0, candy: 0, juke: 0, aibud: 0, job: 0, market: 0, chance: 0, opsec: 0 },
     poolTier: { dca: 1, ff: 1, adopt: 1, manip: 1, candy: 1, juke: 1, aibud: 1, job: 1, market: 1, chance: 1, opsec: 1 },
@@ -9827,6 +9833,7 @@
     if(p!=="defense"){S.defPtr=null;if(S.defHeld)S.defHeld={u:0,d:0,l:0,r:0,f:0,aa:0};}
     try { renderOverlay(); } catch (e) { if (p !== "play") showOverlay(); }
     try { renderHud(); } catch (e) {}
+    try { syncMpChrome(); } catch (e) {}
   }
 
   function startGame(ranked) {
@@ -9985,8 +9992,10 @@
       if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (Math.random() - 0.45) * S.vtPrice * 0.01 * dt + S.vtPrice * 0.0012 * dt);
     }
     S.lifeT += dt; S.sampleAcc += dt;
-    try { awardTick(dt); } catch (e) {}
-    tickAi(dt);
+    if (!S.mpCatch) {
+      try { awardTick(dt); } catch (e) {}
+      tickAi(dt);
+    }
     while (S.sampleAcc >= 0.12) {
       S.tape.push(S.price);
       S.tapeCash.push(S.cash);
@@ -9997,7 +10006,7 @@
     }
     if (!S.hitCap && (S.btc || 0) >= BTC_CAP) {
       S.btc = BTC_CAP;
-      S.hitCap = true; A.sfx.cap();
+      S.hitCap = true; if (!S.mpCatch) A.sfx.cap();
       if (S.mp) return;
       A.speak(t("floatYours"), true);
       snapshotRun();
@@ -10060,10 +10069,13 @@
         if (p.finish) {
           if (!watching) mpFinishRace();
         } else {
-          S.candles++; A.sfx.coin();
-          grantUsd(100, p.x + pw * 0.5, p.gapY - 50, "gain");
-          tickJobChance();
-          if (S.phase === "play" && !S.ranked && S.candles > 0 && S.candles % 10 === 0) openPerkOffer();
+          S.candles++;
+          if (!S.mpCatch) {
+            A.sfx.coin();
+            grantUsd(100, p.x + pw * 0.5, p.gapY - 50, "gain");
+            tickJobChance();
+            if (S.phase === "play" && !S.ranked && S.candles > 0 && S.candles % 10 === 0) openPerkOffer();
+          }
         }
       }
       const inX = S.bird.x + hitR > p.x + 2 && S.bird.x - hitR < p.x + pw - 2;
@@ -11544,8 +11556,25 @@
     const selfGhost = !!(S.mp && (S.spectate || S.dead || S.finished) && foc && foc.id !== mineId);
     if (!blink && !selfGhost) drawBirdAt(ctx, S.bird.x, S.bird.y, S.bird.v, S.bird.r, myHero(), wash, 1, S.laserOn, HERO_ANIM, HERO_SKIN);
     if (S.mp && window.ChoppyMP) {
+      let reactNow = 0;
+      if (mpReactUntil) {
+        reactNow = Date.now();
+        if (reactNow >= mpReactUntil) { mpReactUntil = 0; reactNow = 0; }
+        else {
+          ctx.font = "700 12px \"IBM Plex Mono\", monospace";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillStyle = "#ffe7a0";
+        }
+      }
       (window.ChoppyMP.players() || []).forEach((p) => {
-        if (!p || p.id === mineId) return;
+        if (!p) return;
+        if (reactNow && p.react && p.react.glyph && p.react.until > reactNow) {
+          const rx = p.id === mineId ? S.bird.x : (p._gx != null ? p._gx : p.x);
+          const ry = p.id === mineId ? S.bird.y : (p._gy != null ? p._gy : p.y);
+          if (rx != null && ry != null) ctx.fillText(p.react.glyph, rx, ry - 28);
+        }
+        if (p.id === mineId) return;
         if (p.x == null || p.y == null) return;
         const h = heroOf(p.slot || 0);
         const lead = foc && p.id === foc.id;
@@ -11840,7 +11869,7 @@
           const you = p.id === mine;
           const lead = foc && p.id === foc.id;
           const w = wins[p.id] != null ? wins[p.id] : 0;
-          const extra = (lead && S.mpRoundOver) ? t("mpWins") : dead ? t("mpDead") : fin ? t("mpFinished") : "";
+          const extra = (lead && S.mpRoundOver) ? t("mpWins") : dead ? t("mpDead") : fin ? t("mpFinished") : (p.gone ? t("mpAway") : "");
           return "<span class=\"mp-pill" + (dead || fin ? " out" : "") + (lead ? " lead" : "") + "\"><span class=\"dot\" style=\"background:" + h.fill + "\"></span>"
             + (p.name || "?") + (you ? " · " + t("mpYou") : "")
             + (S.mpRules && S.mpRules.bestOf > 1 ? " · " + w : "")
@@ -13519,6 +13548,7 @@
       + "<label>" + t("mpSwanW") + "</label><input type=\"number\" id=\"mp-w-swan\" min=\"0\" max=\"100\" value=\"" + (r.swan | 0) + "\"" + dis + ">"
       + "<label>" + t("mpColdW") + "</label><input type=\"number\" id=\"mp-w-cold\" min=\"0\" max=\"100\" value=\"" + (r.cold | 0) + "\"" + dis + ">"
       + "</div>"
+      + "<label class=\"mp-open\"><input type=\"checkbox\" id=\"mp-open\"" + (r.open ? " checked" : "") + dis + "> " + t("mpOpen") + "</label>"
       + "<div class=\"mute-row\" style=\"margin-top:8px\">"
       + "<button type=\"button\" class=\"mute-tog" + (r.muteTheme ? " on" : "") + "\" id=\"mp-mute-theme\"" + (host ? "" : " disabled") + ">" + t("bullSongs") + " " + (r.muteTheme ? t("soundOff") : t("soundOn")) + "</button>"
       + "<button type=\"button\" class=\"mute-tog" + (r.muteSfx ? " on" : "") + "\" id=\"mp-mute-sfx\"" + (host ? "" : " disabled") + ">" + t("gameFx") + " " + (r.muteSfx ? t("soundOff") : t("soundOn")) + "</button>"
@@ -13550,7 +13580,8 @@
       bestOf: bestOf === 3 || bestOf === 5 || bestOf === 7 ? bestOf : 1,
       muteTheme: !!(r.muteTheme),
       muteSfx: !!(r.muteSfx),
-      muteVoice: !!(r.muteVoice)
+      muteVoice: !!(r.muteVoice),
+      open: $("mp-open") ? !!$("mp-open").checked : !!r.open
     };
   }
   function pushHostRules(extra) {
@@ -13653,6 +13684,12 @@
       }
     };
     if ($("mp-back")) $("mp-back").onclick = (e) => { e.stopPropagation(); leaveMp(); };
+    const mpBack = $("mp-back");
+    if (mpBack && window.ChoppyMP && window.ChoppyMP.get && !window.ChoppyMP.get().code) {
+      const rooms = document.createElement("div");
+      rooms.innerHTML = mpPublicHtml();
+      mpBack.parentNode.insertBefore(rooms, mpBack);
+    }
     const inp = $("mp-code");
     if (inp) {
       inp.oninput = () => {
@@ -13684,6 +13721,81 @@
     bindMute("mp-mute-theme", "muteTheme");
     bindMute("mp-mute-sfx", "muteSfx");
     bindMute("mp-mute-voice", "muteVoice");
+    if ($("mp-open")) $("mp-open").onchange = () => { pushHostRules(); };
+    if (overlay && overlay.querySelectorAll) overlay.querySelectorAll("[data-room]").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const code = btn.getAttribute("data-room") || "";
+        S.mpJoinCode = code;
+        S.mpErr = "";
+        if (window.ChoppyMP) window.ChoppyMP.join(code);
+      };
+    });
+  }
+  function mpPublicHtml() {
+    const rows = (window.ChoppyMP && window.ChoppyMP.rooms && window.ChoppyMP.rooms()) || [];
+    let html = "<p class=\"k\">" + t("mpPublic") + "</p>";
+    if (!rows.length) return html + "<p class=\"k\">" + t("mpNoRooms") + "</p>";
+    html += "<div class=\"mp-rooms\">";
+    rows.forEach((r) => {
+      const mode = r.mode === "whale" ? t("mpWhale") : r.mode === "race" ? t("mpRace") : t("mpLast");
+      html += "<button type=\"button\" class=\"mp-room\" data-room=\"" + r.code + "\">" + r.code + " · " + mode + " · " + (r.n | 0) + "/8</button>";
+    });
+    return html + "</div>";
+  }
+  function mpRoundLines() {
+    const rows = S.mpLog || [];
+    if (!rows.length) return "";
+    let html = "<div class=\"mp-rounds\">";
+    rows.forEach((r) => { html += "<div>" + t("mpRound") + " " + r.n + " · " + (r.name || "?") + "</div>"; });
+    return html + "</div>";
+  }
+  function mpEloLines() {
+    if (!Array.isArray(S.mpElo) || !S.mpElo.length) return "";
+    const list = (window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || [];
+    let html = "<div class=\"mp-rounds\">";
+    S.mpElo.forEach((row) => {
+      let name = "";
+      for (let i = 0; i < list.length; i++) if (list[i].uid === row.id) name = list[i].name || "";
+      if (!name) name = String(row.id || "").slice(0, 8);
+      const after = row.elo | 0;
+      const before = after - (row.delta | 0);
+      const delta = row.delta | 0;
+      html += "<div>" + name + " " + before + " → " + after + " (" + (delta > 0 ? "+" : "") + delta + ")</div>";
+    });
+    return html + "</div>";
+  }
+  function mpShareText() {
+    const w = S.mpWinner || {};
+    const lines = [t("versus"), (w.name || "?") + " " + t("mpSeriesWin")];
+    (S.mpLog || []).forEach((r) => { lines.push(t("mpRound") + " " + r.n + ": " + (r.name || "?")); });
+    if (Array.isArray(S.mpElo)) {
+      const list = (window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || [];
+      S.mpElo.forEach((row) => {
+        let name = "?";
+        for (let i = 0; i < list.length; i++) if (list[i].uid === row.id && list[i].name) name = list[i].name;
+        lines.push(name + " " + ((row.elo | 0) - (row.delta | 0)) + " → " + (row.elo | 0));
+      });
+    } else if (S.mpEloNote) lines.push(S.mpEloNote);
+    return lines.join("\n");
+  }
+  function noteMpRound(w) {
+    if (!w || !w.id) return;
+    if (!Array.isArray(S.mpLog)) S.mpLog = [];
+    const n = S.mpGameN | 0 || 1;
+    for (let i = 0; i < S.mpLog.length; i++) if (S.mpLog[i].n === n) return;
+    S.mpLog.push({ n: n, id: w.id, name: w.name || "?" });
+  }
+  function copyMpResult(btn) {
+    const text = mpShareText();
+    const done = () => {
+      if (!btn) return;
+      btn.textContent = t("mpShared");
+      setTimeout(() => { if (btn) btn.textContent = t("mpShare"); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(done);
+    } else done();
   }
   function applyMpSound(r) {
     if (!A) return;
@@ -13701,7 +13813,7 @@
     const last = !!S.mpSeriesOver;
     const left = S.mpNextAt ? Math.max(0, Math.ceil((S.mpNextAt - Date.now()) / 1000)) : 0;
     const title = S.mpRoundOver
-      ? (win.id === mine ? t("mpYouWin") : ((win.name || foc.name || "?") + " " + t("mpWins")))
+      ? (last ? ((win.name || "?") + " " + t("mpSeriesWin")) : (win.id === mine ? t("mpYouWin") : ((win.name || foc.name || "?") + " " + t("mpWins"))))
       : (t("mpSpec") + " · " + (foc.name || ""));
     const bo = (S.mpRules && S.mpRules.bestOf) || 1;
     const series = bo > 1
@@ -13713,7 +13825,8 @@
     const timer = S.mpRoundOver && left
       ? "<p class=\"k\">" + (last ? t("mpRematch") + (voteN ? " " + votes + "/" + voteN : "") : t("mpNext")) + " · " + left + "s</p>"
       : "";
-    return "<p class=\"k\">" + title + "</p>" + series + timer
+    const recap = last ? (mpRoundLines() + mpEloLines() + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>") : "";
+    return "<p class=\"k\">" + title + "</p>" + series + timer + recap
       + "<div class=\"overlay-actions\">"
       + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-quit\">" + t("mpQuit") + "</button>"
       + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-stats\">" + t("runStats") + "</button>"
@@ -13734,21 +13847,27 @@
       if (window.ChoppyMP && window.ChoppyMP.setRematch) window.ChoppyMP.setRematch(S.mpRematchOn);
       renderOverlay();
     };
+    if ($("mp-share")) $("mp-share").onclick = (e) => { e.stopPropagation(); copyMpResult($("mp-share")); };
   }
   function mpWinHtml() {
     const w = S.mpWinner || {};
     const mine = window.ChoppyMP && w.id === window.ChoppyMP.id();
     const host = window.ChoppyMP && window.ChoppyMP.get().host;
-    return "<p class=\"k\">" + t("versus") + "</p><h1>" + (mine ? t("mpYouWin") : (w.name || "?") + " " + t("mpWins")) + "</h1>"
+    return "<p class=\"k\">" + t("versus") + "</p><h1>" + ((w.name || "?") + " " + t("mpSeriesWin")) + "</h1>"
+      + (mine ? "<p class=\"k\">" + t("mpYouWin") + "</p>" : "")
       + (S.mpEloNote ? "<p class=\"k\">" + S.mpEloNote + "</p>" : "")
+      + mpRoundLines()
+      + mpEloLines()
       + mpRosterHtml()
       + "<div class=\"overlay-actions\">"
-      + (host ? "<button class=\"cta\" id=\"mp-again\">" + t("mpReady") + "</button>" : "")
+      + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>"
+      + (host ? "<button class=\"cta\" id=\"mp-again\">" + t("mpRematch") + "</button>" : "<button class=\"cta\" id=\"mp-rematch\">" + t("mpRematch") + "</button>")
       + "<button class=\"cta play-alt\" id=\"go\">" + t("mpBack") + "</button></div>";
   }
   function openMpLobby() {
     S.mpErr = "";
     S.mp = false;
+    if (window.ChoppyMP && window.ChoppyMP.browse) window.ChoppyMP.browse(true);
     setPhase("mplobby");
   }
   function playAtFromGo(data) {
@@ -13763,7 +13882,7 @@
     }
     return now + 3200;
   }
-  function beginMpCountdown(data) {
+  function beginMpCountdown(data, resume) {
     S.mp = true;
     S.mpOver = false;
     S.mpRoundOver = false;
@@ -13776,12 +13895,13 @@
     S.runTab = null;
     S.worldSeed = (data && data.seed) >>> 0 || 1;
     S.mpRules = (data && data.rules) || mpRulesNow();
-    S.mpPlayAt = playAtFromGo(data);
+    S.mpPlayAt = (resume && data && data.startAt) ? data.startAt : playAtFromGo(data);
     S.mpSlot = (window.ChoppyMP && window.ChoppyMP.slot && window.ChoppyMP.slot()) || 0;
     S.mpSeriesWins = (data && data.wins) || (window.ChoppyMP && window.ChoppyMP.wins && window.ChoppyMP.wins()) || {};
     S.mpGameN = (data && data.gameN) || (window.ChoppyMP && window.ChoppyMP.gameN && window.ChoppyMP.gameN()) || 1;
-    if ((S.mpGameN | 0) <= 1) S.mpSeriesT0 = Date.now();
-    else if (!S.mpSeriesT0) S.mpSeriesT0 = Date.now();
+    if (data && data.seriesT0) S.mpSeriesT0 = data.seriesT0;
+    else if ((S.mpGameN | 0) <= 1 || !S.mpSeriesT0) S.mpSeriesT0 = Date.now();
+    if ((S.mpGameN | 0) <= 1) S.mpLog = [];
     S.mpElo = null;
     S.mpEloNote = "";
     S.ranked = false;
@@ -13789,10 +13909,36 @@
     resetWorld(false);
     S.dead = false;
     S.countN = 3;
+    const mine = window.ChoppyMP && window.ChoppyMP.id && window.ChoppyMP.id();
+    let me = null;
+    const snapPlayers = data && data.players;
+    if (mine && snapPlayers && snapPlayers.length) {
+      for (let i = 0; i < snapPlayers.length; i++) if (snapPlayers[i] && snapPlayers[i].id === mine) me = snapPlayers[i];
+    }
+    const alreadyOut = !!(resume && me && (me.alive === false || me.quit || data.roundOver));
+    if (alreadyOut) {
+      S.dead = true;
+      S.spectate = true;
+      S.mpRoundOver = !!(data && data.roundOver);
+      S.mpOver = S.mpRoundOver;
+      S.mpSeriesOver = !!(data && data.seriesOver);
+      S.mpWinner = (data && data.winner) || null;
+      setPhase("play");
+      return;
+    }
     setPhase("count");
   }
   function startMpPlay() {
     if (!S.mp || S.phase === "play") return;
+    if (S.mpRoundOver) {
+      S.spectate = true;
+      S.dead = true;
+      S.phase = "play";
+      if (field) field.classList.add("is-play");
+      renderHud();
+      renderOverlay();
+      return;
+    }
     S.dead = false;
     S.phase = "play";
     if (field) field.classList.add("is-play");
@@ -13864,14 +14010,57 @@
   }
   function leaveMp() {
     try { if (window.ChoppyMP) window.ChoppyMP.leave(); } catch (e) {}
-    S.mp = false; S.mpOver = false; S.mpRoundOver = false; S.worldSeed = 0; S.worldRand = null; S.mpWinner = null; S.mpElo = null; S.mpEloNote = ""; S.mpSeriesT0 = 0; S.mpEloTry = (S.mpEloTry || 0) + 1;
+    S.mp = false; S.mpOver = false; S.mpRoundOver = false; S.worldSeed = 0; S.worldRand = null; S.mpWinner = null; S.mpElo = null; S.mpEloNote = ""; S.mpSeriesT0 = 0; S.mpEloTry = (S.mpEloTry || 0) + 1; S.mpLog = []; S.mpCatch = false; mpReactUntil = 0;
     S.mpRules = null; S.mpPlayAt = 0; S.dead = false; S.spectate = false; S.finished = false; S.mpNextAt = 0; S.mpRematchOn = false; S.runTab = null;
     const app = $("app");
     if (app) app.classList.remove("vs-on");
     setPhase("ready");
   }
+  const MP_REACT_KEY = { gg: "reactGg", nice: "reactNice", wow: "reactWow", rip: "reactRip", up: "reactUp", down: "reactDown", gl: "reactGl", hf: "reactHf" };
+  function paintMpLink() {
+    const el = $("mp-link");
+    if (!el || !window.ChoppyMP || !window.ChoppyMP.link) return;
+    const state = window.ChoppyMP.link();
+    const show = !!(S.mp || S.phase === "mplobby" || S.phase === "mpwait" || S.phase === "mpwin" || S.phase === "count");
+    el.classList.toggle("hide", !show);
+    if (!show) return;
+    el.textContent = state === "on" ? t("mpLinkOn") : state === "wait" ? t("mpLinkWait") : t("mpLinkOff");
+    el.classList.toggle("on", state === "on");
+    el.classList.toggle("wait", state === "wait");
+    el.classList.toggle("off", state === "off");
+  }
+  function syncMpChrome() {
+    paintMpLink();
+    const bar = $("mp-reacts");
+    if (!bar) return;
+    bar.classList.toggle("hide", !(S.mp && (S.phase === "play" || S.phase === "count")));
+  }
+  function buildMpReacts() {
+    const bar = $("mp-reacts");
+    if (!bar || bar.childElementCount || !window.ChoppyMP || !window.ChoppyMP.REACTS) return;
+    window.ChoppyMP.REACTS.forEach((r) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "mp-react";
+      b.textContent = t(MP_REACT_KEY[r.id] || r.id);
+      b.onclick = (e) => {
+        e.stopPropagation();
+        if (window.ChoppyMP && window.ChoppyMP.react) window.ChoppyMP.react(r.id);
+      };
+      bar.appendChild(b);
+    });
+  }
+  function tryResumeMp() {
+    if (!window.ChoppyMP || !window.ChoppyMP.resumeRoom) return;
+    const row = window.ChoppyMP.resumeRoom();
+    if (!row || !row.code) return;
+    S.mpJoinCode = row.code;
+    window.ChoppyMP.join(row.code);
+    setPhase("mplobby");
+  }
   function wireMp() {
     if (!window.ChoppyMP) return;
+    buildMpReacts();
     window.ChoppyMP.setHandler((ev, data) => {
       const typing = () => {
         const ae = document.activeElement;
@@ -13922,12 +14111,39 @@
         S.mpSeriesWins = (data && data.wins) || S.mpSeriesWins || {};
         S.mpGameN = (data && data.gameN) || S.mpGameN || 1;
         S.mpSeriesOver = !!(data && data.seriesOver);
+        noteMpRound(S.mpWinner);
         S.mpNextAt = Date.now() + Math.max(4000, (data && data.waitMs) || (S.mpSeriesOver ? 12000 : 8000));
         const me = window.ChoppyMP && window.ChoppyMP.id();
         if (S.mpWinner && me && S.mpWinner.id !== me) S.spectate = true;
         if (S.mpSeriesOver) reportMpElo();
-        renderHud();
-        renderOverlay();
+        if (S.phase === "count") {
+          S.spectate = true;
+          S.dead = true;
+          setPhase("play");
+        } else {
+          renderHud();
+          renderOverlay();
+        }
+      } else if (ev === "sync") {
+        if (!data || !data.seed) return;
+        const seed = data.seed >>> 0;
+        const gn = (data.gameN | 0) || 1;
+        if (S.mp && S.worldSeed === seed && (S.mpGameN | 0) === gn && (S.phase === "play" || S.phase === "count")) return;
+        beginMpCountdown(data, true);
+        S.mpEloNote = t("mpRestored");
+      } else if (ev === "link") {
+        paintMpLink();
+      } else if (ev === "react") {
+        if (data && data.until > mpReactUntil) mpReactUntil = data.until;
+        const key = data && MP_REACT_KEY[data.rid];
+        if (key && data.id && window.ChoppyMP) {
+          const roster = window.ChoppyMP.players() || [];
+          for (let i = 0; i < roster.length; i++) {
+            if (roster[i].id === data.id && roster[i].react) roster[i].react.glyph = t(key);
+          }
+        }
+      } else if (ev === "rooms") {
+        if (S.phase === "mplobby" && !(document.activeElement && overlay && overlay.contains(document.activeElement) && document.activeElement.tagName === "INPUT")) renderOverlay();
       } else if (ev === "err") {
         S.mpErr = data === "need 2" ? t("mpNeed") : data === "not ready" ? t("mpNeedReady") : data === "full" ? t("mpFull") : data === "mix" ? t("mpMixNeed") : String(data || "error");
         if (S.phase === "mplobby") renderOverlay();
@@ -14031,6 +14247,12 @@
     } else if (p === "mpwin") {
       overlay.innerHTML = mpWinHtml();
       if ($("go")) $("go").onclick = (e) => { e.stopPropagation(); leaveMp(); };
+      if ($("mp-share")) $("mp-share").onclick = (e) => { e.stopPropagation(); copyMpResult($("mp-share")); };
+      if ($("mp-rematch")) $("mp-rematch").onclick = (e) => {
+        e.stopPropagation();
+        S.mpRematchOn = true;
+        if (window.ChoppyMP && window.ChoppyMP.setRematch) window.ChoppyMP.setRematch(true);
+      };
       if ($("mp-again") && window.ChoppyMP && window.ChoppyMP.get().host) {
         $("mp-again").onclick = (e) => {
           e.stopPropagation();
@@ -14232,12 +14454,17 @@
     }
   }
 
-  let last = performance.now(), acc = 0, hudAcc = 0;
+  let last = performance.now(), acc = 0, hudAcc = 0, mpReactUntil = 0;
   function mpCatchUp() {
     if (!S.mp || S.phase !== "play" || !S.mpPlayAt) return;
     const target = Math.max(0, (Date.now() - S.mpPlayAt) / 1000);
+    if (S.lifeT + 1 / 60 > target) return;
+    S.mpCatch = true;
+    S.invuln = 10000;
     let guard = 0;
     while (S.lifeT + 1 / 60 <= target && guard++ < 1800) step(1 / 60);
+    S.mpCatch = false;
+    S.invuln = 2.5;
   }
   function mpTickClock() {
     if (S.phase === "count" && S.mp && S.mpPlayAt) {
@@ -14465,6 +14692,12 @@
     const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || (e.target && e.target.isContentEditable);
     if (typing) return;
+    if (S.mp && (S.phase === "play" || S.phase === "count") && /^Digit[1-8]$/.test(e.code || "") && !e.repeat && window.ChoppyMP && window.ChoppyMP.REACTS) {
+      const n = (e.code.charCodeAt(5) - 49) | 0;
+      const pick = window.ChoppyMP.REACTS[n];
+      if (pick && window.ChoppyMP.react) { e.preventDefault(); window.ChoppyMP.react(pick.id); }
+      return;
+    }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const sheet = $("kb-sheet");
     if (sheet && sheet.classList.contains("open") && (e.code === "Escape" || e.key === "?")) { e.preventDefault(); kbSheetToggle(false); return; }
@@ -14919,6 +15152,7 @@
       const q = new URLSearchParams(location.search || "");
       const room = (q.get("room") || q.get("mp") || "").toUpperCase();
       if (room.length >= 4) { S.mpJoinCode = room; openMpLobby(); }
+      else tryResumeMp();
     } catch (e) {}
     requestAnimationFrame(loop);
   } catch (e) {

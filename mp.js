@@ -545,7 +545,7 @@
     p.react.rid = id;
     p.react.until = now + 1600;
     p.react.at = at || now;
-    emit("react", { id: pid, glyph: glyph, until: p.react.until });
+    emit("react", { id: pid, rid: id, glyph: glyph, until: p.react.until });
   }
   function handle(ev, pl) {
     if (!pl) return;
