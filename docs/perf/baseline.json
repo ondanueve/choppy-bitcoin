@@ -1,0 +1,783 @@
+{
+  "url": "http://127.0.0.1:8080/choppy-bitcoin/",
+  "at": "2026-10-30T16:32:05.974Z",
+  "device": "Pixel 5",
+  "cpu": 4,
+  "net": {
+    "offline": false,
+    "latency": 562.5,
+    "downloadThroughput": 180000,
+    "uploadThroughput": 84375
+  },
+  "playMs": 60000,
+  "cold": {
+    "ttiMs": 8169,
+    "dcl": 0,
+    "requestsAtTti": {
+      "all": {
+        "n": 11,
+        "bytes": 1192286
+      },
+      "groups": {
+        "doc": {
+          "n": 1,
+          "bytes": 10802
+        },
+        "js": {
+          "n": 9,
+          "bytes": 1114062
+        },
+        "css": {
+          "n": 1,
+          "bytes": 67422
+        }
+      },
+      "sample": [
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/",
+          "bytes": 10802,
+          "mime": "text/html",
+          "type": "Document"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/nozoom.js?v=mp142",
+          "bytes": 1009,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/supabase-lib.js",
+          "bytes": 14904,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/run-stats.js",
+          "bytes": 15662,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/i18n.js?v=mp179",
+          "bytes": 28437,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/auth.js?v=mp66",
+          "bytes": 30349,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/style.css?v=mp192",
+          "bytes": 67422,
+          "mime": "text/css",
+          "type": "Stylesheet"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/mp.js?v=mp8",
+          "bytes": 24657,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/audio.js?v=mp172",
+          "bytes": 77155,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js",
+          "bytes": 126485,
+          "mime": "application/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/game.js?v=mp192",
+          "bytes": 795404,
+          "mime": "text/javascript",
+          "type": "Script"
+        }
+      ]
+    },
+    "requestsAtTtiPlus3s": {
+      "all": {
+        "n": 17,
+        "bytes": 1634792
+      },
+      "groups": {
+        "doc": {
+          "n": 1,
+          "bytes": 10802
+        },
+        "js": {
+          "n": 9,
+          "bytes": 1114062
+        },
+        "css": {
+          "n": 1,
+          "bytes": 67422
+        },
+        "other": {
+          "n": 4,
+          "bytes": 1388
+        },
+        "media": {
+          "n": 2,
+          "bytes": 441118
+        }
+      },
+      "sample": [
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/",
+          "bytes": 10802,
+          "mime": "text/html",
+          "type": "Document"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/nozoom.js?v=mp142",
+          "bytes": 1009,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/supabase-lib.js",
+          "bytes": 14904,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/run-stats.js",
+          "bytes": 15662,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/i18n.js?v=mp179",
+          "bytes": 28437,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/auth.js?v=mp66",
+          "bytes": 30349,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/style.css?v=mp192",
+          "bytes": 67422,
+          "mime": "text/css",
+          "type": "Stylesheet"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/mp.js?v=mp8",
+          "bytes": 24657,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/audio.js?v=mp172",
+          "bytes": 77155,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js",
+          "bytes": 126485,
+          "mime": "application/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/game.js?v=mp192",
+          "bytes": 795404,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 0,
+          "mime": "",
+          "type": "Preflight"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 0,
+          "mime": "",
+          "type": "Preflight"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 516,
+          "mime": "application/json",
+          "type": "Fetch"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 872,
+          "mime": "application/json",
+          "type": "Fetch"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/landfill-wide.jpg?v=cin14",
+          "bytes": 208108,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/taxbill-wide.jpg?v=cin14",
+          "bytes": 233010,
+          "mime": "image/jpeg",
+          "type": "Image"
+        }
+      ]
+    },
+    "heapTti": {
+      "jsHeapUsed": 4131392,
+      "jsHeapTotal": 5042176,
+      "nodes": 828
+    },
+    "play": {
+      "n": 3401,
+      "sum": 60114.2,
+      "mean": 17.675448397530136,
+      "p50": 16.69999999999709,
+      "p95": 33.299999999995634,
+      "max": 133.3000000000011,
+      "fps": 56.57565101090924,
+      "overlayHidden": false
+    },
+    "heapPlayStart": {
+      "jsHeapUsed": 4664884,
+      "jsHeapTotal": 6352896,
+      "nodes": 1580
+    },
+    "heapPlayEnd": {
+      "jsHeapUsed": 4590940,
+      "jsHeapTotal": 6090752,
+      "nodes": 1288
+    },
+    "requestsAfterPlay": {
+      "all": {
+        "n": 52,
+        "bytes": 11281782
+      },
+      "groups": {
+        "doc": {
+          "n": 1,
+          "bytes": 10802
+        },
+        "js": {
+          "n": 9,
+          "bytes": 1114062
+        },
+        "css": {
+          "n": 1,
+          "bytes": 67422
+        },
+        "other": {
+          "n": 4,
+          "bytes": 1388
+        },
+        "media": {
+          "n": 37,
+          "bytes": 10088108
+        }
+      },
+      "sample": [
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/",
+          "bytes": 10802,
+          "mime": "text/html",
+          "type": "Document"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/nozoom.js?v=mp142",
+          "bytes": 1009,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/supabase-lib.js",
+          "bytes": 14904,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/run-stats.js",
+          "bytes": 15662,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/i18n.js?v=mp179",
+          "bytes": 28437,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/auth.js?v=mp66",
+          "bytes": 30349,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/style.css?v=mp192",
+          "bytes": 67422,
+          "mime": "text/css",
+          "type": "Stylesheet"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/mp.js?v=mp8",
+          "bytes": 24657,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/audio.js?v=mp172",
+          "bytes": 77155,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js",
+          "bytes": 126485,
+          "mime": "application/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/game.js?v=mp192",
+          "bytes": 795404,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 0,
+          "mime": "",
+          "type": "Preflight"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 0,
+          "mime": "",
+          "type": "Preflight"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 516,
+          "mime": "application/json",
+          "type": "Fetch"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 872,
+          "mime": "application/json",
+          "type": "Fetch"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/landfill-wide.jpg?v=cin14",
+          "bytes": 208108,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/taxbill-wide.jpg?v=cin14",
+          "bytes": 233010,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/nicoWedding-wide.jpg?v=cin14",
+          "bytes": 280162,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/mexico-wide.jpg?v=cin14",
+          "bytes": 365054,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/flu-wide.jpg?v=cin14",
+          "bytes": 231508,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/phish-wide.jpg?v=cin14",
+          "bytes": 203022,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/crash-wide.jpg?v=cin14",
+          "bytes": 319966,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/wine-wide.jpg?v=cin14",
+          "bytes": 247355,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/poker-wide.jpg?v=cin14",
+          "bytes": 218929,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/casino-wide.jpg?v=cin14",
+          "bytes": 266947,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/uncle-wide.jpg?v=cin14",
+          "bytes": 221516,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/school-wide.jpg?v=cin14",
+          "bytes": 304139,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/roof-wide.jpg?v=cin14",
+          "bytes": 308950,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/hospital-wide.jpg?v=cin14",
+          "bytes": 259232,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/startup-wide.jpg?v=cin14",
+          "bytes": 305903,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/tow-wide.jpg?v=cin14",
+          "bytes": 314883,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/courage-wide.jpg?v=cin14",
+          "bytes": 243954,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/ring-wide.jpg?v=cin14",
+          "bytes": 272776,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/date-wide.jpg?v=cin14",
+          "bytes": 262610,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/proposal-wide.jpg?v=cin14",
+          "bytes": 303605,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/wedding-wide.jpg?v=cin14",
+          "bytes": 314230,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/honeymoon-wide.jpg?v=cin14",
+          "bytes": 281738,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/pregnancy-wide.jpg?v=cin14",
+          "bytes": 273088,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/baby-wide.jpg?v=cin14",
+          "bytes": 294595,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/cousin-wide.jpg?v=cin14",
+          "bytes": 312217,
+          "mime": "image/jpeg",
+          "type": "Image"
+        }
+      ]
+    },
+    "errors": [],
+    "blocking": [
+      {
+        "name": "http://127.0.0.1:8080/choppy-bitcoin/style.css?v=mp192",
+        "type": "link",
+        "transfer": 67535,
+        "encoded": 67235,
+        "blocking": "blocking"
+      },
+      {
+        "name": "http://127.0.0.1:8080/choppy-bitcoin/nozoom.js?v=mp142",
+        "type": "script",
+        "transfer": 1117,
+        "encoded": 817,
+        "blocking": "blocking"
+      }
+    ]
+  },
+  "warm": {
+    "ttiMs": 891,
+    "dcl": 1006.2000000001863,
+    "requestsAtTti": {
+      "all": {
+        "n": 13,
+        "bytes": 104
+      },
+      "groups": {
+        "css": {
+          "n": 1,
+          "bytes": 0
+        },
+        "js": {
+          "n": 9,
+          "bytes": 0
+        },
+        "doc": {
+          "n": 1,
+          "bytes": 104
+        },
+        "media": {
+          "n": 2,
+          "bytes": 0
+        }
+      },
+      "sample": [
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/style.css?v=mp192",
+          "bytes": 0,
+          "mime": "text/css",
+          "type": "Stylesheet"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/nozoom.js?v=mp142",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/i18n.js?v=mp179",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js",
+          "bytes": 0,
+          "mime": "application/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/supabase-lib.js",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/auth.js?v=mp66",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/run-stats.js",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/audio.js?v=mp172",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/mp.js?v=mp8",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/game.js?v=mp192",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/",
+          "bytes": 104,
+          "mime": "text/html",
+          "type": "Document"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/landfill-wide.jpg?v=cin14",
+          "bytes": 0,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/taxbill-wide.jpg?v=cin14",
+          "bytes": 0,
+          "mime": "image/jpeg",
+          "type": "Image"
+        }
+      ]
+    },
+    "requestsAtTtiPlus3s": {
+      "all": {
+        "n": 15,
+        "bytes": 1175
+      },
+      "groups": {
+        "css": {
+          "n": 1,
+          "bytes": 0
+        },
+        "js": {
+          "n": 9,
+          "bytes": 0
+        },
+        "doc": {
+          "n": 1,
+          "bytes": 104
+        },
+        "media": {
+          "n": 2,
+          "bytes": 0
+        },
+        "other": {
+          "n": 2,
+          "bytes": 1071
+        }
+      },
+      "sample": [
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/style.css?v=mp192",
+          "bytes": 0,
+          "mime": "text/css",
+          "type": "Stylesheet"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/nozoom.js?v=mp142",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/i18n.js?v=mp179",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js",
+          "bytes": 0,
+          "mime": "application/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/supabase-lib.js",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/auth.js?v=mp66",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/run-stats.js",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/audio.js?v=mp172",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/mp.js?v=mp8",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/game.js?v=mp192",
+          "bytes": 0,
+          "mime": "text/javascript",
+          "type": "Script"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/",
+          "bytes": 104,
+          "mime": "text/html",
+          "type": "Document"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/landfill-wide.jpg?v=cin14",
+          "bytes": 0,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "http://127.0.0.1:8080/choppy-bitcoin/chance/taxbill-wide.jpg?v=cin14",
+          "bytes": 0,
+          "mime": "image/jpeg",
+          "type": "Image"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 536,
+          "mime": "application/json",
+          "type": "Fetch"
+        },
+        {
+          "url": "https://xhewdrhfofwpzfogthai.supabase.co/rest/v1/profiles?select=username%2C%20highscore%2C%20last_score_at%2C%20score_time%2C%20run_stats&order=highscore.desc&limit=40",
+          "bytes": 535,
+          "mime": "application/json",
+          "type": "Fetch"
+        }
+      ]
+    },
+    "heapTti": {
+      "jsHeapUsed": 5908192,
+      "jsHeapTotal": 6676480,
+      "nodes": 2833
+    },
+    "errors": []
+  }
+}

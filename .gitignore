@@ -5,3 +5,5 @@ node_modules/
 !.env.example
 _site/
 tests/out/
+# Local pull-request draft. It quotes failure output and is not part of the site.
+PR.md

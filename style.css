@@ -105,8 +105,9 @@ body {
   white-space: nowrap; overflow: hidden; line-height: 1.2; padding: 0 2px; font-weight: 700;
 }
 .juke-hud-title > span {
-  display: inline-block; white-space: nowrap; will-change: transform;
+  display: inline-block; white-space: nowrap;
 }
+.juke-hud-title.marquee > span { will-change: transform; }
 .juke-hud-title.marquee > span {
   animation: juke-title-shift var(--juke-dur, 12s) ease-in-out infinite;
 }
@@ -1517,6 +1518,17 @@ body.kb-sheet-on #overlay{visibility:hidden}
 .award-toast-n { font-size: 13px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
 @keyframes award-toast-life { 0% { opacity: 0; transform: translateY(-6px); } 8% { opacity: 1; transform: none; } 85% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-4px); } }
 @media (max-width: 520px) { .award-toasts { top: calc(env(safe-area-inset-top, 0px) + 6px); right: calc(env(safe-area-inset-right, 0px) + 6px); } .award-toast { padding: 6px 9px; } .award-toast-n { font-size: 12px; } }
-@media (prefers-reduced-motion: reduce) { .award-toast { animation-name: award-toast-fade; } @keyframes award-toast-fade { 0%, 100% { opacity: 0; } 8%, 85% { opacity: 1; } } }
+@media (prefers-reduced-motion: reduce) {
+  .award-toast { animation-name: award-toast-fade; }
+  @keyframes award-toast-fade { 0%, 100% { opacity: 0; } 8%, 85% { opacity: 1; } }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .field.bear #c, .field.bear.swan-bear #c, #bc-open.army-ready, .field.perk-ui .pause { animation: none !important; }
+  .juke-hud-title > span { will-change: auto; }
+}
 .aw-all summary { cursor: pointer; color: var(--gold); list-style-position: inside; margin-bottom: 6px; }
 .awards .aw-cat { margin: 10px 0 4px; color: var(--gold); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }

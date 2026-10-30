@@ -178,13 +178,12 @@
       <button type="button" class="text-btn" id="btn-close-profile">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp194"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js" integrity="sha384-QEx1pDqNtno80p4xYN5Cqm5JcAAtUDUCHqFLq0UBhWRFoFzzNHumh20zFGG/9XMi" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="supabase-lib.js"></script>
-  <script src="auth.js?v=mp193"></script>
-  <script src="run-stats.js"></script>
-  <script src="audio.js?v=mp172"></script>
-  <script src="mp.js?v=mp194"></script>
-  <script src="game.js?v=mp194"></script>
+  <!-- abcjs loads when the jukebox opens (audio.js). mp.js loads when Versus opens. -->
+  <script src="/choppy-bitcoin/i18n.js?v=mp194" defer></script>
+  <script src="supabase-lib.js" defer></script>
+  <script src="auth.js?v=mp193" defer></script>
+  <script src="run-stats.js" defer></script>
+  <script src="audio.js?v=mp193" defer></script>
+  <script src="game.js?v=mp194" defer></script>
 </body>
 </html>

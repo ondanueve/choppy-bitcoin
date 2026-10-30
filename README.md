@@ -34,6 +34,14 @@ python3 -m http.server 8080 -d /tmp/site
 
 Or clone the hub and run its `scripts/assemble.sh` to preview the whole site.
 
+## Pruebas
+
+`node tests/smoke.js` revisa sintaxis, relleno, nombres prohibidos, tamaño de `game.js`/`style.css` frente a `origin/main`, etiquetas `?v=mpNNN`, imágenes `chance/` y paridad EN/ES. Sin red ni dependencias; debe tardar menos de 10 s.
+
+`node tests/boot.js` abre el menú en headless. Sin Playwright ni Chromium sale con código 0 y avisa «omitido». Instalación local, fuera del repo: `npm install --no-save playwright` y `npx playwright install chromium`.
+
+GitHub Actions (workflow `ci`) ejecuta el smoke test en cada pull request y en cada push a ramas distintas de `main`.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
