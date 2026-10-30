@@ -66,10 +66,14 @@ eq(sw.scopeDocumentAliases(ORIGIN + "/choppy-bitcoin/about/").length, 0, "about 
 
 const shellJs = plan(ORIGIN + "/choppy-bitcoin/game.js?v=" + sw.CACHE_VERSION);
 eq(shellJs.bucket, "shell", "game.js bucket");
-eq(shellJs.strategy, "stale-while-revalidate", "game.js strategy");
+eq(shellJs.strategy, "cache-first-versioned", "game.js strategy");
+eq(plan(ORIGIN + "/choppy-bitcoin/run-stats.js").strategy, "network-first", "untagged code is network-first");
+eq(plan(ORIGIN + "/choppy-bitcoin/game.js").strategy, "network-first", "untagged game.js is network-first");
+["i18n-extra.js","chess-data.js","mp.js","nft-preview.js","game.js","supabase-lib.js"].forEach((f) => eq(sw.precacheUrls().indexOf("/choppy-bitcoin/" + f + "?v=" + sw.CACHE_VERSION) !== -1, true, "precache " + f));
+["index.html","game.js","about/index.html","profile/index.html","u/index.html","i18n.js"].forEach((f) => { const src = fs.readFileSync(path.join(ROOT, f), "utf8"); (src.match(/\.(?:js|css)\?v=mp\d+/g) || []).forEach((tag) => eq(tag.replace(/^.*\?/, "?"), "?v=" + sw.CACHE_VERSION, f + " tag matches CACHE_VERSION")); });
 eq(shellJs.store, true, "game.js store");
 
-eq(plan(ORIGIN + "/choppy-bitcoin/style.css?v=" + sw.CACHE_VERSION).strategy, "stale-while-revalidate", "css strategy");
+eq(plan(ORIGIN + "/choppy-bitcoin/style.css?v=" + sw.CACHE_VERSION).strategy, "cache-first-versioned", "css strategy");
 eq(plan(ORIGIN + "/choppy-bitcoin/i18n.js?v=" + sw.CACHE_VERSION).bucket, "shell", "i18n bucket");
 eq(plan(ORIGIN + "/choppy-bitcoin/").strategy, "network-first", "directory strategy");
 eq(plan(ORIGIN + "/choppy-bitcoin/index.html").strategy, "network-first", "index strategy");
@@ -85,8 +89,7 @@ eq(plan(ORIGIN + "/choppy-bitcoin/chance/clip.mp4").bucket, "bypass", "chance vi
 eq(plan(ORIGIN + "/choppy-bitcoin/chance/clip.mp4").store, false, "video is not stored");
 eq(plan(ORIGIN + "/choppy-bitcoin/intro.webm").reason, "video", "webm bypass");
 
-eq(plan(ORIGIN + "/choppy-bitcoin/mp.js?v=" + sw.CACHE_VERSION).bucket, "bypass", "versus script bypass");
-eq(plan(ORIGIN + "/choppy-bitcoin/mp.js?v=" + sw.CACHE_VERSION).store, false, "versus script not stored");
+eq(plan(ORIGIN + "/choppy-bitcoin/mp.js?v=" + sw.CACHE_VERSION).strategy, "cache-first-versioned", "versus code cached per version");
 eq(plan(ORIGIN + "/choppy-bitcoin/sw.js").reason, "control", "worker script bypass");
 eq(plan(ORIGIN + "/choppy-bitcoin/sw-kill.json").reason, "control", "kill file bypass");
 eq(plan(ORIGIN + "/choppy-bitcoin/sw-kill.json").store, false, "kill file is never cached");

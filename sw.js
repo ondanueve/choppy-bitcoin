@@ -1,7 +1,7 @@
 /*
 Choppy Bitcoin service worker. Scope is /choppy-bitcoin/ only.
 The page registers this file only after an explicit opt-in (?pwa=1 or the
-options switch). Install does not precache the catalog.
+options switch). Install precaches the versioned shell plus the lazy files.
 
 CACHE_VERSION matches the ?v=mpNNN tag on game.js in index.html.
 Shell responses use a versioned cache. Chance art uses one bounded cache
@@ -10,7 +10,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 (function () {
   "use strict";
 
-  var CACHE_VERSION = "mp195";
+  var CACHE_VERSION = "mp196";
   var SCOPE_PATH = "/choppy-bitcoin/";
   var ART_MAX_COUNT = 40;
   var ART_MAX_BYTES = 30 * 1024 * 1024;
@@ -34,8 +34,31 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "favicon-192.png",
     "favicon-512.png",
     "favicon-maskable-512.png",
-    "apple-touch-icon.png"
+    "apple-touch-icon.png",
+    "i18n-extra.js",
+    "chess-data.js",
+    "mp.js",
+    "nft-preview.js"
   ];
+  // Code files the pages request with ?v=CACHE_VERSION. The cache key keeps that tag,
+  // so a cached copy can only answer a request for the exact same version.
+  var VERSIONED = /\.(js|css)$/i;
+
+  function precacheUrls(version) {
+    var v = version || CACHE_VERSION;
+    var seen = {};
+    var out = [];
+    SHELL_PATHS.forEach(function (rel) {
+      var url = SCOPE_PATH + rel + (VERSIONED.test(rel) ? "?v=" + v : "");
+      if (rel === "index.html") url = SCOPE_PATH;
+      if (!seen[url]) { seen[url] = true; out.push(url); }
+    });
+    return out;
+  }
+
+  function hasVersionTag(urlString) {
+    try { return /^mp\d+$/.test(new URL(String(urlString), "https://bitcoinizate.com").searchParams.get("v") || ""); } catch (e) { return false; }
+  }
 
   function cacheNames(version) {
     return {
@@ -69,7 +92,6 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
       if (/\.(jpe?g|png|webp|gif)$/i.test(path)) return { bucket: "art", reason: "chance-image" };
       return { bucket: "bypass", reason: "chance-other" };
     }
-    if (/\/mp\.js$/i.test(path)) return { bucket: "bypass", reason: "versus" };
     if (path.endsWith(".html") || path.endsWith("/") || path.endsWith(".webmanifest")) {
       return { bucket: "html", reason: "document" };
     }
@@ -93,7 +115,10 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
       return { bucket: "html", reason: cls.reason, strategy: "network-first", store: method === "GET", fallback: "shell" };
     }
     if (cls.bucket === "shell") {
-      return { bucket: "shell", reason: cls.reason, strategy: "stale-while-revalidate", store: method === "GET", fallback: "none" };
+      // Version-tagged code is cache-first on its exact URL; anything untagged is network-first,
+      // so the worker can never answer with an older game build while online.
+      var tagged = hasVersionTag(opts.url);
+      return { bucket: "shell", reason: cls.reason, strategy: tagged ? "cache-first-versioned" : "network-first", store: method === "GET", fallback: "none" };
     }
     if (cls.bucket === "art") {
       return { bucket: "art", reason: cls.reason, strategy: "cache-bounded", store: method === "GET", fallback: "gradient" };
@@ -190,6 +215,8 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     ART_MAX_COUNT: ART_MAX_COUNT,
     ART_MAX_BYTES: ART_MAX_BYTES,
     SHELL_PATHS: SHELL_PATHS,
+    precacheUrls: precacheUrls,
+    hasVersionTag: hasVersionTag,
     cacheNames: cacheNames,
     classifyRequest: classifyRequest,
     planFetch: planFetch,
@@ -340,20 +367,17 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     }
   }
 
-  async function staleWhileRevalidate(event, req, store) {
+  async function cacheFirstVersioned(req, store) {
     var cache = await caches.open(cacheNames().shell);
     var cached = await cache.match(req);
-    var refresh = fetch(req).then(async function (res) {
+    if (cached) return cached;
+    try {
+      var res = await fetch(req);
       if (store && acceptStore && canStoreResponse(res)) await putIfLive(cache, req, res.clone());
       return res;
-    }).catch(function () { return null; });
-    if (cached) {
-      event.waitUntil(refresh.then(function () {}));
-      return cached;
+    } catch (e) {
+      return new Response("offline", { status: 503, headers: { "Cache-Control": "no-store" } });
     }
-    var fresh = await refresh;
-    if (fresh) return fresh;
-    return new Response("offline", { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 
   async function storeArt(cache, req, buf, type) {
@@ -409,6 +433,12 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 
   self.addEventListener("install", function (event) {
     event.waitUntil((async function () {
+      var cache = await caches.open(cacheNames().shell);
+      await Promise.all(precacheUrls().map(function (url) {
+        return fetch(url, { cache: "no-cache" }).then(function (res) {
+          if (acceptStore && canStoreResponse(res)) return putIfLive(cache, url, res);
+        }).catch(function () {});
+      }));
       if (!self.registration.active) return;
       await tellClients({ type: "update-ready", version: CACHE_VERSION });
     })());
@@ -456,7 +486,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
       return;
     }
     if (plan.bucket === "shell") {
-      event.respondWith(staleWhileRevalidate(event, req, plan.store));
+      event.respondWith(plan.strategy === "cache-first-versioned" ? cacheFirstVersioned(req, plan.store) : networkFirst(req, plan.store));
       return;
     }
     if (plan.bucket === "art") {
