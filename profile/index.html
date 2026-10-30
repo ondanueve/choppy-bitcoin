@@ -27,28 +27,34 @@
 </head>
 <body>
   <p><a href="/choppy-bitcoin/">Choppy Bitcoin</a> · <a href="/">Bitcoinizate</a></p>
-  <h1 id="title">Edit profile</h1>
+  <h1 id="title" data-i18n="profileEdit">Edit profile</h1>
   <p id="dash-score" class="msg"></p>
   <p id="need" class="msg hide"></p>
   <form id="form" class="hide">
-    <label for="alias">Username</label>
+    <label for="alias"><span data-i18n="profileUser">Username</span></label>
     <input id="alias" type="text" maxlength="16" autocomplete="username">
-    <label for="photo">Avatar</label>
+    <label for="photo"><span data-i18n="profileAvatar">Avatar</span></label>
     <input id="photo" type="file" accept="image/*">
     <img id="preview" alt="">
     <div>
-      <button type="submit" id="save">Save changes</button>
+      <button type="submit" id="save" data-i18n="profileSave">Save changes</button>
     </div>
     <p class="msg" id="msg"></p>
   </form>
-  <p><a id="public-link" href="/">Public profile</a></p>
+  <p><a id="public-link" href="/" data-i18n="profilePublic">Public profile</a></p>
+  <script src="/choppy-bitcoin/i18n.js"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp194"></script>
   <script src="/choppy-bitcoin/supabase-lib.js"></script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
     (function () {
-      var es = (navigator.language || "").toLowerCase().indexOf("es") === 0;
-      document.getElementById("title").textContent = es ? "Editar perfil" : "Edit profile";
-      document.getElementById("save").textContent = es ? "Guardar cambios" : "Save changes";
+      function syncProfileChrome() {
+        var esNow = window.BZ && BZ.lang && BZ.lang() === "es";
+        document.title = (esNow ? "Editar perfil" : "Edit profile") + " | Bitcoinizate";
+      }
+      var es = window.BZ && BZ.lang && BZ.lang() === "es";
+      syncProfileChrome();
+      window.addEventListener("bz-lang", syncProfileChrome);
       var sb = window.supabase && window.supabase.createClient && window.supabase.createClient();
       var form = document.getElementById("form");
       var need = document.getElementById("need");
@@ -128,7 +134,7 @@
           var label = es ? "Mejor puntaje" : "High score";
           sc.innerHTML = label + " " + btc.toFixed(4) + " BTC"
             + (profile.elo != null ? " · ELO " + Math.round(Number(profile.elo) || 1000) : "")
-            + (profile.run_stats ? " <button type=\"button\" class=\"stats-mini\" id=\"dash-stats\">STATS</button>" : "");
+            + (profile.run_stats ? " <button type=\"button\" class=\"stats-mini\" id=\"dash-stats\">" + ((window.BZ && BZ.t("runStats")) || "STATS") + "</button>" : "");
           var db = document.getElementById("dash-stats");
           if (db && window.openSavedRunStats) db.onclick = function () { window.openSavedRunStats(profile.run_stats); };
           form.classList.remove("hide");
@@ -190,7 +196,7 @@
       try { on = new URLSearchParams(location.search).get("nftpreview") === "1"; } catch (e) { on = false; }
       if (!on) return;
       var s = document.createElement("script");
-      s.src = "/choppy-bitcoin/nft-preview.js?v=mp193";
+      s.src = "/choppy-bitcoin/nft-preview.js?v=mp194";
       s.defer = true;
       document.body.appendChild(s);
     })();

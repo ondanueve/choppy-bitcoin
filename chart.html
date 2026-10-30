@@ -19,13 +19,22 @@
 </head>
 <body>
   <header>
-    <h1>CHART</h1>
+    <h1 data-i18n="runChart">CHART</h1>
     <div class="chart-opts" id="opts"></div>
   </header>
   <canvas id="big-chart"></canvas>
+  <script src="i18n.js"></script>
+  <script src="i18n-extra.js?v=mp194"></script>
   <script src="run-stats.js"></script>
   <script>
     (function () {
+      function syncChartChrome() {
+        if (!window.BZ || !BZ.t) return;
+        document.documentElement.lang = BZ.lang() === "es" ? "es" : "en";
+        document.title = BZ.t("runChartTitle");
+      }
+      syncChartChrome();
+      window.addEventListener("bz-lang", syncChartChrome);
       var packed = {};
       try { packed = JSON.parse(sessionStorage.getItem("choppy-chart") || "{}"); } catch (e) { packed = {}; }
       var bag = packed.bag || {};

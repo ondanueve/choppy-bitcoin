@@ -699,7 +699,7 @@
       if (id === "adopt") {
         const bear = adoptBearLabel(tier);
         const bull = adoptBullLabel(tier);
-        return es ? "bulls +" + bull + ", bears " + bear : "bulls +" + bull + ", bears " + bear;
+        return es ? "bulls +" + bull + " y bears " + bear : "bulls +" + bull + ", bears " + bear;
       }
       if (id === "manip") return (es ? "tendencia ×" : "trend ×") + tier;
       if (id === "juke") {
@@ -1175,6 +1175,98 @@
     return 40;
   }
 
+  const VOICE_ES = {
+    "Black swan!": "¡Cisne negro!",
+    "Cold storage lost!": "¡Perdiste el cold storage!",
+    "Oh oh, Funds not SAFU!": "Oh oh, ¡los fondos no están SAFU!",
+    "Coldcard randomness!": "¡Aleatoriedad de Coldcard!",
+    "China ban!": "¡Prohibición en China!",
+    "In before oceans evaporation!": "¡Antes de que se evaporen los océanos!",
+    "You got F. T. X.'d!": "¡Te aplicaron un F. T. X.!",
+    "Bull market!": "¡Mercado bull!",
+    "To the moon!": "¡A la luna!",
+    "We are SO back!": "¡Volvimos con todo!",
+    "Luke, I am your spammer": "Luke, soy tu spammer",
+    "Bitcoin C.E.O. to increase prices": "El C.E.O. de Bitcoin va a subir los precios",
+    "Going up forever Laura!": "¡Esto sube para siempre, Laura!",
+    "Laser eyes!": "¡Ojos láser!",
+    "Nothing stops this train": "Nada frena este tren",
+    "Conviction addiction": "Adicción a la convicción",
+    "There is no second best": "No hay un segundo mejor",
+    "Stay humble stack Sats": "Humildad y a juntar sats",
+    "Have fun staying poor!": "¡Diviértete quedándote pobre!",
+    "Fix the money fix the world!": "¡Arregla el dinero, arregla el mundo!",
+    "Unconfiscable power!": "¡Poder inconfiscable!",
+    "Do it for Scottie Pippen": "Hazlo por Scottie Pippen",
+    "Halving in sight!": "¡Halving a la vista!",
+    "Tick tock, next block": "Tic tac, el próximo bloque",
+    "Bear market! Crash!": "¡Mercado bear! ¡Caída!",
+    "Quantum conundrum!": "¡Dilema cuántico!",
+    "Bukele all-in ethereum": "Bukele, todo a ethereum",
+    "Bitcoin Depravement Proposals": "Propuestas de depravación de Bitcoin",
+    "Rat poison squared!": "¡Veneno para ratas al cuadrado!",
+    "Block size wars!": "¡Guerras del tamaño de bloque!",
+    "Long it!": "¡Ponte en largo!",
+    "Bitcoin bought": "Bitcoin comprado",
+    "All-in corn!": "¡Todo al maíz!",
+    "Stack it!": "¡Júntalo!",
+    "Buy the dip!": "¡Compra la baja!",
+    "Greater fool found": "Apareció un tonto mayor",
+    "Short it!": "¡Ponte en corto!",
+    "You are now a nocoiner": "Ahora eres nocoiner",
+    "Bitcoin sold": "Bitcoin vendido",
+    "Exit all crypto markets": "Sal de todos los mercados cripto",
+    "Halving aborted": "Halving abortado",
+    "The grinch stole the halving": "El Grinch se robó el halving",
+    "Bitcoin C.E.O to cancel halving": "El C.E.O. de Bitcoin cancela el halving",
+    "Gary Gensler stole the halving": "Gary Gensler se robó el halving",
+    "Oh no, Peter Schiff stole the halving": "Oh no, Peter Schiff se robó el halving",
+    "Faketoshi stole the halving": "Faketoshi se robó el halving",
+    "No halving soup for you!": "¡No hay sopa de halving para ti!",
+    "Halving missed": "Halving fallido",
+    "Cold storage secured!": "¡Cold storage asegurado!",
+    "Multisig enabled": "Multisig activado",
+    "Security improved to multisig": "Seguridad mejorada a multisig",
+    "Multisig rescue!": "¡Rescate multisig!",
+    "Cold storage rescue!": "¡Rescate de cold storage!",
+    "Black swan vaporized!": "¡Cisne negro vaporizado!",
+    "A.I. bud is timing the market for you!": "¡A.I. bud está midiendo el mercado por ti!",
+    "Fibonacci treshold reached, grab your perk!": "Umbral de Fibonacci. ¡Toma tu perk!"
+  };
+  const PERK_VOICE_ES = {
+    "D.C.A.": "D.C.A.",
+    "Candle candy": "Caramelo de vela",
+    "Employment": "Empleo",
+    "an A.I. bud upgrade": "una mejora de A.I. bud",
+    "Manipulation": "Manipulación",
+    "Adoption": "Adopción",
+    "Marketplace": "Mercado",
+    "Arc": "Arco",
+    "FastForward": "FastForward",
+    "Jukebox": "Jukebox",
+    "Opsec": "Opsec",
+    "a perk": "una perk"
+  };
+  const CAPTION_RES = [
+    { re: /^Halving number (\d+)$/, es: (m) => "Halving número " + m[1] },
+    { re: /^Liberty Nodes (\d+)\/100$/, es: (m) => "Nodos de Libertad " + m[1] + "/100" },
+    { re: /^You cannot cover (.+) yet\.?$/, es: (m) => "Todavía no cubres " + m[1] + "." },
+    { re: /^Army tier (\d+)\/7 · speed \+(.+)% · shield -(.+)% · −(.+)$/, es: (m) => "Nivel de ejército " + m[1] + "/7 · velocidad +" + m[2] + "% · escudo −" + m[3] + "% · −" + m[4] },
+    { re: /^Defense force formed\. (.+)$/, es: (m) => "Fuerza de defensa formada. " + m[1] },
+    { re: /^A\.I\. bud takes (.+)$/, es: (m) => "A.I. bud toma " + (PERK_VOICE_ES[m[1]] || m[1]) },
+    { re: /^A\.I\. bud picks (.+)$/, es: (m) => "A.I. bud elige " + (PERK_VOICE_ES[m[1]] || m[1]) },
+    { re: /^Stacking with (.+)$/, es: (m) => "Juntas con " + (PERK_VOICE_ES[m[1]] || m[1]) }
+  ];
+  function visLine(line) {
+    if (!(window.BZ && BZ.lang && BZ.lang() === "es")) return line;
+    if (Object.prototype.hasOwnProperty.call(VOICE_ES, line)) return VOICE_ES[line];
+    for (let i = 0; i < CAPTION_RES.length; i++) {
+      const m = CAPTION_RES[i].re.exec(line);
+      if (m) return CAPTION_RES[i].es(m);
+    }
+    return line;
+  }
+
   function say(line, urgent, kind) {
     if (!line) return;
     line = formatVoice(line);
@@ -1184,7 +1276,7 @@
     if (busy && rank <= prev) return;
     if (rank < 80 && S.lifeT < S.halveSpeechUntil) return;
     if (rank < 70 && S.lifeT < (S.aibudSpeechUntil || 0)) return;
-    S.ticker = (window.BZ && BZ.lang && BZ.lang() === "es" && kind === "ui") ? line : line;
+    S.ticker = visLine(line);
     S.tickerT = Math.max(1.5, lineDur(line));
     S.speechUntil = S.lifeT + lineDur(spoken(line));
     S.speechRank = rank;
@@ -1957,8 +2049,9 @@
     grantUsd(n, S.bird.x, S.bird.y - 24, "gain");
     const job = currentJob();
     const t = Math.max(1, Math.min(7, S.have.job || 1));
-    const title = (job && job.titles && job.titles[t - 1]) || "Job";
-    say(title + " payday", false);
+    const titleEn = (job && job.titles && job.titles[t - 1]) || "Job";
+    const titleShow = jobTitleAt(job, t) || titleEn;
+    sayEn(titleEn + " payday", titleShow + (chanceLang() ? ": día de pago" : " payday"), false);
   }
 
   function chanceP3(tier) {
@@ -4313,7 +4406,7 @@
       const pick = bestAiPerk(real);
       grantPerk(pick.id);
       bumpOffer();
-      aiAct("Perk " + perkTitle(pick.id, S.have[pick.id]), pick.why);
+      aiAct("perk:" + pick.id + ":" + (S.have[pick.id] || 1), pick.why);
       say(aiPerkVoice(pick.id), true, "aibud");
       return;
     }
@@ -4445,6 +4538,53 @@
       trend: !!(S.aibudOn && t >= 3 && S.have.manip > 0),
       trade: !!(S.aibudOn && t >= 4)
     };
+  }
+
+  const AI_ES = {
+    "Sold BTC": "Vendió BTC",
+    "Bought BTC": "Compró BTC",
+    "DCA ON": "DCA ACTIVADO",
+    "DCA OFF": "DCA APAGADO",
+    "Trend UP": "TENDENCIA ↑",
+    "Trend DOWN": "TENDENCIA ↓",
+    "Dump incoming · raise cash for the dip": "Viene una caída · junta efectivo para la baja",
+    "Sold the bull · raise cash for the dip": "Vendió el bull · junta efectivo para la baja",
+    "Pump incoming · accumulate": "Viene una subida · acumula",
+    "Bought the black swan": "Compró el cisne negro",
+    "Bought the bear": "Compró el bear",
+    "Bear/swan · income to bitcoin": "Bear o cisne · el ingreso va a bitcoin",
+    "Bull · do not buy the top": "Bull · no compres el máximo",
+    "Holding · pump the bag": "Con bolsa · empuja el precio",
+    "Flat · cheaper next buy": "Sin bolsa · la próxima compra sale más barata",
+    "Stronger army for the next battle": "Un ejército más fuerte para la próxima batalla",
+    "Adoption is not worth it here": "Aquí la adopción no conviene",
+    "Income becomes bitcoin": "El ingreso se vuelve bitcoin",
+    "More candle cash to stack sats": "Más cash de velas para juntar sats",
+    "Paycheck to convert into bitcoin": "El sueldo se convierte en bitcoin",
+    "Better timing for the stack": "Mejor momento para el stack",
+    "Steer price while we accumulate": "Guía el precio mientras acumulamos",
+    "Lasers and lives to keep stacking": "Láseres y vidas para seguir juntando",
+    "Tamer bears protect the bag": "Bears más suaves protegen la bolsa",
+    "Arc shots at more bitcoin": "Tiros de Arc para más bitcoin",
+    "More candles, more cash to stack": "Más velas, más cash para juntar",
+    "No stack value, last resort": "No suma al stack, último recurso",
+    "Extra lives to keep stacking": "Vidas extra para seguir juntando",
+    "Best for stacking bitcoin": "Lo mejor para juntar bitcoin"
+  };
+  const AI_RES = [
+    /^Army tier (\d+)\/7$/,
+    /^perk:([A-Za-z0-9]+):(\d+)$/
+  ];
+  function aiVis(s) {
+    const text = String(s || "");
+    const perk = AI_RES[1].exec(text);
+    if (perk) return "Perk " + perkTitle(perk[1], Number(perk[2]) || 1);
+    if (window.BZ && BZ.lang && BZ.lang() === "es") {
+      if (Object.prototype.hasOwnProperty.call(AI_ES, text)) return AI_ES[text];
+      const army = AI_RES[0].exec(text);
+      if (army) return "Nivel de ejército " + army[1] + "/7";
+    }
+    return text;
   }
 
   function aiAct(act, why) {
@@ -12011,7 +12151,7 @@
     if (pauseBtn) {
       const paused = S.phase === "paused" || S.phase === "perk" || !!S.arcHold;
       pauseBtn.textContent = paused ? "▶" : "||";
-      pauseBtn.setAttribute("aria-label", paused ? "Play" : "Pause");
+      pauseBtn.setAttribute("aria-label", paused ? t("ariaPlay") : t("ariaPause"));
       pauseBtn.classList.toggle("arc-resume", !!(S.arcHold && S.phase === "paused"));
     }
     if (S.have.ff <= 0) S.speedMul = 1;
@@ -12390,7 +12530,7 @@
     paintHaloText(ctx, "▼ S sell", 96, H - 12, PAL.labelDn || RED);
   }
   const AWARD_CATS = [
-    { id: "trading", en: "Trading", es: "Trading" },
+    { id: "trading", en: "Trading", es: "Operaciones" },
     { id: "survival", en: "Survival", es: "Supervivencia" },
     { id: "perks", en: "Perks", es: "Perks" },
     { id: "family", en: "Family", es: "Familia" },
@@ -12405,7 +12545,7 @@
     { id: "paper", cat: "trading", name: "Paper Hands", nameEs: "Manos de papel", why: "Sold BTC in a bear market.", whyEs: "Vendió BTC en un bear market." },
     { id: "doubler", cat: "trading", name: "Double Stack", nameEs: "Stack doble", why: "Finished a run with at least 2× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos el doble del patrimonio inicial en BTC." },
     { id: "tenx", cat: "trading", name: "Ten Bagger", nameEs: "Diez veces", why: "Finished a run with at least 10× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos 10 veces el patrimonio inicial en BTC." },
-    { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Day trader", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
+    { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Trader del día", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
     { id: "cap21", cat: "trading", name: "Twenty One Million", nameEs: "Veintiún millones", why: "Stacked 21M BTC.", whyEs: "Juntó 21M BTC." },
     { id: "halver", cat: "survival", name: "Halving Catcher", nameEs: "Atrapa halvings", why: "Every halving that spawned was eaten.", whyEs: "Comió todos los halvings que salieron." },
     { id: "greedy", cat: "survival", name: "Greedy Miner", nameEs: "Minero greedy", why: "Ate 0 halvings.", whyEs: "Comió 0 halvings." },
@@ -12422,7 +12562,7 @@
     { id: "married", cat: "family", secret: true, name: "Just Married", nameEs: "Recién casados", why: "Married Lena.", whyEs: "Se casó con Lena." },
     { id: "runaway", cat: "family", secret: true, name: "Something Else", nameEs: "Otra cosa", why: "Walked away from the wedding to build something else.", whyEs: "Dejó la boda para construir otra cosa." },
     { id: "babyBoard", cat: "family", secret: true, name: "A Brand New Day", nameEs: "Un nuevo amanecer", why: "Welcomed the baby.", whyEs: "Le dio la bienvenida al bebé." },
-    { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Family office", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
+    { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Oficina familiar", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
     { id: "classicFartface", cat: "family", secret: true, name: "Classic Fartface", nameEs: "Típico de Cara de Pedo", why: "Sent Lena a PDF of financial advice.", whyEs: "Le envió a Lena un PDF con consejos financieros." },
     { id: "landowner", cat: "country", secret: true, name: "Landowner", nameEs: "Terrateniente", why: "Bought the island.", whyEs: "Compró la isla." },
     { id: "notForSale", cat: "country", secret: true, name: "Not for Sale", nameEs: "No está en venta", why: "Turned down the consortium's offer.", whyEs: "Rechazó la oferta del consorcio." },
@@ -13128,7 +13268,7 @@
   }
 
   function optHead(title) {
-    return "<h1>" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"Close\">×</button>";
+    return "<h1>" + title + "</h1><button type=\"button\" class=\"opt-x\" id=\"opt-x\" aria-label=\"" + t("close") + "\">×</button>";
   }
   function pauseMarkup() {
     const panel = S.optPanel || "";
@@ -13139,7 +13279,7 @@
       const mul = S.ranked ? 10 : 1;
       const cold = 1200 * mul, laser = 1800 * mul, msig = 9000 * mul;
       const book = S.bcBookOffer&&!S.bcBook ? "<button class=\"cta\" data-buy=\"bcbook\">THE BITCOIN STATE · "+costLabel(666)+"</button>" : "";
-      const island = S.bcIslandOffer&&!S.bcIsland&&S.chanceMet&&S.chanceMet.islandTrip ? "<button class=\"cta\" data-buy=\"bcisland\">The Island · "+costLabel(S.bcIslandOffer)+"</button>" : "";
+      const island = S.bcIslandOffer&&!S.bcIsland&&S.chanceMet&&S.chanceMet.islandTrip ? "<button class=\"cta\" data-buy=\"bcisland\">" + (chanceLang() ? "La isla" : "The Island") + " · "+costLabel(S.bcIslandOffer)+"</button>" : "";
       return "<div class=\"opt-head\">" + optHead(t("market")) + "</div>"
         + "<p class=\"k\">" + fmtCostUsd(S.cash) + " · " + fmtCostBtc(S.btc) + "</p>" + book + island
         + "<button class=\"cta\" data-buy=\"cold\">Cold storage · " + costLabel(cold) + "</button>"
@@ -13158,7 +13298,7 @@
       }
       const rows = (S.iaLog || []).map((e) => {
         const sec = Math.floor(e.t);
-        return "<p><span class=\"ia-act\">" + e.act + "</span> — " + e.why + " <span class=\"k\">" + sec + "s · " + fmtBtc(e.btc != null ? e.btc : 0) + "</span></p>";
+        return "<p><span class=\"ia-act\">" + aiVis(e.act) + "</span> — " + aiVis(e.why) + " <span class=\"k\">" + sec + "s · " + fmtBtc(e.btc != null ? e.btc : 0) + "</span></p>";
       }).join("") || "<p>" + t("noAiCalls") + "</p>";
       return "<div class=\"opt-head\">" + optHead(t("aiLog")) + "</div><p class=\"k\">" + t("markedPl") + " " + fmtBtc(S.iaProfit || 0) + " · T" + (S.have.aibud || 0) + "</p><div class=\"awards\">" + rows + "</div>";
     }
@@ -13174,6 +13314,15 @@
         return "<div class=\"opt-head\">" + optHead(t("jukebox")) + "</div><p>" + t("jukeNeed") + "</p>";
       }
       fillJukebox();
+      const labPrev = t("ariaPrev");
+      const labPlay = t("ariaPlay");
+      const labPause = t("ariaPause");
+      const labNext = t("ariaNext");
+      const labShuf = t("ariaShuffle");
+      const labRep = t("ariaRepeat");
+      const labOn = t("ariaEnable");
+      const labOff = t("ariaDisable");
+      const labRetro = t("jukeRetro");
       const id = S.jukeList[S.jukeTrack] || "";
       const live = !!(A.jukePlaying && A.jukePlaying());
       const paused = !!(A.jukePaused && A.jukePaused());
@@ -13185,25 +13334,25 @@
         return "<div class=\"juke-line" + (i === S.jukeTrack ? " on" : "") + (off ? " dim" : "") + "\">"
           + "<button type=\"button\" class=\"juke-track\" data-juke=\"" + i + "\">" + t + "</button>"
           + "<span class=\"juke-len\">" + (len ? fmtJuke(len) : "") + "</span>"
-          + "<button type=\"button\" class=\"juke-arm" + (off ? " off" : " on") + "\" data-skip=\"" + sid + "\" aria-label=\"" + (off ? "Enable" : "Disable") + "\">" + (off ? "✕" : "✓") + "</button>"
+          + "<button type=\"button\" class=\"juke-arm" + (off ? " off" : " on") + "\" data-skip=\"" + sid + "\" aria-label=\"" + (off ? labOn : labOff) + "\">" + (off ? "✕" : "✓") + "</button>"
           + "</div>";
       }).join("");
       const rpt = S.jukeRepeat || "off";
       return "<div class=\"opt-head\">" + optHead(t("jukebox")) + "</div><div class=\"juke retro\">"
-        + "<p class=\"juke-lab\">Retro Jukebox</p>"
+        + "<p class=\"juke-lab\">" + labRetro + "</p>"
         + "<p class=\"juke-now\">" + (song ? song.title : id) + "</p>"
         + "<p class=\"juke-gen\">" + (song && song.genre ? song.genre : "") + "</p>"
         + "<div class=\"juke-row\">"
-        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-prev\" aria-label=\"Previous\">⏮</button>"
-        + "<button type=\"button\" class=\"juke-btn ico juke-play" + (live ? " on" : "") + "\" id=\"juke-play\" aria-label=\"Play\">▶</button>"
-        + "<button type=\"button\" class=\"juke-btn ico" + (paused ? " on" : "") + "\" id=\"juke-pause\" aria-label=\"Pause\">❚❚</button>"
-        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-next\" aria-label=\"Next\">⏭</button>"
+        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-prev\" aria-label=\"" + labPrev + "\">⏮</button>"
+        + "<button type=\"button\" class=\"juke-btn ico juke-play" + (live ? " on" : "") + "\" id=\"juke-play\" aria-label=\"" + labPlay + "\">▶</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (paused ? " on" : "") + "\" id=\"juke-pause\" aria-label=\"" + labPause + "\">❚❚</button>"
+        + "<button type=\"button\" class=\"juke-btn ico\" id=\"juke-next\" aria-label=\"" + labNext + "\">⏭</button>"
         + "</div>"
         + "<div class=\"juke-prog\"><div class=\"juke-prog-bar\" id=\"juke-bar\"></div></div>"
         + "<div class=\"juke-times\"><span id=\"juke-el\">0:00</span><span id=\"juke-left\"></span></div>"
         + "<div class=\"juke-row\">"
-        + "<button type=\"button\" class=\"juke-btn ico" + (S.jukeShuffle ? " on" : "") + "\" id=\"juke-shuf\" aria-label=\"Shuffle\">🔀</button>"
-        + "<button type=\"button\" class=\"juke-btn ico" + (rpt !== "off" ? " on" : "") + "\" id=\"juke-rep\" aria-label=\"Repeat\">" + (rpt === "one" ? "🔂" : "🔁") + "</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (S.jukeShuffle ? " on" : "") + "\" id=\"juke-shuf\" aria-label=\"" + labShuf + "\">🔀</button>"
+        + "<button type=\"button\" class=\"juke-btn ico" + (rpt !== "off" ? " on" : "") + "\" id=\"juke-rep\" aria-label=\"" + labRep + "\">" + (rpt === "one" ? "🔂" : "🔁") + "</button>"
         + "</div>"
         + "<div class=\"juke-list\">" + rows + "</div>"
         + "</div>";
@@ -13956,7 +14105,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp193";
+      s.src = "mp.js?v=mp194";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14343,6 +14492,8 @@
       }
     } else if (p === "mplobby") {
       overlay.innerHTML = mpLobbyHtml();
+      const mpCodeIn = $("mp-code");
+      if (mpCodeIn) mpCodeIn.setAttribute("place" + "holder", chanceLang() ? "CÓDIGO" : "CODE");
       bindMpLobby();
     } else if (p === "mpwait") {
       overlay.innerHTML = mpSpecHtml();
@@ -14404,7 +14555,12 @@
       if (S.battleTutOpen) title = t("tutBattle");
       if (card.job) title = fillJob(title, card.jobTier);
       title = stampNation(title);
-      const body = stampNation(S.battleTutOpen ? battleTutPlain() : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body)));
+      const snapBody = card.job || card.input === "move" || card.id === "chess" || card.id === "anOffer" || card.id === "ambassador"
+        || card.id === "firstBloc" || card.id === "rearmament" || card.id === "threeColors"
+        || card.id === "blocReplies" || card.id === "blocAssault" || card.id === "battleWon" || card.id === "blocTriumph";
+      const rawBody = S.battleTutOpen ? battleTutPlain()
+        : (!snapBody ? weaveCast(es ? (card.bodyEs || card.body) : card.body) : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body)));
+      const body = stampNation(rawBody);
       const pic = (S.chanceNote && S.chanceOpt) ? postArtHtml(card.id, S.chanceOpt) : blocArtHtml(card);
       let btns = "";
       if (S.chanceNote) {
@@ -14695,8 +14851,8 @@
     {id:"flap",g:"play",k:"Space",en:"Jump / flap",es:"Saltar / aletear"},
     {id:"buy",g:"play",k:"KeyB",en:"Buy BTC",es:"Comprar BTC",btn:"buy-btc"},
     {id:"sell",g:"play",k:"KeyS",en:"Sell BTC",es:"Vender BTC",btn:"sell-btc"},
-    {id:"dca",g:"play",k:"KeyD",en:"DCA on/off",es:"DCA on/off",btn:"dca-btn"},
-    {id:"aibud",g:"play",k:"KeyI",en:"A.I. Bud on/off",es:"A.I. Bud on/off",btn:"iabud-btn"},
+    {id:"dca",g:"play",k:"KeyD",en:"DCA on/off",es:"DCA activado/apagado",btn:"dca-btn"},
+    {id:"aibud",g:"play",k:"KeyI",en:"A.I. Bud on/off",es:"A.I. Bud activado/apagado",btn:"iabud-btn"},
     {id:"trend",g:"play",k:"KeyT",en:"Trend (manipulation)",es:"Tendencia (manipulación)",btn:"trend-btn"},
     {id:"market",g:"play",k:"KeyM",en:"Market",es:"Mercado",btn:"market-btn"},
     {id:"pause",g:"play",k:"KeyP",en:"Pause",es:"Pausa",btn:"pause-btn"},
@@ -15043,6 +15199,7 @@
     if (A && A.setLang && window.BZ && BZ.lang) A.setLang(BZ.lang());
     renderOverlay();
     renderHud();
+    try { renderBitcoinCountry(); } catch (e) {}
   });
   const bcOpen=$("bc-open"),bcClose=$("bc-close"),bcArmy10=$("bc-army10"),bcArmyBar=$("bc-army-bar"),bcDeclare=$("bc-declare"),bcForm=$("bc-form-army");
   if(bcOpen)bcOpen.addEventListener("click",()=>{const p=$("bc-panel");if(p)p.classList.remove("hide");renderBitcoinCountry();});

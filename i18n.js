@@ -2,7 +2,6 @@
   const KEY = "bitcoinizate-lang";
   const dict = {
     en: {
-      brandSub: "Free bitcoin-themed games",
       signIn: "SIGN IN",
       signUp: "Sign up",
       createAccount: "Create account",
@@ -20,19 +19,10 @@
       btcAddr: "BTC address",
       lightning: "Lightning",
       highScore: "High score",
-      lead1: "Bitcoinizate is a new games site. This is our first title.",
-      lead2: "Fly through Japanese candles. The price moves while you fly. Score is total net worth in BTC at the in-game price.",
-      playNow: "Play now",
       playSub: "Play is ranked (0 cold, 0 multisig).",
-      ctaAccount: "Create a free account",
-      ctaSub: "Save score and a BTC address to qualify for sats prizes",
-      faqPrize: "Donations",
       donateTitle: "Donations",
       donateBody: "Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.",
-      faqPrizeA: "Guest scores do not count. We may ignore runs that look automated.",
-      playMoney: "In-game cash, price and score are play money. They are not real bitcoin.",
       how: "How to play",
-      enjoy: "We hope you try it and enjoy the ride.",
       prizes: "Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.",
       feedback: "Feedback",
       send: "Send",
@@ -56,16 +46,6 @@
       tutB4: "One pickup at a time. After the field is empty, the next waits a random 5–15 seconds, then lasts 12.5 seconds. + restores a heart, or adds a fourth at 3/3. S stays: faster shot, then two bullets, then it breaks metal and one-shots heavies and trees. The star is 7.5s of invulnerability. F freezes enemies for 7.5s. X blows up every enemy. W wraps the citadel in metal for 7.5s, then that metal becomes ordinary brick.",
       tutB5: "Fury, the long-range missile, sits above the stick. Hold it until the ring fills, move the red circle with the stick, then tap again to fire. After each strike it needs a few seconds to recharge. It reaches helicopters, and troops on the wrong ground: a tank in a sea battle, a ship in a land battle.",
       tutB6: "Light, medium and heavy hulls. Some units come for you. Some go for the citadel. Up to 15% of them use the other element. KIA is destroyed over sent. A higher World number sends more troops, and each battle fields more than the one before.",
-      faq: "FAQ",
-      faqWhat: "What is Bitcoinizate?",
-      faqWhatA: "A site of free bitcoin-themed games. Now: Choppy Bitcoin. No token. In the browser.",
-      faqAcc: "Do I need an account?",
-      faqAccA: "No. Play is free. Sign in only if you want the cloud leaderboard.",
-      discordTitle: "Discord",
-      discordBody: "The game chat is here. Questions, bugs, and the people who already play.",
-      discordJoin: "Join the server",
-      playLink: "play Choppy Bitcoin",
-      privacy: "Privacy",
       options: "OPTIONS",
       paused: "PAUSED",
       resume: "RESUME",
@@ -91,10 +71,6 @@
       animHero: "3D",
       hero2d: "2D",
       tapHero: "Tap the hero to switch 2D / 3D",
-      textSize: "TEXT SIZE",
-      textSmall: "SMALL",
-      textMed: "MEDIUM",
-      textLarge: "LARGE",
       candleText: "CANDLE INCOME",
       tradeText: "BUY / SELL",
       aiLog: "A.I. BUD LOG",
@@ -231,7 +207,6 @@
       mpPublic: "Open rooms",
       mpNoRooms: "No open rooms",
       mpRestored: "Round restored",
-      mpAbout: "Versus is a room for up to 8 players. Last one standing, most BTC, or a race to a candle. It does not count for ranked or for awards.",
       reactGg: "GG",
       reactNice: "Nice",
       reactWow: "Wow",
@@ -240,23 +215,12 @@
       reactDown: "Down",
       reactGl: "GL",
       reactHf: "HF",
-      aliasMonth: "Alias can change once every 30 days.",
-      aliasWait: "Next alias change after ",
       best: "Best",
       congrats: "The float is yours",
       stacked: "You stacked the cap. Here is the tape of the run.",
       newPass: "New password",
       savePass: "Save password",
       choosePass: "Choose a new password.",
-      privacyH: "Privacy policy",
-      privacyB1: "Bitcoinizate is a browser games site. We do not sell a token, we do not run ads, and we do not sell your data.",
-      privacyB2: "If you play as a guest, this device keeps your best score, awards, and settings such as look, sound, and language. That stays in local storage on the device. We do not receive it.",
-      privacyB3: "If you create an account we keep your email, a password hash (handled by Supabase), your alias, optional Bitcoin and Lightning payout addresses, your cloud high score, a saved run tape, awards, and your versus rating. Feedback you send while signed in is stored with your account.",
-      privacyB4: "We use that to sign you in, show a public leaderboard of alias and score, pay prize winners, and read feedback. We do not sell lists. Donations go to our Lightning invoice or Bitcoin address. The payment itself does not tell us who you are.",
-      privacyB5: "You can sign out anytime. To delete an account, email hello@bitcoinizate.com from the address you registered with. We delete the account and the profile tied to it.",
-      privacyB6: "Questions: <a href=\"mailto:hello@bitcoinizate.com\">hello@bitcoinizate.com</a>",
-      lookUp: "Look up!",
-      lookDown: "Look down!",
       halveTipUp: "Halving. Look up!",
       halveTipDown: "Halving. Look down!",
       aidTitle: "San Arnaldo",
@@ -294,9 +258,23 @@
       soundOff: "OFF",
       noAiCalls: "No calls yet. Toggle A.I. bud ON in the HUD.",
       markedPl: "Marked P/L",
+      ariaPlayPause: "Play/Pause",
+      ariaVolume: "Volume",
+      ariaCountry: "Bitcoin Country",
+      ariaReverse: "Reverse",
+      ariaSpread: "Shot spread",
+      ariaFury: "Fury strike",
+      ariaPause: "Pause",
+      ariaPlay: "Play",
+      ariaPrev: "Previous",
+      ariaNext: "Next",
+      ariaShuffle: "Shuffle",
+      ariaRepeat: "Repeat",
+      ariaEnable: "Enable",
+      ariaDisable: "Disable",
+      jukeRetro: "Retro Jukebox"
     },
     es: {
-      brandSub: "Juegos gratis de temática bitcoin",
       signIn: "INICIAR SESIÓN",
       signUp: "Crear cuenta",
       createAccount: "Crear cuenta",
@@ -314,19 +292,10 @@
       btcAddr: "Dirección BTC",
       lightning: "Lightning",
       highScore: "Mejor puntaje",
-      lead1: "Bitcoinizate es un sitio nuevo de juegos. Este es nuestro primer título.",
-      lead2: "Vuela entre velas japonesas. El precio se mueve mientras vuelas. El puntaje es el patrimonio total en BTC al precio del juego.",
-      playNow: "Jugar ahora",
       playSub: "Jugar es ranked (0 cold, 0 multisig).",
-      ctaAccount: "Crea una cuenta gratis",
-      ctaSub: "Guarda puntaje y una dirección BTC para calificar por premios en sats",
-      faqPrize: "Donaciones",
       donateTitle: "Donaciones",
       donateBody: "Las donaciones mantienen el juego. El 70% de cada donación se reparte en premios del ranking.",
-      faqPrizeA: "El puntaje de invitado no cuenta. Podemos descartar partidas que parezcan automáticas.",
-      playMoney: "El efectivo, el precio y el puntaje del juego son play money. No es bitcoin real.",
       how: "Cómo se juega",
-      enjoy: "Esperamos que lo pruebes y disfrutes el viaje.",
       prizes: "Las donaciones mantienen el juego. El 70% de cada donación se reparte en premios del ranking.",
       feedback: "Feedback",
       send: "Enviar",
@@ -350,16 +319,6 @@
       tutB4: "Sale uno por vez. Cuando no hay ninguno, el siguiente espera entre 5 y 15 segundos al azar, y dura 12,5 segundos. + cura un corazón, o suma un cuarto si ya estás en 3/3. S no se va: tiro más rápido, después dos balas, después rompe el metal y mata de un tiro a los pesados y a los árboles. La estrella son 7,5 s de invulnerabilidad. F congela enemigos 7,5 s. X hace explotar a todos. W rodea la ciudadela de metal por 7,5 s, y después ese metal pasa a ladrillo normal, que se rompe.",
       tutB5: "La Furia, el misil de largo alcance, está arriba de la palanca. Mantenla apretada hasta que se llene el anillo, mueve el círculo rojo con la palanca y toca de nuevo para lanzar. Después de cada disparo necesita unos segundos para recargarse. Alcanza helicópteros y tropas en el terreno equivocado: un tanque en una batalla de mar, un barco en una de tierra.",
       tutB6: "Cascos livianos, medios y pesados. Algunos vienen por ti. Otros van a la ciudadela. Hasta el 15% usa el otro elemento. KIA es cuántos destruiste sobre cuántos mandaron. Un Mundo más alto manda más tropas, y cada batalla trae más que la anterior.",
-      faq: "Preguntas",
-      faqWhat: "¿Qué es Bitcoinizate?",
-      faqWhatA: "Un sitio de juegos gratis de temática bitcoin. Ahora: Choppy Bitcoin. Sin token. En el navegador.",
-      faqAcc: "¿Necesito una cuenta?",
-      faqAccA: "No. Jugar es gratis. Inicia sesión solo si quieres el ranking en la nube.",
-      discordTitle: "Discord",
-      discordBody: "El chat del juego está aquí. Dudas, bugs y la gente que ya juega.",
-      discordJoin: "Entrar al server",
-      playLink: "jugar Choppy Bitcoin",
-      privacy: "Privacidad",
       options: "OPCIONES",
       paused: "PAUSA",
       resume: "SEGUIR",
@@ -385,10 +344,6 @@
       animHero: "3D",
       hero2d: "2D",
       tapHero: "Toca el héroe para cambiar 2D / 3D",
-      textSize: "TAMAÑO DEL TEXTO",
-      textSmall: "CHICO",
-      textMed: "MEDIO",
-      textLarge: "GRANDE",
       candleText: "INGRESO DE VELAS",
       tradeText: "COMPRA / VENTA",
       aiLog: "REGISTRO A.I. BUD",
@@ -410,7 +365,7 @@
       arcCards: "CARTAS ARC",
       arcTldrOn: "TLDR",
       arcFullOn: "TEXTO COMPLETO",
-      testing: "Testing",
+      testing: "Pruebas",
       testPerk: "Perk",
       testGrant: "Dar",
       testArc: "Velas por arco",
@@ -525,7 +480,6 @@
       mpPublic: "Salas abiertas",
       mpNoRooms: "No hay salas abiertas",
       mpRestored: "Ronda recuperada",
-      mpAbout: "Versus es una sala de hasta 8 jugadores. Último en pie, más BTC o una carrera hasta una vela. No cuenta para ranked ni para los premios.",
       reactGg: "GG",
       reactNice: "Bien",
       reactWow: "Uau",
@@ -534,23 +488,12 @@
       reactDown: "Baja",
       reactGl: "Suerte",
       reactHf: "HF",
-      aliasMonth: "El alias se puede cambiar una vez cada 30 días.",
-      aliasWait: "Próximo cambio de alias después del ",
       best: "Mejor",
       congrats: "El float es tuyo",
       stacked: "Llenaste el tope. Esta es la cinta de la partida.",
       newPass: "Nueva contraseña",
       savePass: "Guardar contraseña",
       choosePass: "Elige una contraseña nueva.",
-      privacyH: "Política de privacidad",
-      privacyB1: "Bitcoinizate es un sitio de juegos en el navegador. No vendemos un token, no mostramos anuncios y no vendemos tus datos.",
-      privacyB2: "Si juegas como invitado, este dispositivo guarda tu mejor puntaje, premios de partida y ajustes como el aspecto, el sonido y el idioma. Eso queda en el almacenamiento local del dispositivo. No lo recibimos.",
-      privacyB3: "Si creas una cuenta guardamos tu correo, un hash de contraseña (lo maneja Supabase), tu alias, direcciones opcionales de Bitcoin y Lightning para cobros, tu puntaje en la nube, la cinta de una partida guardada, logros y tu rating de versus. El feedback que envías con la sesión iniciada se guarda con tu cuenta.",
-      privacyB4: "Eso sirve para iniciar sesión, mostrar un ranking público de alias y puntaje, pagar premios y leer el feedback. No vendemos listas. Las donaciones van a nuestra factura Lightning o a nuestra dirección Bitcoin. El pago en sí no nos dice quién eres.",
-      privacyB5: "Puedes cerrar sesión cuando quieras. Para borrar una cuenta escribe a hello@bitcoinizate.com desde el correo con el que te registraste. Borramos la cuenta y el perfil asociado.",
-      privacyB6: "Consultas: <a href=\"mailto:hello@bitcoinizate.com\">hello@bitcoinizate.com</a>",
-      lookUp: "¡Mira arriba!",
-      lookDown: "¡Mira abajo!",
       halveTipUp: "Halving. ¡Mira arriba!",
       halveTipDown: "Halving. ¡Mira abajo!",
       aidTitle: "San Arnaldo",
@@ -587,7 +530,22 @@
       soundOn: "ON",
       soundOff: "OFF",
       noAiCalls: "Todavía no hay llamadas. Activa A.I. bud en el HUD.",
-      markedPl: "P/L marcado"
+      markedPl: "P/L marcado",
+      ariaPlayPause: "Reproducir/Pausa",
+      ariaVolume: "Volumen",
+      ariaCountry: "Bitcoin Country",
+      ariaReverse: "Reversa",
+      ariaSpread: "Dispersión de tiro",
+      ariaFury: "Disparo de furia",
+      ariaPause: "Pausa",
+      ariaPlay: "Reproducir",
+      ariaPrev: "Anterior",
+      ariaNext: "Siguiente",
+      ariaShuffle: "Aleatorio",
+      ariaRepeat: "Repetir",
+      ariaEnable: "Activar",
+      ariaDisable: "Desactivar",
+      jukeRetro: "Jukebox retro"
     }
   };
 
@@ -607,13 +565,41 @@
     return pack[key] != null ? pack[key] : (dict.en[key] != null ? dict.en[key] : key);
   }
 
+  // A key not loaded yet (see i18n-extra.js) keeps the element's own fallback text instead of showing raw.
+  function has(key) {
+    return dict.en[key] != null || (dict[lang] && dict[lang][key] != null);
+  }
+
+  // Rarely needed strings live in i18n-extra.js, loaded after startup so the game bundle stays small.
+  let extraLoaded = false;
+  function extend(more) {
+    extraLoaded = true;
+    ["en", "es"].forEach((l) => { if (more && more[l]) Object.assign(dict[l], more[l]); });
+    if (document.body) apply(document);
+    window.dispatchEvent(new CustomEvent("bz-lang", { detail: lang }));
+  }
+  function loadExtra() {
+    if (extraLoaded || document.getElementById("bz-i18n-extra")) return;
+    const s = document.createElement("script");
+    s.id = "bz-i18n-extra";
+    s.async = true;
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp194";
+    document.head.appendChild(s);
+  }
+
   function apply(root) {
     const box = root || document;
     box.querySelectorAll("[data-i18n]").forEach((el) => {
-      el.textContent = t(el.getAttribute("data-i18n"));
+      const k = el.getAttribute("data-i18n");
+      if (has(k)) el.textContent = t(k);
     });
     box.querySelectorAll("[data-i18n-html]").forEach((el) => {
-      el.innerHTML = t(el.getAttribute("data-i18n-html"));
+      const k = el.getAttribute("data-i18n-html");
+      if (has(k)) el.innerHTML = t(k);
+    });
+    box.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+      const k = el.getAttribute("data-i18n-aria");
+      if (has(k)) el.setAttribute("aria-label", t(k));
     });
     document.documentElement.lang = lang === "es" ? "es" : "en";
     document.querySelectorAll("[data-lang]").forEach((btn) => {
@@ -627,11 +613,16 @@
   function setLang(next) {
     lang = next === "es" ? "es" : "en";
     try { localStorage.setItem(KEY, lang); } catch (e) {}
+    loadExtra();
     apply(document);
     window.dispatchEvent(new CustomEvent("bz-lang", { detail: lang }));
   }
 
-  window.BZ = { t, setLang, apply, lang() { return lang; }, detect };
+  window.BZ = { t, setLang, apply, extend, loadExtra, lang() { return lang; }, detect };
+  if (window.BZ_EXTRA) extend(window.BZ_EXTRA);
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+  if (document.readyState === "complete") idle(loadExtra);
+  else window.addEventListener("load", () => idle(loadExtra), { once: true });
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-lang]");
     if (!btn) return;

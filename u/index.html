@@ -64,15 +64,16 @@
     <div class="card">
       <p class="k" id="k-score">High score</p>
       <p id="score">—</p>
-      <p class="k" id="k-elo">Versus ELO</p>
+      <p class="k" id="k-elo" data-i18n="eloBoard">Versus ELO</p>
       <p id="elo">—</p>
-      <p><button type="button" class="stats-mini hide" id="score-stats">STATS</button></p>
+      <p><button type="button" class="stats-mini hide" id="score-stats" data-i18n="runStats">STATS</button></p>
       <div id="awards" class="awards"></div>
     </div>
     <p id="miss" class="miss hide"></p>
-    <a class="play" href="/choppy-bitcoin/">Play Choppy Bitcoin</a>
+    <a class="play" href="/choppy-bitcoin/" data-i18n="play">Play Choppy Bitcoin</a>
   </div>
   <script src="/choppy-bitcoin/i18n.js"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp194"></script>
   <script src="/choppy-bitcoin/supabase-lib.js"></script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
@@ -110,7 +111,7 @@
         { id: "paper", cat: "trading", name: "Paper Hands", nameEs: "Manos de papel", why: "Sold BTC in a bear market.", whyEs: "Vendió BTC en un bear market." },
         { id: "doubler", cat: "trading", name: "Double Stack", nameEs: "Stack doble", why: "Finished a run with at least 2× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos el doble del patrimonio inicial en BTC." },
         { id: "tenx", cat: "trading", name: "Ten Bagger", nameEs: "Diez veces", why: "Finished a run with at least 10× the starting net worth in BTC.", whyEs: "Terminó una partida con al menos 10 veces el patrimonio inicial en BTC." },
-        { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Day trader", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
+        { id: "dayTrader", cat: "trading", name: "Day Trader", nameEs: "Trader del día", why: "Made 50 or more trades in one run.", whyEs: "Hizo 50 operaciones o más en una partida." },
         { id: "cap21", cat: "trading", name: "Twenty One Million", nameEs: "Veintiún millones", why: "Stacked 21M BTC.", whyEs: "Juntó 21M BTC." },
         { id: "halver", cat: "survival", name: "Halving Catcher", nameEs: "Atrapa halvings", why: "Every halving that spawned was eaten.", whyEs: "Comió todos los halvings que salieron." },
         { id: "greedy", cat: "survival", name: "Greedy Miner", nameEs: "Minero greedy", why: "Ate 0 halvings.", whyEs: "Comió 0 halvings." },
@@ -127,7 +128,7 @@
         { id: "married", cat: "family", secret: true, name: "Just Married", nameEs: "Recién casados", why: "Married Lena.", whyEs: "Se casó con Lena." },
         { id: "runaway", cat: "family", secret: true, name: "Something Else", nameEs: "Otra cosa", why: "Walked away from the wedding to build something else.", whyEs: "Dejó la boda para construir otra cosa." },
         { id: "babyBoard", cat: "family", secret: true, name: "A Brand New Day", nameEs: "Un nuevo amanecer", why: "Welcomed the baby.", whyEs: "Le dio la bienvenida al bebé." },
-        { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Family office", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
+        { id: "familyOffice", cat: "family", secret: true, name: "Family Office", nameEs: "Oficina familiar", why: "Set money and a cold-storage device aside for the baby.", whyEs: "Apartó dinero y un dispositivo de almacenamiento en frío para el bebé." },
         { id: "classicFartface", cat: "family", secret: true, name: "Classic Fartface", nameEs: "Típico de Cara de Pedo", why: "Sent Lena a PDF of financial advice.", whyEs: "Le envió a Lena un PDF con consejos financieros." },
         { id: "landowner", cat: "country", secret: true, name: "Landowner", nameEs: "Terrateniente", why: "Bought the island.", whyEs: "Compró la isla." },
         { id: "notForSale", cat: "country", secret: true, name: "Not for Sale", nameEs: "No está en venta", why: "Turned down the consortium's offer.", whyEs: "Rechazó la oferta del consorcio." },
