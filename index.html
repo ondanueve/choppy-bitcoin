@@ -27,7 +27,7 @@
   <meta name="twitter:title" content="Play Choppy Bitcoin">
   <meta name="twitter:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
   <meta name="twitter:image:alt" content="Choppy Bitcoin hero">
-  <link rel="stylesheet" href="style.css?v=mp192">
+  <link rel="stylesheet" href="style.css?v=mp193">
   <script src="nozoom.js?v=mp142"></script>
 </head>
 <body>
@@ -176,13 +176,12 @@
       <button type="button" class="text-btn" id="btn-close-profile">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp179"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js" integrity="sha384-QEx1pDqNtno80p4xYN5Cqm5JcAAtUDUCHqFLq0UBhWRFoFzzNHumh20zFGG/9XMi" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="supabase-lib.js"></script>
-  <script src="auth.js?v=mp66"></script>
-  <script src="run-stats.js"></script>
-  <script src="audio.js?v=mp172"></script>
-  <script src="mp.js?v=mp8"></script>
-  <script src="game.js?v=mp192"></script>
+  <!-- abcjs loads when the jukebox opens (audio.js). mp.js loads when Versus opens. -->
+  <script src="/choppy-bitcoin/i18n.js?v=mp179" defer></script>
+  <script src="supabase-lib.js" defer></script>
+  <script src="auth.js?v=mp66" defer></script>
+  <script src="run-stats.js" defer></script>
+  <script src="audio.js?v=mp193" defer></script>
+  <script src="game.js?v=mp193" defer></script>
 </body>
 </html>
