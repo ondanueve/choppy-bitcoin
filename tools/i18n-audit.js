@@ -109,6 +109,9 @@ const EXCEPT = new Map([
   ["KIA", "Battle abbreviation kept in the tutorial"],
   ["HUD", "Interface abbreviation"],
   ["REV", "Control abbreviation"],
+  ["GG", "Gaming chat reaction used as-is in Spanish"],
+  ["RIP", "Gaming chat reaction used as-is in Spanish"],
+  ["HF", "Gaming chat reaction used as-is in Spanish"],
   ["Trading", "Category loanword — replaced in the catalogs, not excepted here"]
 ]);
 EXCEPT.delete("Trading");

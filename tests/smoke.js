@@ -35,7 +35,8 @@ const TEXT_EXT = new Set([
 ]);
 // The detector lists these patterns on purpose. Scanning this file would
 // match the list itself.
-const SKIP_CONTENT_SCAN = new Set(["tests/smoke.js"]);
+// The i18n audit, its report and docs/i18n.md list the same filler and voseo patterns this file checks for.
+const SKIP_CONTENT_SCAN = new Set(["tests/smoke.js", "tools/i18n-audit.js", "tests/out/i18n-report.md", "docs/i18n.md"]);
 
 // Scripts that ship today without a cache-bust query. Presence is allowed
 // on an unchanged tree. A byte change versus origin/main still fails,
