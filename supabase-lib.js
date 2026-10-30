@@ -29,6 +29,11 @@
     const msg = d.msg || d.error_description || d.error || d.message || fallback;
     return new Error(typeof msg === "string" ? msg : fallback);
   }
+  function offlineErr(err) {
+    const msg = String(err && (err.message || err) || "");
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return true;
+    return /offline|failed to fetch|networkerror|load failed|network request failed/i.test(msg);
+  }
 
   function createClient() {
     async function takeUrlSession() {
@@ -108,7 +113,12 @@
         if (!s || !s.access_token) return { data: { session: null }, error: null };
         if (s.expires_at && s.expires_at * 1000 < Date.now() + 15000) {
           const ref = await auth.refresh();
-          if (ref.error) return { data: { session: null }, error: ref.error };
+          if (ref.error) {
+            if (offlineErr(ref.error) && s.access_token) {
+              return { data: { session: { user: s.user, access_token: s.access_token, type: s.type || "" } }, error: null };
+            }
+            return { data: { session: null }, error: ref.error };
+          }
         }
         const cur = loadSess();
         if (!cur) return { data: { session: null }, error: null };
@@ -128,8 +138,8 @@
           });
           const d = await readJson(r);
           if (!r.ok || !d.access_token) {
-            saveSess(null);
-            return { data: { session: null }, error: apiError(d, "Session expired") };
+            if (!(d && d.offline === true)) saveSess(null);
+            return { data: { session: null }, error: apiError(d, d && d.offline ? "offline" : "Session expired") };
           }
           const next = {
             access_token: d.access_token,

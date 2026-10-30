@@ -620,7 +620,17 @@
     tutB3: "Sand is beach. Grass and dirt are open. Brick breaks. Metal, rock and the lighthouse do not. Trees block too. The coast is jagged, except beside docks and roads. Tanks stay on land. Ships stay on water.",
     tutB4: "One pickup at a time. After the field is empty, the next waits a random 5–15 seconds, then lasts 12.5 seconds. + restores a heart, or adds a fourth at 3/3. S stays: faster shot, then two bullets, then it breaks metal and one-shots heavies and trees. The star is 7.5s of invulnerability. F freezes enemies for 7.5s. X blows up every enemy. W wraps the citadel in metal for 7.5s, then that metal becomes ordinary brick.",
     tutB5: "Fury, the long-range missile, sits above the stick. Hold it until the ring fills, move the red circle with the stick, then tap again to fire. After each strike it needs a few seconds to recharge. It reaches helicopters, and troops on the wrong ground: a tank in a sea battle, a ship in a land battle.",
-    tutB6: "Light, medium and heavy hulls. Some units come for you. Some go for the citadel. Up to 15% of them use the other element. KIA is destroyed over sent. A higher World number sends more troops, and each battle fields more than the one before."
+    tutB6: "Light, medium and heavy hulls. Some units come for you. Some go for the citadel. Up to 15% of them use the other element. KIA is destroyed over sent. A higher World number sends more troops, and each battle fields more than the one before.",
+    pwaOpt: "OFFLINE APP", pwaOn: "ON", pwaOff: "OFF",
+    pwaUpdate: "A new version is ready.", pwaReload: "Reload", pwaLater: "Not now",
+    pwaReloadOn: "Reload once to store the game on this device.",
+    pwaReloadOff: "Reload once to remove the offline copy.",
+    netTitle: "No connection",
+    netSignIn: "Sign-in needs a connection. You can keep playing as a guest on this device.",
+    netScore: "This score stays on this device. It was not sent, and it will not be sent later by itself.",
+    netVersus: "Versus needs a connection. Ranked and training still work on this device.",
+    netArt: "That picture is not saved on this device. Play continues on a plain background.",
+    netClose: "OK"
   };
   function t(k) {
     if (window.BZ && typeof BZ.t === "function") {
@@ -2766,7 +2776,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp195";
+    s.src = "chess-data.js?v=mp196";
     document.head.appendChild(s);
   }
   (function () {
@@ -3401,7 +3411,7 @@
     if (!m) return base;
     const src = "chance/" + key + "-wide.jpg?v=" + (POST_ART_VER[key] || "post3");
     return base.replace(/ onerror="[^"]*"/, "").replace(m[0], " src=\"" + src + "\" data-base=\"" + m[1] + "\"")
-      .replace("<img ", "<img onerror=\"this.onerror=null;window.__choppyPostMiss&&window.__choppyPostMiss('" + key + "');this.src=this.dataset.base;\" ");
+      .replace("<img ", "<img onerror=\"window.__choppyPostMiss&&window.__choppyPostMiss('" + key + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
   }
   window.__choppyPostMiss = (k) => POST_ART_MISS.add(k);
   // Bloc intro cards show the art of whichever bloc fills that slot this run (falls back to the card's own art).
@@ -3443,7 +3453,7 @@
     if (va && base.indexOf("<img") === 0) {
       const m0 = base.match(/ src="([^"]*)"/);
       if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat3\" data-base=\"" + m0[1] + "\"")
-        .replace("<img ", "<img onerror=\"this.onerror=null;window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');this.src=this.dataset.base;\" ");
+        .replace("<img ", "<img onerror=\"window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
     }
     const aid = blocArtId(card);
     if (!aid || aid === card.id || base.indexOf("<img") !== 0) return base;
@@ -3451,8 +3461,30 @@
     if (!m) return base;
     const src = "chance/" + aid + "-wide.jpg?v=cin14";
     return base.replace(/ onerror="[^"]*"/, "").replace(m[0], " src=\"" + src + "\" data-base=\"" + m[1] + "\"")
-      .replace("<img ", "<img onerror=\"this.onerror=null;this.src=this.dataset.base;\" ");
+      .replace("<img ", "<img onerror=\"window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
   }
+  function choppyArtAbs(fb) {
+    try { return new URL(fb, location.href).href; } catch (e) { return fb; }
+  }
+  function choppyArtMiss(img) {
+    if (!img || img.tagName !== "IMG" || img.getAttribute("data-dead") === "1") return;
+    const fb = img.getAttribute("data-base") || img.getAttribute("data-fb") || "";
+    let online = true;
+    try { online = navigator.onLine !== false; } catch (e) {}
+    if (fb && img.getAttribute("data-tried") !== "1" && online && img.src !== choppyArtAbs(fb)) {
+      img.setAttribute("data-tried", "1");
+      img.src = fb;
+      return;
+    }
+    img.setAttribute("data-dead", "1");
+    img.onerror = null;
+    const box = document.createElement("div");
+    box.className = (img.className || "chance-art") + " art-miss";
+    box.setAttribute("role", "img");
+    if (img.alt) box.setAttribute("aria-label", img.alt);
+    if (img.parentNode) img.parentNode.replaceChild(box, img);
+  }
+  window.__choppyArtMiss = choppyArtMiss;
   function chanceArtHtml(id) {
     const meta = getChanceArtMeta(id);
     if (meta.isVideo) {
@@ -3461,7 +3493,7 @@
     const wideClass = meta.wide ? " wide-art" : "";
     const festClass = (id === "blocTriumph" || meta.artId === "festival") ? " fest-art" : "";
     const fallback = meta.fallbackSrc ? meta.fallbackSrc : meta.artId && meta.artId !== "hero" ? "chance/" + meta.artId + ".jpg?v=" + (SQ_JPG_VER[meta.artId] || "mp86") : "chance/hero.jpg";
-    return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\" onerror=\"this.onerror=null;this.src='" + fallback + "';\">";
+    return "<img class=\"chance-art" + festClass + wideClass + "\" src=\"" + meta.src + "\" data-fb=\"" + fallback + "\" alt=\"" + arcAltText(id) + "\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\" onerror=\"window.__choppyArtMiss&&window.__choppyArtMiss(this)\">";
   }
 
   // Four enemy blocs exist; each run fights three of them, picked and ordered at random (S.bcBlocs).
@@ -13387,6 +13419,7 @@
       + (S.ranked ? "" : "<button type=\"button\" class=\"cta opt-item\" id=\"opt-test\">" + t("testing") + "</button>")
       + "<button type=\"button\" class=\"cta opt-item" + ((S.have.juke || 0) > 0 ? "" : " dim") + "\" id=\"opt-juke\">" + t("jukebox") + "</button>"
       + "<button type=\"button\" class=\"cta opt-item" + ((S.have.aibud || 0) > 0 ? "" : " dim") + "\" id=\"opt-aibud\">" + t("aiLog") + "</button>"
+      + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-pwa\">" + t("pwaOpt") + " · " + (pwaEnabled() ? t("pwaOn") : t("pwaOff")) + "</button>"
       + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-help\">" + t("tutorial") + "</button>"
       + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-feed\">" + t("feedback") + "</button>"
       + "</div>";
@@ -13502,6 +13535,19 @@
     };
     const optLang = $("opt-lang");
     if (optLang) optLang.onclick = (e) => { e.stopPropagation(); S.optPanel = "lang"; renderOverlay(); };
+    const optPwa = $("opt-pwa");
+    if (optPwa) optPwa.onclick = (e) => {
+      e.stopPropagation();
+      if (pwaEnabled()) {
+        window.__choppyPwaForceOff = true;
+        stopPwa().then(() => showPwaBar("reload-off")).catch(() => {});
+      } else {
+        window.__choppyPwaForceOff = false;
+        pwaPersist(true);
+        startPwa().catch(() => {});
+      }
+      renderOverlay();
+    };
     const optPrice = $("opt-price");
     if (optPrice) optPrice.onclick = (e) => { e.stopPropagation(); cyclePriceMode(); renderOverlay(); renderHud(); };
     const optSound = $("opt-sound");
@@ -14081,7 +14127,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp195";
+      s.src = "mp.js?v=mp196";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14092,6 +14138,10 @@
     return mpScript;
   }
   function openMpLobby() {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      if (window.choppyNetBlock) window.choppyNetBlock("versus");
+      return;
+    }
     S.mpErr = "";
     S.mp = false;
     if (window.ChoppyMP && window.ChoppyMP.browse) window.ChoppyMP.browse(true);
@@ -14214,6 +14264,10 @@
       S.mpEloNote = t("eloGuest");
       return;
     }
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      S.mpEloNote = t("eloPending");
+      return;
+    }
     if (typeof window.submitVersusResult !== "function") {
       S.mpEloNote = t("eloPending");
       return;
@@ -14223,7 +14277,7 @@
     Promise.resolve(window.submitVersusResult(S.worldSeed, w.uid, uids, dur)).then((res) => {
       if (token !== S.mpEloTry) return;
       const status = paintMpElo(res);
-      if (status === "pending" && nTry < 4) {
+      if (status === "pending" && nTry < 4 && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         setTimeout(() => {
           if (token !== S.mpEloTry) return;
           reportMpElo(nTry + 1);
@@ -15596,6 +15650,7 @@
       const q = new URLSearchParams(location.search || "");
       const room = (q.get("room") || q.get("mp") || "").toUpperCase();
       if (room.length >= 4) { S.mpJoinCode = room; openMpLobby(); }
+      else if (q.get("versus") === "1") openMpLobby();
       else tryResumeMp();
     } catch (e) {}
     requestAnimationFrame(loop);
@@ -15603,4 +15658,193 @@
     try { console.error(e); } catch (err) {}
     try { renderOverlay(); } catch (err) {}
   }
+  const PWA_KEY = "choppy-pwa";
+  function pwaQuery(name) {
+    try { return new URLSearchParams(location.search || "").get(name); } catch (e) { return null; }
+  }
+  function pwaEnabled() {
+    if (window.__choppyPwaForceOff) return false;
+    if (pwaQuery("pwa") === "0") return false;
+    if (pwaQuery("pwa") === "1") return true;
+    try { return localStorage.getItem(PWA_KEY) === "1"; } catch (e) { return false; }
+  }
+  function pwaPersist(on) {
+    try {
+      if (on) localStorage.setItem(PWA_KEY, "1");
+      else localStorage.removeItem(PWA_KEY);
+    } catch (e) {}
+  }
+  function choppySwScope(reg) {
+    try { return new URL(reg.scope).pathname.indexOf("/choppy-bitcoin/") === 0; } catch (e) { return false; }
+  }
+  function pwaText(key) {
+    return t(key);
+  }
+  function ensurePwaBar() {
+    let el = $("pwa-update");
+    if (el) return el;
+    el = document.createElement("div");
+    el.id = "pwa-update";
+    el.className = "pwa-update hide";
+    el.innerHTML = "<p id=\"pwa-update-text\"></p><button type=\"button\" id=\"pwa-update-go\"></button><button type=\"button\" id=\"pwa-update-later\"></button>";
+    document.body.appendChild(el);
+    return el;
+  }
+  function showPwaBar(mode) {
+    const el = ensurePwaBar();
+    const text = $("pwa-update-text");
+    const go = $("pwa-update-go");
+    const later = $("pwa-update-later");
+    const key = mode === "update" ? "pwaUpdate" : mode === "reload-off" ? "pwaReloadOff" : "pwaReloadOn";
+    if (text) text.textContent = pwaText(key);
+    if (go) go.textContent = pwaText("pwaReload");
+    if (later) later.textContent = pwaText("pwaLater");
+    if (later) later.onclick = () => el.classList.add("hide");
+    if (go) go.onclick = () => {
+      window.__choppyPwaReload = true;
+      const reg = window.__choppyPwaReg;
+      const worker = window.__choppyPwaWaiting || (reg && (reg.waiting || reg.installing));
+      if (mode === "update" && worker) {
+        try { worker.postMessage({ type: "skip-waiting" }); } catch (e) { location.reload(); }
+        return;
+      }
+      location.reload();
+    };
+    el.classList.remove("hide");
+  }
+  function ensureNetBlock() {
+    let el = $("net-block");
+    if (el) return el;
+    el = document.createElement("div");
+    el.id = "net-block";
+    el.className = "net-block hide";
+    el.setAttribute("role", "alertdialog");
+    el.innerHTML = "<h2 id=\"net-title\"></h2><p id=\"net-body\"></p><button type=\"button\" id=\"net-ok\"></button>";
+    document.body.appendChild(el);
+    const ok = el.querySelector("#net-ok");
+    if (ok) ok.onclick = () => el.classList.add("hide");
+    return el;
+  }
+  function choppyNetBlock(kind) {
+    const el = ensureNetBlock();
+    const title = $("net-title");
+    const body = $("net-body");
+    const ok = $("net-ok");
+    const key = kind === "score" ? "netScore" : kind === "versus" ? "netVersus" : kind === "art" ? "netArt" : "netSignIn";
+    if (title) title.textContent = pwaText("netTitle");
+    if (body) body.textContent = pwaText(key);
+    if (ok) ok.textContent = pwaText("netClose");
+    el.classList.remove("hide");
+  }
+  window.choppyNetBlock = choppyNetBlock;
+  function onPwaMessage(ev) {
+    const data = ev.data || {};
+    if (data.type === "killed") {
+      pwaPersist(false);
+      showPwaBar("reload-off");
+      return;
+    }
+    if (data.type === "update-ready") {
+      window.__choppyPwaWaiting = ev.source || null;
+      showPwaBar("update");
+    }
+  }
+  function hookPwa() {
+    if (window.__choppyPwaHooked || !("serviceWorker" in navigator)) return;
+    window.__choppyPwaHooked = true;
+    navigator.serviceWorker.addEventListener("message", onPwaMessage);
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (window.__choppyPwaReload) location.reload();
+    });
+  }
+  function watchReg(reg) {
+    window.__choppyPwaReg = reg;
+    const watch = (worker) => {
+      if (!worker) return;
+      worker.addEventListener("statechange", () => {
+        if (worker.state === "installed" && navigator.serviceWorker.controller) {
+          window.__choppyPwaWaiting = worker;
+          showPwaBar("update");
+        }
+      });
+    };
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      window.__choppyPwaWaiting = reg.waiting;
+      showPwaBar("update");
+    }
+    watch(reg.installing);
+    reg.addEventListener("updatefound", () => watch(reg.installing));
+  }
+  async function dropChoppyCaches() {
+    if (!(window.caches && caches.keys)) return;
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((name) => name.indexOf("choppy-") === 0).map((name) => caches.delete(name)));
+    } catch (e) {}
+  }
+  async function stopPwa() {
+    pwaPersist(false);
+    if (!("serviceWorker" in navigator)) return;
+    let regs = [];
+    try { regs = await navigator.serviceWorker.getRegistrations(); } catch (e) {}
+    for (let i = 0; i < regs.length; i++) {
+      const reg = regs[i];
+      if (!choppySwScope(reg)) continue;
+      const worker = reg.active || reg.waiting || reg.installing;
+      if (worker) {
+        try { worker.postMessage({ type: "wipe" }); } catch (e) {}
+      }
+    }
+    await dropChoppyCaches();
+    for (let i = 0; i < regs.length; i++) {
+      const reg = regs[i];
+      if (!choppySwScope(reg)) continue;
+      try {
+        await Promise.race([reg.unregister(), new Promise((resolve) => setTimeout(resolve, 1500))]);
+      } catch (e) {}
+    }
+    await dropChoppyCaches();
+  }
+  async function killFileOn() {
+    try {
+      const res = await fetch("/choppy-bitcoin/sw-kill.json", { cache: "no-store" });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return !!(data && (data.kill === true || data.disabled === true));
+    } catch (e) {
+      return false;
+    }
+  }
+  async function startPwa() {
+    if (!("serviceWorker" in navigator)) return;
+    if (pwaQuery("pwa") === "0") {
+      hookPwa();
+      await stopPwa();
+      return;
+    }
+    if (!pwaEnabled()) {
+      // Off: any leftover worker from an earlier opt-in removes itself and its caches.
+      let regs = [];
+      try { regs = await navigator.serviceWorker.getRegistrations(); } catch (e) {}
+      if (regs.some(choppySwScope)) await stopPwa();
+      return;
+    }
+    hookPwa();
+    if (await killFileOn()) {
+      await stopPwa();
+      showPwaBar("reload-off");
+      return;
+    }
+    if (pwaQuery("pwa") === "1") pwaPersist(true);
+    const hadController = !!navigator.serviceWorker.controller;
+    const reg = await navigator.serviceWorker.register("/choppy-bitcoin/sw.js", { scope: "/choppy-bitcoin/", updateViaCache: "none" });
+    watchReg(reg);
+    if (!hadController) showPwaBar("reload-on");
+  }
+  function bootPwa() {
+    const run = () => { startPwa().catch(() => {}); };
+    if (document.readyState === "complete") run();
+    else window.addEventListener("load", run, { once: true });
+  }
+  bootPwa();
 })();

@@ -134,6 +134,16 @@
     authMsg.classList.toggle("bad", !!bad);
   }
 
+  function netDown() {
+    return typeof navigator !== "undefined" && navigator.onLine === false;
+  }
+  function netErr(err) {
+    const msg = String(err && err.message || err || "");
+    return netDown() || /offline|failed to fetch|networkerror|load failed|network request failed/i.test(msg);
+  }
+  function showNet(kind) {
+    if (typeof window.choppyNetBlock === "function") window.choppyNetBlock(kind);
+  }
   function sayMsg(key, fb, bad, vars) {
     lastMsgKey = key;
     lastMsgFb = fb;
@@ -360,7 +370,11 @@
     const username = ($("auth-username") && $("auth-username").value || "").trim();
     if (!email || !password) { sayMsg("authNeedBoth", "Enter email or alias, and password.", true); return; }
     if (password.length < 8) { sayMsg("authPassShort", "Password must be at least 8 characters.", true); return; }
-    if (!supabase) { sayMsg("authOffline", "Auth is offline.", true); return; }
+    if (!supabase || netDown()) {
+      sayMsg("netSignIn", "Sign-in needs a connection. You can keep playing as a guest on this device.", true);
+      showNet("signIn");
+      return;
+    }
     sayMsg("authWorking", "Working…");
     try {
       if (isSignUpMode) {
@@ -395,6 +409,11 @@
         setMsg("");
       }
     } catch (e) {
+      if (netErr(e)) {
+        sayMsg("netSignIn", "Sign-in needs a connection. You can keep playing as a guest on this device.", true);
+        showNet("signIn");
+        return;
+      }
       lastMsgKey = "";
       setMsg(e.message || tr("authFailed", "Authentication failed."), true);
     }
@@ -639,7 +658,8 @@
   }
 
   async function submitNewHighScore(n, meta) {
-    if (!currentUser || !currentProfile || !supabase) return;
+    if (!currentUser || !currentProfile) return;
+    if (!supabase) return;
     const next = Number(n) || 0;
     if (next <= 0 || !isFinite(next)) return;
     if (next > 21e6 * 250000) return;
@@ -651,6 +671,10 @@
     const oldT = currentProfile.score_time != null ? Number(currentProfile.score_time) : null;
     const improving = next > old || (next === old && (oldT == null || life < oldT));
     const stats = meta && meta.stats ? meta.stats : null;
+    if (netDown()) {
+      showNet("score");
+      return;
+    }
     try {
       let { error } = await supabase.rpc("submit_choppy_score", {
         p_score: next,
@@ -659,6 +683,10 @@
         p_stats: stats
       });
       if (error) {
+        if (netErr(error)) {
+          showNet("score");
+          return;
+        }
         const msg = String(error.message || "");
         const statsRejected = /bad stats|stats mismatch/i.test(msg);
         const retry = await supabase.rpc("submit_choppy_score", {
@@ -671,11 +699,16 @@
           try { await supabase.from("profiles").update({ run_stats: stats, score_time: life }).eq("id", currentUser.id); } catch (e2) {}
         }
       }
-      if (error) return;
+      if (error) {
+        if (netErr(error)) showNet("score");
+        return;
+      }
       if (improving) await loadUserProfile();
       const mine = localAwardIds();
       if (mine.length && window.persistAwards) await window.persistAwards(mine);
-    } catch (e) {}
+    } catch (e) {
+      if (netErr(e)) showNet("score");
+    }
   }
 
   function toggleAuthMode() {
@@ -694,6 +727,11 @@
     if (currentUser && currentProfile) {
       const tag = $("user-profile-tag");
       if (tag) tag.click();
+      return;
+    }
+    if (netDown()) {
+      sayMsg("netSignIn", "Sign-in needs a connection. You can keep playing as a guest on this device.", true);
+      showNet("signIn");
       return;
     }
     isSignUpMode = false;
