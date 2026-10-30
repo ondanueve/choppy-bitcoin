@@ -14,7 +14,7 @@ Grok Build carga este archivo al empezar una sesión. Léelo antes de editar.
 
 Una sesión anterior escribió texto de relleno dentro de `game.js` y `style.css`. Hubo que restaurar y redesplegar.
 
-- Cada edición lleva código o texto real y completo. No dejes marcadores: ni la palabra formada por «PLACE» + «HOLDER», ni «TODO» + «_REPLACE», ni «lorem» + « ipsum», ni «insert» + « here», ni plantillas de doble llave, ni un comentario que diga que el resto del archivo sigue igual, ni un comentario de bloque vacío o hecho solo de puntos.
+- Cada edición lleva código o texto real y completo. No dejes marcadores: ni la palabra formada por «PLACE» + «HOLDER», ni «TODO» + «_REPLACE», ni «lo» + «rem» + « ipsum», ni «insert» + « here», ni plantillas de doble llave, ni un comentario que diga que el resto del archivo sigue igual, ni un comentario de bloque vacío o hecho solo de puntos.
 - `game.js`, `style.css` e `i18n.js` se editan con reemplazos puntuales. No los reescribas enteros. Después de cada edición corre `git diff --stat`. Si el tamaño no es el que esperabas, restaura con `git checkout -- <archivo>` y repite.
 - Antes de cada commit: `node --check` de cada `.js` que hayas tocado, y `node tests/smoke.js`.
 - `game.js` y `style.css` no pueden bajar más de un 5 % ni subir más de un 15 % respecto de `origin/main` sin la variable `ALLOW_SIZE_CHANGE=1`.
