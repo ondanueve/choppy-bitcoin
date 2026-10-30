@@ -501,26 +501,42 @@
     }
   }
 
-  async function submitVersusResult(seed, winnerUid, playerUids) {
-    if (!supabase || !currentUser) return null;
+  function versusRpcMiss(error) {
+    const msg = String((error && (error.message || error.code)) || "");
+    return /duration|PGRST202|schema cache|Could not find the function/i.test(msg);
+  }
+
+  async function submitVersusResult(seed, winnerUid, playerUids, durationS) {
+    if (!supabase || !currentUser) return { status: "guest" };
     const ids = (playerUids || []).filter((id) => typeof id === "string" && id.length > 20);
-    if (!winnerUid || ids.length < 2) return null;
-    if (ids.indexOf(currentUser.id) < 0) return null;
+    if (!winnerUid || ids.length < 2 || ids.indexOf(currentUser.id) < 0) return { status: "guest" };
+    const body = {
+      p_seed: Number(seed) || 0,
+      p_winner: winnerUid,
+      p_players: ids
+    };
+    const dur = Number(durationS);
+    if (isFinite(dur) && dur >= 0) body.p_duration_s = Math.max(0, Math.round(dur));
     try {
-      const { data, error } = await supabase.rpc("submit_versus_result", {
-        p_seed: Number(seed) || 0,
-        p_winner: winnerUid,
-        p_players: ids
-      });
-      if (error) return null;
-      let rows = data;
+      let res = await supabase.rpc("submit_versus_result", body);
+      if (res.error && body.p_duration_s != null && versusRpcMiss(res.error)) {
+        res = await supabase.rpc("submit_versus_result", {
+          p_seed: body.p_seed,
+          p_winner: body.p_winner,
+          p_players: body.p_players
+        });
+      }
+      if (res.error) return { status: "pending" };
+      let rows = res.data;
       if (typeof rows === "string") try { rows = JSON.parse(rows); } catch (e) { rows = null; }
-      await loadUserProfile();
-      fetchEloBoard("ready-elo");
-      fetchEloBoard("site-elo");
+      if (Array.isArray(rows) && rows.length) {
+        await loadUserProfile();
+        fetchEloBoard("ready-elo");
+        fetchEloBoard("site-elo");
+      }
       return rows;
     } catch (e) {
-      return null;
+      return { status: "pending" };
     }
   }
 

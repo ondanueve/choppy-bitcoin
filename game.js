@@ -471,6 +471,7 @@
     mpNext: "Next game", mpSeries: "Series", mpFinished: "FINISHED",
     mpNote: "Same candles. Last standing, whale, or race. Does not count for the board.",
     eloBoard: "VERSUS ELO", eloGuest: "Sign in to record ELO", eloUpdated: "ELO updated", eloPending: "ELO not saved",
+    eloDisputed: "No ELO change (no agreement)", eloTooShort: "Too short for ELO", eloLimited: "ELO rate limit",
     soundOn: "ON", soundOff: "OFF",
     bullSongs: "BULL/BEAR SONGS", gameFx: "GAME FX", voices: "VOICES",
     chanceHead: "ARC", chanceAck: "GOT IT", chanceTldr: "TLDR", chanceOutcome: "OUTCOME",
@@ -945,7 +946,7 @@
     stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true,
     mp: false, worldSeed: 0, worldRand: null, mpOver: false, mpErr: "", mpJoinCode: "",
     mpRules: null, mpPlayAt: 0, mpSlot: 0, btcColdAt: 0, spectate: false, finished: false,
-    mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false,
+    mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false, mpSeriesT0: 0, mpEloTry: 0,
     jobTrack: null, jobOffer: null, jobName: "",
     have: { dca: 0, ff: 0, adopt: 0, manip: 0, candy: 0, juke: 0, aibud: 0, job: 0, market: 0, chance: 0, opsec: 0 },
     poolTier: { dca: 1, ff: 1, adopt: 1, manip: 1, candy: 1, juke: 1, aibud: 1, job: 1, market: 1, chance: 1, opsec: 1 },
@@ -13779,6 +13780,10 @@
     S.mpSlot = (window.ChoppyMP && window.ChoppyMP.slot && window.ChoppyMP.slot()) || 0;
     S.mpSeriesWins = (data && data.wins) || (window.ChoppyMP && window.ChoppyMP.wins && window.ChoppyMP.wins()) || {};
     S.mpGameN = (data && data.gameN) || (window.ChoppyMP && window.ChoppyMP.gameN && window.ChoppyMP.gameN()) || 1;
+    if ((S.mpGameN | 0) <= 1) S.mpSeriesT0 = Date.now();
+    else if (!S.mpSeriesT0) S.mpSeriesT0 = Date.now();
+    S.mpElo = null;
+    S.mpEloNote = "";
     S.ranked = false;
     applyMpSound(S.mpRules);
     resetWorld(false);
@@ -13798,35 +13803,68 @@
   function startMpMatch(seed) {
     beginMpCountdown({ seed: seed, startAt: Date.now() + 3200, rules: mpRulesNow() });
   }
-  function reportMpElo() {
-    S.mpElo = null;
-    S.mpEloNote = "";
-    const list = (window.ChoppyMP && window.ChoppyMP.players()) || [];
+  function mpEloUids(list) {
     const uids = [];
-    list.forEach((p) => { if (p.uid && uids.indexOf(p.uid) < 0) uids.push(p.uid); });
+    (list || []).forEach((p) => {
+      if (!p || !p.uid) return;
+      if (uids.indexOf(p.uid) < 0) uids.push(p.uid);
+    });
+    return uids;
+  }
+  function paintMpElo(res) {
+    if (Array.isArray(res) && res.length) {
+      S.mpElo = res;
+      S.mpEloNote = t("eloUpdated");
+      return "final";
+    }
+    if (res && res.status === "disputed") S.mpEloNote = t("eloDisputed");
+    else if (res && res.status === "short") S.mpEloNote = t("eloTooShort");
+    else if (res && res.status === "limited") S.mpEloNote = t("eloLimited");
+    else if (res && res.status === "guest") S.mpEloNote = t("eloGuest");
+    else S.mpEloNote = t("eloPending");
+    return (res && res.status) || "pending";
+  }
+  function reportMpElo(attempt) {
+    const nTry = attempt || 0;
+    if (!nTry) {
+      S.mpElo = null;
+      S.mpEloNote = "";
+      S.mpEloTry = (S.mpEloTry || 0) + 1;
+    }
+    const token = S.mpEloTry;
+    const list = (window.ChoppyMP && window.ChoppyMP.players()) || [];
     const w = S.mpWinner || {};
-    if (!w.uid || uids.length < 2) {
+    const uids = mpEloUids(list);
+    const signed = !!(window.choppySignedIn && window.choppyUid);
+    if (!signed || !w.uid || uids.length < 2 || uids.indexOf(window.choppyUid) < 0) {
       S.mpEloNote = t("eloGuest");
       return;
     }
     if (typeof window.submitVersusResult !== "function") {
-      S.mpEloNote = t("eloGuest");
+      S.mpEloNote = t("eloPending");
       return;
     }
-    Promise.resolve(window.submitVersusResult(S.worldSeed, w.uid, uids)).then((rows) => {
-      if (Array.isArray(rows) && rows.length) {
-        S.mpElo = rows;
-        S.mpEloNote = t("eloUpdated");
-      } else S.mpEloNote = t("eloPending");
+    const dur = S.mpSeriesT0 ? Math.max(0, Math.round((Date.now() - S.mpSeriesT0) / 1000)) : null;
+    S.mpEloNote = t("eloPending");
+    Promise.resolve(window.submitVersusResult(S.worldSeed, w.uid, uids, dur)).then((res) => {
+      if (token !== S.mpEloTry) return;
+      const status = paintMpElo(res);
+      if (status === "pending" && nTry < 4) {
+        setTimeout(() => {
+          if (token !== S.mpEloTry) return;
+          reportMpElo(nTry + 1);
+        }, 1200 * (nTry + 1));
+      }
       if (S.phase === "mpwin" || S.mpRoundOver) renderOverlay();
     }).catch(() => {
+      if (token !== S.mpEloTry) return;
       S.mpEloNote = t("eloPending");
       if (S.phase === "mpwin" || S.mpRoundOver) renderOverlay();
     });
   }
   function leaveMp() {
     try { if (window.ChoppyMP) window.ChoppyMP.leave(); } catch (e) {}
-    S.mp = false; S.mpOver = false; S.mpRoundOver = false; S.worldSeed = 0; S.worldRand = null; S.mpWinner = null; S.mpElo = null; S.mpEloNote = "";
+    S.mp = false; S.mpOver = false; S.mpRoundOver = false; S.worldSeed = 0; S.worldRand = null; S.mpWinner = null; S.mpElo = null; S.mpEloNote = ""; S.mpSeriesT0 = 0; S.mpEloTry = (S.mpEloTry || 0) + 1;
     S.mpRules = null; S.mpPlayAt = 0; S.dead = false; S.spectate = false; S.finished = false; S.mpNextAt = 0; S.mpRematchOn = false; S.runTab = null;
     const app = $("app");
     if (app) app.classList.remove("vs-on");
