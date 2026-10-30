@@ -30,9 +30,13 @@ begin
   if current_setting(''app.elo_ok'', true) = ''1'' then
     return new;
   end if;
-  if tg_op = ''update'' then
+  -- TG_OP is upper case. The old lower-case test never matched, so players could set their own elo.
+  if tg_op = ''UPDATE'' then
     new.elo := old.elo;
     new.elo_games := old.elo_games;
+  elsif tg_op = ''INSERT'' then
+    new.elo := 1000;
+    new.elo_games := 0;
   end if;
   return new;
 end;
@@ -40,7 +44,7 @@ end;
 
 drop trigger if exists trg_guard_elo on public.profiles;
 create trigger trg_guard_elo
-before update on public.profiles
+before insert or update on public.profiles
 for each row execute function public.guard_elo();
 
 create or replace function public.submit_versus_result(
