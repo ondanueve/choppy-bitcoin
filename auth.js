@@ -300,12 +300,7 @@
       try { await supabase.from("profiles").update({ email: currentUser.email }).eq("id", currentUser.id); } catch (e) {}
       currentProfile.email = currentUser.email;
     }
-    if (localStorage.getItem("choppy-reset-420") === "1") {
-      try { localStorage.removeItem("choppy-awards"); } catch (e) {}
-      try { await supabase.from("profiles").update({ awards: [], highscore: 0 }).eq("id", currentUser.id); } catch (e) {}
-      currentProfile.awards = [];
-      currentProfile.highscore = 0;
-    } else if (Array.isArray(data.awards) && window.mergeChoppyAwards) window.mergeChoppyAwards(data.awards);
+    if (Array.isArray(data.awards) && window.mergeChoppyAwards) window.mergeChoppyAwards(data.awards);
     updateAuthUI(currentProfile);
   }
 
@@ -558,26 +553,42 @@
     }
   }
 
-  async function submitVersusResult(seed, winnerUid, playerUids) {
-    if (!supabase || !currentUser) return null;
+  function versusRpcMiss(error) {
+    const msg = String((error && (error.message || error.code)) || "");
+    return /duration|PGRST202|schema cache|Could not find the function/i.test(msg);
+  }
+
+  async function submitVersusResult(seed, winnerUid, playerUids, durationS) {
+    if (!supabase || !currentUser) return { status: "guest" };
     const ids = (playerUids || []).filter((id) => typeof id === "string" && id.length > 20);
-    if (!winnerUid || ids.length < 2) return null;
-    if (ids.indexOf(currentUser.id) < 0) return null;
+    if (!winnerUid || ids.length < 2 || ids.indexOf(currentUser.id) < 0) return { status: "guest" };
+    const body = {
+      p_seed: Number(seed) || 0,
+      p_winner: winnerUid,
+      p_players: ids
+    };
+    const dur = Number(durationS);
+    if (isFinite(dur) && dur >= 0) body.p_duration_s = Math.max(0, Math.round(dur));
     try {
-      const { data, error } = await supabase.rpc("submit_versus_result", {
-        p_seed: Number(seed) || 0,
-        p_winner: winnerUid,
-        p_players: ids
-      });
-      if (error) return null;
-      let rows = data;
+      let res = await supabase.rpc("submit_versus_result", body);
+      if (res.error && body.p_duration_s != null && versusRpcMiss(res.error)) {
+        res = await supabase.rpc("submit_versus_result", {
+          p_seed: body.p_seed,
+          p_winner: body.p_winner,
+          p_players: body.p_players
+        });
+      }
+      if (res.error) return { status: "pending" };
+      let rows = res.data;
       if (typeof rows === "string") try { rows = JSON.parse(rows); } catch (e) { rows = null; }
-      await loadUserProfile();
-      fetchEloBoard("ready-elo");
-      fetchEloBoard("site-elo");
+      if (Array.isArray(rows) && rows.length) {
+        await loadUserProfile();
+        fetchEloBoard("ready-elo");
+        fetchEloBoard("site-elo");
+      }
       return rows;
     } catch (e) {
-      return null;
+      return { status: "pending" };
     }
   }
 
@@ -592,8 +603,7 @@
     if (meta && meta.human === false) return;
     const old = seasonScore(currentProfile);
     const oldT = currentProfile.score_time != null ? Number(currentProfile.score_time) : null;
-    if (next < old) return;
-    if (next === old && oldT != null && life >= oldT) return;
+    const improving = next > old || (next === old && (oldT == null || life < oldT));
     const stats = meta && meta.stats ? meta.stats : null;
     try {
       let { error } = await supabase.rpc("submit_choppy_score", {
@@ -603,18 +613,22 @@
         p_stats: stats
       });
       if (error) {
+        const msg = String(error.message || "");
+        const statsRejected = /bad stats|stats mismatch/i.test(msg);
         const retry = await supabase.rpc("submit_choppy_score", {
           p_score: next,
           p_life: life,
           p_candles: candles
         });
         error = retry.error;
-        if (!error && stats) {
+        if (!error && stats && improving && !statsRejected) {
           try { await supabase.from("profiles").update({ run_stats: stats, score_time: life }).eq("id", currentUser.id); } catch (e2) {}
         }
       }
       if (error) return;
-      await loadUserProfile();
+      if (improving) await loadUserProfile();
+      const mine = localAwardIds();
+      if (mine.length && window.persistAwards) await window.persistAwards(mine);
     } catch (e) {}
   }
 
@@ -772,10 +786,69 @@
     };
   }
 
-  window.persistAwards = async function (ids) {
-    if (!currentUser || !supabase || !ids) return;
+  let awardsRpcWarned = false;
+  function rpcMissing(error) {
+    if (!error) return false;
+    const code = String(error.code || "");
+    const status = Number(error.status || error.statusCode || 0);
+    const msg = String(error.message || error.msg || "");
+    if (code === "PGRST202" || code === "404" || status === 404) return true;
+    if (/PGRST202/i.test(msg)) return true;
+    if (/could not find the function/i.test(msg)) return true;
+    if (/schema cache/i.test(msg) && /grant_awards/i.test(msg)) return true;
+    return false;
+  }
+  function localAwardIds() {
+    if (!currentUser) return [];
     try {
-      await supabase.from("profiles").update({ awards: ids }).eq("id", currentUser.id);
+      const bag = JSON.parse(localStorage.getItem("choppy-awards") || "{}");
+      const map = bag[currentUser.id] || {};
+      return Object.keys(map).filter((k) => map[k] && typeof k === "string");
+    } catch (e) {
+      return [];
+    }
+  }
+  function compactAwardRun() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("bitcoinizate-v1") || "{}");
+      const st = saved && saved.choppyStats;
+      if (!st || typeof st !== "object") return null;
+      const keep = ["time", "candles", "buys", "sells", "sellsBear", "coldLost", "boughtBtc", "swans", "lasers", "halvings", "halveMiss", "endBtc", "net", "startCash", "startPrice", "haveSum", "iabud", "iaProfit", "job", "hitCap", "perkMaxed"];
+      const out = {};
+      keep.forEach((k) => {
+        if (st[k] != null) out[k] = st[k];
+      });
+      return out;
+    } catch (e) {
+      return null;
+    }
+  }
+  window.persistAwards = async function (ids) {
+    if (!currentUser || !supabase || !ids || !Array.isArray(ids) || !ids.length) return;
+    try {
+      const { data, error } = await supabase.rpc("grant_awards", {
+        p_ids: ids,
+        p_run: compactAwardRun()
+      });
+      if (error) {
+        if (rpcMissing(error)) {
+          if (!awardsRpcWarned) {
+            awardsRpcWarned = true;
+            console.warn("grant_awards is not available yet; awards stay on this device.");
+          }
+        }
+        return;
+      }
+      let back = data;
+      if (typeof back === "string") {
+        try { back = JSON.parse(back); } catch (e) { back = null; }
+      }
+      if (Array.isArray(back)) {
+        if (currentProfile) currentProfile.awards = back;
+        if (window.mergeChoppyAwards) {
+          try { window.mergeChoppyAwards(back); } catch (e) {}
+        }
+      }
     } catch (e) {}
   };
   window.submitNewHighScore = submitNewHighScore;

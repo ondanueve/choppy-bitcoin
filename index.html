@@ -27,7 +27,7 @@
   <meta name="twitter:title" content="Play Choppy Bitcoin">
   <meta name="twitter:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
   <meta name="twitter:image:alt" content="Choppy Bitcoin hero">
-  <link rel="stylesheet" href="style.css?v=mp192">
+  <link rel="stylesheet" href="style.css?v=mp193">
   <script src="nozoom.js?v=mp142"></script>
 </head>
 <body>
@@ -73,6 +73,7 @@
       <button type="button" id="market-btn" class="dca-tog" disabled data-i18n="market">MARKET</button>
     </div>
     <div id="mp-hud-list" class="mp-hud-list hide"></div>
+    <div id="mp-reacts" class="mp-reacts hide"></div>
     <div id="bc-bar" class="bc-bar hide" data-i18n-aria="ariaCountry" aria-label="Bitcoin Country">
       <button type="button" id="bc-open" class="bc-open">BITCOIN COUNTRY</button>
       <span id="bc-mini">NODES 0/100 · ARMY 0 · WORLD 20</span>
@@ -98,6 +99,7 @@
       </div>
       <div id="now-playing" class="hide"></div>
       <div id="mp-chip" class="mp-chip hide"></div>
+      <div id="mp-link" class="mp-link hide"></div>
       <div id="clock-box">
         <div id="clock">0:00</div>
         <div id="h-candles">0</div>
@@ -176,13 +178,12 @@
       <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp179"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.7.0/abcjs-basic-min.js" integrity="sha384-QEx1pDqNtno80p4xYN5Cqm5JcAAtUDUCHqFLq0UBhWRFoFzzNHumh20zFGG/9XMi" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="supabase-lib.js"></script>
-  <script src="auth.js?v=mp66"></script>
-  <script src="run-stats.js"></script>
-  <script src="audio.js?v=mp172"></script>
-  <script src="mp.js?v=mp8"></script>
-  <script src="game.js?v=mp192"></script>
+  <!-- abcjs loads when the jukebox opens (audio.js). mp.js loads when Versus opens. -->
+  <script src="/choppy-bitcoin/i18n.js?v=mp193" defer></script>
+  <script src="supabase-lib.js" defer></script>
+  <script src="auth.js?v=mp193" defer></script>
+  <script src="run-stats.js" defer></script>
+  <script src="audio.js?v=mp193" defer></script>
+  <script src="game.js?v=mp193" defer></script>
 </body>
 </html>
