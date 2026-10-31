@@ -3717,9 +3717,9 @@
   const REPORT_TEXT={
     pact:[
       { enT:"The Beach Holds", esT:"La playa resiste",
-        en:"The Pact's landing collapses on the beach. They had even brought a clerk, occupation order ready to stamp.\n\nPaco comes back with the clerk's rubber stamp in his teeth. Nobody knows what became of the clerk.",
-        es:"El desembarco del Pacto se derrumba en la playa. Hasta traían a un funcionario con la orden de ocupación lista para sellar.\n\nPaco vuelve con el sello de goma del funcionario entre los dientes. Del funcionario, nadie sabe nada.",
-        tEn:"The Pact's landing collapses. Paco brings back their clerk's rubber stamp.", tEs:"El desembarco del Pacto se derrumba. Paco trae el sello de goma de su funcionario." },
+        en:"The Pact's landing collapses on the beach. The landing craft had even brought the clerk who stamped Voss's communiqué.\n\nPaco comes back with the rubber stamp in his teeth. Nobody knows what became of the clerk.",
+        es:"El desembarco del Pacto se derrumba en la playa. En las lanchas venía hasta el funcionario que había sellado el comunicado de Voss.\n\nPaco vuelve con el sello de goma entre los dientes. Del funcionario, nadie sabe nada.",
+        tEn:"The Pact's landing collapses. Paco brings back the clerk's rubber stamp.", tEs:"El desembarco del Pacto se derrumba. Paco trae el sello de goma de su funcionario." },
       { enT:"The Other Cove", esT:"La otra caleta",
         en:"The tanks reach the coast road but never clear the hill. Marek watches what the tide brings back and refuses to call it a victory.\n\nNico opens the bar anyway.",
         es:"Los tanques llegan al camino de la costa, pero nunca superan la colina. Marek mira lo que devuelve la marea y se niega a llamarlo victoria.\n\nNico abre el bar de todos modos.",
