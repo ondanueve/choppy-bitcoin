@@ -2776,7 +2776,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp197";
+    s.src = "chess-data.js?v=mp198";
     document.head.appendChild(s);
   }
   (function () {
@@ -2897,14 +2897,17 @@
       if (r < 0.00029) {
         const share = opt === "b" ? 4000 : (4000 / 3);
         creditBtc(share);
+        S.chanceVar = "jackpot"; // no outcome art on purpose: falls back to the card art
         return say("You find the hard drive. +" + share.toFixed(2) + " BTC.",
           "Encuentras el disco duro. +" + share.toFixed(2) + " BTC.");
       }
       if (r < 0.00029 + 0.22) {
         arcPay(8);
+        S.chanceVar = "nokia";
         return say("You find an old Nokia. +$8.",
           "Encuentras un Nokia viejo. +$8.");
       }
+      S.chanceVar = "nothing";
       return say("Three weeks of digging through clay turn up nothing.",
         "Tres semanas excavando arcilla no dan ningún resultado.");
     }
@@ -2963,10 +2966,12 @@
       const stake = cutPct(opt === "b" ? 0.3 : 0.1);
       if (Math.random() < 0.46) {
         arcPay(stake * 2);
+        S.chanceVar = "win";
         if (opt === "b") { try { grantAward("highRoller"); } catch (e) {} }
         return say("The number hits. +" + money(stake * 2) + " on " + costLabel(stake) + ".",
           "Sale el número. +" + money(stake * 2) + " sobre " + costLabel(stake) + ".");
       }
+      S.chanceVar = "lose";
       return say("The table does not know you. −" + costLabel(stake) + ".", "La mesa no te conoce. −" + costLabel(stake) + ".");
     }
     if (card.id === "poker") {
@@ -2974,6 +2979,7 @@
         "Marek se levanta de la mesa diez minutos después. \"Probablemente fue mejor así.\" Lo dice sin mirarte.");
       const stake = cutPct(opt === "b" ? 0.25 : 0.08);
       const r = Math.random();
+      S.chanceVar = r < 0.52 ? "win" : "bust"; // scoop, 3x and min-cash share one "you won a pot" picture
       if (r < 0.06) { arcPay(stake * 8); try { grantAward("scoop"); } catch (e) {} return say("You scoop the table. +" + money(stake * 8) + ".", "Te llevas toda la mesa. +" + money(stake * 8) + "."); }
       if (r < 0.28) { arcPay(stake * 3); return say("+" + money(stake * 3) + " on a " + costLabel(stake) + " buy-in.", "+" + money(stake * 3) + " con una entrada de " + costLabel(stake) + "."); }
       if (r < 0.52) { arcPay(stake * 1.4); return say("Min-cash. +" + money(stake * 1.4) + ".", "Cobras un premio menor. +" + money(stake * 1.4) + "."); }
@@ -3009,9 +3015,11 @@
       const paid = cutPct(0.2);
       if (Math.random() < 0.28) {
         arcPay(paid * 4);
+        S.chanceVar = "win";
         try { grantAward("unicorn"); } catch (e) {}
         return say("They actually ship. 4× on " + costLabel(paid) + ".", "De verdad lanzan la app. 4× sobre " + costLabel(paid) + ".");
       }
+      S.chanceVar = "lose";
       return say("The domain expired. " + costLabel(paid) + " is a case study.", "El dominio venció. " + costLabel(paid) + " ahora es un caso de estudio.");
     }
     if (card.id === "tow") {
@@ -3141,9 +3149,11 @@
       const paid = cutPct(0.4);
       if (Math.random() < 0.5) {
         arcPay(paid * 2.2);
+        S.chanceVar = "win";
         try { grantAward("soldPump"); } catch (e) {}
         return say("$FRY really does pump. You sell on Thursday: 2.2× on " + costLabel(paid) + ".", "$FRY sube de verdad. Vendes el jueves: 2.2× sobre " + costLabel(paid) + ".");
       }
+      S.chanceVar = "lose";
       return say("The developers pull the liquidity and vanish. Your $FRY can no longer be sold. −" + costLabel(paid) + ".", "Los desarrolladores retiran la liquidez y desaparecen. Tus $FRY ya no se pueden vender. −" + costLabel(paid) + ".");
     }
     if (card.id === "speeding") {
@@ -3166,9 +3176,11 @@
       const paid = cutPct(0.12);
       if (Math.random() < 0.3) {
         const back = grantWealthPct(0.03);
+        S.chanceVar = "works";
         return say("It works. −" + costLabel(paid) + " then +" + money(back) + ".", "Funciona. −" + costLabel(paid) + " y después +" + money(back) + ".");
       }
       const extra = cutPct(0.04);
+      S.chanceVar = "lemon";
       return say("Lemon. The Sharpie was the honest part. −" + costLabel(paid + extra) + ".",
         "Es un cacharro. Lo único honesto era el Sharpie. −" + costLabel(paid + extra) + ".");
     }
@@ -3178,8 +3190,10 @@
       const stake = cutBill(20);
       if (Math.random() < 0.42) {
         arcPay(stake * 3);
+        S.chanceVar = "win";
         return say("The well stays clean. +" + money(stake * 3) + ".", "El tablero queda limpio. +" + money(stake * 3) + ".");
       }
+      S.chanceVar = "lose";
       return say("A long bar would have saved you. −" + costLabel(stake) + ".", "Una pieza larga te habría salvado. −" + costLabel(stake) + ".");
     }
     if (card.id === "chess") {
@@ -3187,12 +3201,14 @@
       const line = es ? cp.lineEs : cp.line;
       const typed = String(opt || "").replace(/^move:/, "").trim().slice(0, 16).replace(/[<>&"]/g, "");
       if (chessMoveOk(typed, cp)) {
+        S.chanceVar = "win";
         const out = creditBtc(1);
         try { noteChessSolved(S.chessPick); } catch (e) {}
         return say("Marek looks at the board for a long moment, then plays it out for you: " + line + " " + cp.win + " He slides the bitcoin across the table. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " and +" + money(out.cash) : "") + ".",
           "Marek mira el tablero un largo rato y luego lo juega por ti: " + line + " " + cp.winEs + " Te pasa el bitcoin por la mesa. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " y +" + money(out.cash) : "") + ".");
       }
       // a wrong move costs nothing: Marek shows the line and waves off the bet
+      S.chanceVar = "miss";
       return say((typed ? "Marek shakes his head at " + typed : "Marek waits, then shrugs") + " and shows you the line: " + line + " " + cp.miss,
         (typed ? "Marek niega con la cabeza ante " + typed : "Marek espera y luego se encoge de hombros") + " y te muestra la línea: " + line + " " + cp.missEs);
     }
@@ -3369,9 +3385,13 @@
     for (let i = from; i < srcs.length; i++) prefetchArtUrl(srcs[i]);
     const card = S && S.chanceCard;
     if (card && typeof POST_ART !== "undefined" && POST_ART[card.id]) {
-      const opts = String(POST_ART[card.id]);
-      for (let k = 0; k < opts.length; k++) {
-        const key = card.id + "-" + opts.charAt(k);
+      // Result art is 220-380 KB per file: on phones / data saver only the first two keys are warmed, the rest load on demand.
+      let keys = postArtKeys(card.id);
+      let saver = false;
+      try { saver = !!(navigator.connection && navigator.connection.saveData); } catch (e) {}
+      if (MOBILE_ART || saver) keys = keys.slice(0, saver ? 1 : 2);
+      for (let k = 0; k < keys.length; k++) {
+        const key = card.id + "-" + keys[k];
         const ver = (typeof POST_ART_VER !== "undefined" && POST_ART_VER[key]) || "post3";
         prefetchArtUrl("chance/" + key + "-wide.jpg?v=" + ver);
       }
@@ -3391,29 +3411,58 @@
     const tt = c ? (chanceLang() ? (c.titleEs || c.title) : c.title) : "";
     return String(tt || "").replace(/[<>&"]/g, "");
   }
-  // Post-decision art: drop chance/<id>-<choice>-wide.jpg in and it shows on the result screen; falls back to the card art if missing.
+  // Post-decision art: drop chance/<id>-<key>-wide.jpg in and it shows on the result screen; falls back to the card art if missing.
+  // POST_ART[id] is a string of option letters ("abc") or an array of keys. A key is "<opt>-<variant>", "<variant>" or "<opt>";
+  // random outcomes set S.chanceVar (win/lose/bust/works/lemon/nokia/nothing...) in resolveChance. Only list keys whose file exists
+  // (tests/smoke.js checks it).
   const POST_ART = {
     proposal:"abc", wedding:"abc", honeymoon:"abc", phish:"ab", courage:"a", islandInspection:"a",
-    protectIsland:"abc", citadelQuestion:"ab", anOffer:"ab", theQuestion:"a"
+    protectIsland:"abc", citadelQuestion:"ab", anOffer:"ab", theQuestion:"a",
+    unclemike:"abc", casino:["win","lose","c"], poker:["win","bust","c"], startup:["win","lose"], cousin:["win","lose"],
+    usedcar:["works","lemon"], stateVisit:"ab", extensionCord:"ab", landfill:["nokia","nothing","c"], baby:"ac",
+    nicoWedding:"ac", chess:["win","miss"]
   };
   // Cache tags per post image: bump only the files that change (default post3).
   const POST_ART_VER = {
     "honeymoon-a":"post5", "citadelQuestion-a":"post4", "islandInspection-a":"post4", "phish-a":"post4", "phish-b":"post4",
     "anOffer-b":"post5", "anOffer-a":"post5", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
-    "wedding-a":"post4", "wedding-b":"post5", "wedding-c":"post4"
+    "wedding-a":"post4", "wedding-b":"post5", "wedding-c":"post4",
+    "unclemike-a":"post6", "unclemike-b":"post6", "unclemike-c":"post6", "casino-win":"post6",
+    "casino-lose":"post6", "casino-c":"post6", "poker-win":"post6", "poker-bust":"post6",
+    "poker-c":"post6", "startup-win":"post6", "startup-lose":"post6", "cousin-win":"post6",
+    "cousin-lose":"post6", "usedcar-works":"post6", "usedcar-lemon":"post6", "stateVisit-a":"post6",
+    "stateVisit-b":"post6", "extensionCord-a":"post6", "extensionCord-b":"post6", "landfill-nokia":"post6",
+    "landfill-nothing":"post6", "landfill-c":"post6", "baby-a":"post6", "baby-c":"post6",
+    "nicoWedding-a":"post6", "nicoWedding-c":"post6", "chess-win":"post6", "chess-miss":"post6"
   };
   const POST_ART_MISS = new Set();
-  function postArtHtml(id, opt) {
+  function postArtKeys(id) {
+    const l = POST_ART[id];
+    return !l ? [] : Array.isArray(l) ? l.slice() : String(l).split("");
+  }
+  // Lookup chain: "<opt>-<variant>" -> "<variant>" -> "<opt>"; chess has no letter option (its opt is "move:<text>"), so only the variant counts.
+  function postArtKey(id, opt, vari) {
+    const list = postArtKeys(id);
+    if (!list.length) return "";
+    const o = id === "chess" ? "" : String(opt || "");
+    const v = String(vari || "");
+    const has = (k) => !!k && list.indexOf(k) >= 0 && !POST_ART_MISS.has(id + "-" + k);
+    const chain = [o && v ? o + "-" + v : "", v, o];
+    for (let i = 0; i < chain.length; i++) if (has(chain[i])) return chain[i];
+    return "";
+  }
+  function postArtHtml(id, opt, vari) {
     const base = chanceArtHtml(id);
-    const key = id + "-" + opt;
-    if (!opt || !POST_ART[id] || POST_ART[id].indexOf(opt) < 0 || POST_ART_MISS.has(key) || base.indexOf("<img") !== 0) return base;
+    const pk = postArtKey(id, opt, vari);
+    if (!pk || base.indexOf("<img") !== 0) return base;
+    const key = id + "-" + pk;
     const m = base.match(/ src="([^"]*)"/);
     if (!m) return base;
     const src = "chance/" + key + "-wide.jpg?v=" + (POST_ART_VER[key] || "post3");
     return base.replace(/ onerror="[^"]*"/, "").replace(m[0], " src=\"" + src + "\" data-base=\"" + m[1] + "\"")
       .replace("<img ", "<img onerror=\"window.__choppyPostMiss&&window.__choppyPostMiss('" + key + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
   }
-  window.__choppyPostMiss = (k) => POST_ART_MISS.add(k);
+  window.__choppyPostMiss = (k) => POST_ART_MISS.add(k); // k is "<id>-<key>"
   // Bloc intro cards show the art of whichever bloc fills that slot this run (falls back to the card's own art).
   // Battle art variants: chance/battle-<bloc>-<n>-pre-wide.jpg (before a battle), battle-<bloc>-<n>-post-wide.jpg
   // (after a won battle), battle-<bloc>-win-wide.jpg (bloc defeated) and generic battle-gen-<n>-pre/post.
@@ -3678,9 +3727,9 @@
   const REPORT_TEXT={
     pact:[
       { enT:"The Beach Holds", esT:"La playa resiste",
-        en:"The Pact's landing collapses on the beach. Its occupation order had already been stamped.\n\nPaco comes back with one of the seals in his mouth and does not explain what happened to the clerk.",
-        es:"El desembarco del Pacto se derrumba en la playa. Su orden de ocupación ya estaba sellada.\n\nPaco vuelve con uno de los sellos en la boca y no explica qué pasó con el funcionario.",
-        tEn:"The Pact's landing collapses. Paco brings back one of its seals in his mouth.", tEs:"El desembarco del Pacto se derrumba. Paco trae uno de sus sellos." },
+        en:"The Pact's landing collapses on the beach. The landing craft had even brought the clerk who stamped Voss's communiqué.\n\nPaco comes back with the rubber stamp in his teeth. Nobody knows what became of the clerk.",
+        es:"El desembarco del Pacto se derrumba en la playa. En las lanchas venía hasta el funcionario que había sellado el comunicado de Voss.\n\nPaco vuelve con el sello de goma entre los dientes. Del funcionario, nadie sabe nada.",
+        tEn:"The Pact's landing collapses. Paco brings back the clerk's rubber stamp.", tEs:"El desembarco del Pacto se derrumba. Paco trae el sello de goma de su funcionario." },
       { enT:"The Other Cove", esT:"La otra caleta",
         en:"The tanks reach the coast road but never clear the hill. Marek watches what the tide brings back and refuses to call it a victory.\n\nNico opens the bar anyway.",
         es:"Los tanques llegan al camino de la costa, pero nunca superan la colina. Marek mira lo que devuelve la marea y se niega a llamarlo victoria.\n\nNico abre el bar de todos modos.",
@@ -3980,7 +4029,7 @@
     S.chanceUsed[card.id] = true;
     if (card.id === S.arcBias) S.arcBias = "";
     noteArcSeen(card.id);
-    S.chanceCard = card; S.chanceOpt = null;
+    S.chanceCard = card; S.chanceOpt = null; S.chanceVar = "";
     if (card.id === "chess") pickChessProblem();
     try { preloadChanceArt(); } catch (e) {}
     S.chanceNote = "";
@@ -4309,6 +4358,7 @@
       }
       const before = bagSnap();
       let note = "";
+      S.chanceVar = "";
       try { note = stampNation(resolveChance(card, opt) || ""); } catch (err) { note = ""; }
       try { cardAwards(card, opt); } catch (e) {}
       if (!note) note = chanceLang() ? "Listo." : "Done.";
@@ -14132,7 +14182,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp197";
+      s.src = "mp.js?v=mp198";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14690,7 +14740,7 @@
       const rawBody = S.battleTutOpen ? battleTutPlain()
         : (!snapBody ? weaveCast(es ? (card.bodyEs || card.body) : card.body) : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body)));
       const body = stampNation(rawBody);
-      const pic = (S.chanceNote && S.chanceOpt) ? postArtHtml(card.id, S.chanceOpt) : blocArtHtml(card);
+      const pic = (S.chanceNote && S.chanceOpt) ? postArtHtml(card.id, S.chanceOpt, S.chanceVar) : blocArtHtml(card);
       let btns = "";
       if (S.chanceNote) {
         btns = "<button class=\"cta\" data-ch=\"ok\">" + t("chanceAck") + "</button>";
