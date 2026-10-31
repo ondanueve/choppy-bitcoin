@@ -546,6 +546,29 @@ function checkImages() {
   for (const id of takeSet("const WIDE_ART_PNG")) refs.add("chance/" + id + "-wide.png");
   for (const slug of takeKeys("const CHESS_ART_VER")) refs.add("chance/chess-" + slug + "-wide.jpg");
   for (const key of takeKeys("const POST_ART_VER")) refs.add("chance/" + key + "-wide.jpg");
+  // Post-decision (outcome) art: every key listed in POST_ART must exist on disk, and every POST_ART_VER key must be a listed one.
+  {
+    const body = extractAfter(game, "const POST_ART =", "{", "}");
+    const postKeys = new Set();
+    if (body == null) fail("images: could not find const POST_ART in game.js");
+    else {
+      const table = evalExpr("{" + body.slice(1, -1) + "}", "POST_ART");
+      if (table) {
+        for (const id of Object.keys(table)) {
+          const list = Array.isArray(table[id]) ? table[id] : String(table[id]).split("");
+          if (!list.length) fail("images: POST_ART." + id + " is empty");
+          if (new Set(list).size !== list.length) fail("images: POST_ART." + id + " has duplicate keys");
+          for (const k of list) {
+            postKeys.add(id + "-" + k);
+            refs.add("chance/" + id + "-" + k + "-wide.jpg");
+          }
+        }
+      }
+    }
+    for (const key of takeKeys("const POST_ART_VER")) {
+      if (postKeys.size && !postKeys.has(key)) fail("images: POST_ART_VER." + key + " has no matching POST_ART entry");
+    }
+  }
 
   let missing = 0;
   for (const ref of refs) {

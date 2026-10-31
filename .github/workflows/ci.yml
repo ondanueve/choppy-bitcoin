@@ -45,6 +45,9 @@ jobs:
       - name: Military aid offer
         run: node tests/aid-offer.js
 
+      - name: Outcome art lookup
+        run: node tests/post-art.js
+
       - name: i18n audit
         run: node tools/i18n-audit.js
 
