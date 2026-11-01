@@ -2776,7 +2776,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp199";
+    s.src = "chess-data.js?v=mp200";
     document.head.appendChild(s);
   }
   (function () {
@@ -3501,7 +3501,7 @@
     const va = battleArtPick(card);
     if (va && base.indexOf("<img") === 0) {
       const m0 = base.match(/ src="([^"]*)"/);
-      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat4\" data-base=\"" + m0[1] + "\"")
+      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat5\" data-base=\"" + m0[1] + "\"")
         .replace("<img ", "<img onerror=\"window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
     }
     const aid = blocArtId(card);
@@ -14182,7 +14182,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp199";
+      s.src = "mp.js?v=mp200";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
