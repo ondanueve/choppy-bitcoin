@@ -51,6 +51,9 @@ jobs:
       - name: Battle tutorial unlock
         run: node tests/battle-tut.js
 
+      - name: Halving rainbow
+        run: node tests/halving-rainbow.js
+
       - name: i18n audit
         run: node tools/i18n-audit.js
 
