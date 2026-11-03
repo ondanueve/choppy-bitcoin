@@ -48,6 +48,9 @@ jobs:
       - name: Outcome art lookup
         run: node tests/post-art.js
 
+      - name: Battle tutorial unlock
+        run: node tests/battle-tut.js
+
       - name: i18n audit
         run: node tools/i18n-audit.js
 
