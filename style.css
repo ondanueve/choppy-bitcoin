@@ -198,6 +198,7 @@ html.auth-pending #btn-show-auth, html.auth-pending #overlay-auth { visibility: 
 #h-candles { margin-top: 2px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: #c8c4bc; text-shadow: 0 0 4px #000, 0 1px 0 #000; }
 .field.bear #c { animation: shake 0.16s infinite; }
 .field.bear.swan-bear #c { animation: shake-hard 0.11s infinite; }
+.field.bull.halve-shake #c { animation: shake-half 0.11s infinite; }
 @keyframes shake {
   0%, 100% { transform: translate(0, 0); }
   25% { transform: translate(-3px, 2px); }
@@ -210,6 +211,13 @@ html.auth-pending #btn-show-auth, html.auth-pending #overlay-auth { visibility: 
   40% { transform: translate(7px, -5px); }
   60% { transform: translate(-5px, -4px); }
   80% { transform: translate(5px, 3px); }
+}
+@keyframes shake-half {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3.5px, -2.5px); }
+  60% { transform: translate(-2.5px, -2px); }
+  80% { transform: translate(2.5px, 1.5px); }
 }
 .banner { position: absolute; left: 50%; transform: translateX(-50%); max-width: 90%; text-align: center; font-size: 12px; background: rgba(10,10,12,0.85); border: 1px solid var(--line); padding: 6px 12px; border-radius: 4px; pointer-events: none; z-index: 5; }
 .banner.top {
@@ -1470,15 +1478,9 @@ html.ui-pop .field { overflow: visible; }
   border: 1px solid rgba(58,58,64,0.7);
   border-radius: 6px;
 }
-/* Opera Game card: typed chess move */
 .overlay.dock.chance-ui .arc-move { width: min(100%, 300px); }
 .overlay.dock.chance-ui .arc-move-label { font: 700 11px "IBM Plex Mono", monospace; letter-spacing: .06em; color: var(--gold); text-align: center; }
 .overlay.dock.chance-ui .arc-move input { font-size: 16px; text-transform: none; }
-/* chess problem: position diagram drawn from the FEN (game.js chessDiagramHtml) */
-.overlay.dock.chance-ui .chess-diagram { width: min(100%, 340px); margin: 10px auto 4px; padding: 8px 8px 6px; background: #2a2018; border: 1px solid rgba(232,220,200,.18); border-radius: 8px; box-sizing: border-box; }
-.overlay.dock.chance-ui .chess-diagram svg { display: block; width: 100%; height: auto; }
-.overlay.dock.chance-ui .chess-diagram figcaption { margin-top: 6px; text-align: center; font: 500 12px "IBM Plex Mono", monospace; letter-spacing: .03em; color: #e8dcc8; }
-.overlay.dock.chance-ui .chess-diagram figcaption strong { color: var(--gold); font-weight: 700; }
 
 /* desktop hotkeys */
 .kb-list{display:flex;flex-direction:column;gap:4px;max-height:52vh;overflow-y:auto;text-align:left;margin:6px 0}
@@ -1537,7 +1539,7 @@ body.kb-sheet-on #overlay{visibility:hidden}
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .field.bear #c, .field.bear.swan-bear #c, #bc-open.army-ready, .field.perk-ui .pause { animation: none !important; }
+  .field.bear #c, .field.bear.swan-bear #c, .field.bull.halve-shake #c, #bc-open.army-ready, .field.perk-ui .pause { animation: none !important; }
   .juke-hud-title > span { will-change: auto; }
   .juke-hud-title.marquee > span { animation: none !important; }
   #bc-open.army-ready { border-color: #f2a900; color: #f2a900; }
@@ -1609,6 +1611,7 @@ body.kb-sheet-on #overlay{visibility:hidden}
 }
 html[data-reduce-motion="1"] .field.bear #c,
 html[data-reduce-motion="1"] .field.bear.swan-bear #c,
+html[data-reduce-motion="1"] .field.bull.halve-shake #c,
 html[data-reduce-motion="1"] .juke-hud-title.marquee > span,
 html[data-reduce-motion="1"] .field.perk-ui .pause.arc-resume,
 html[data-reduce-motion="1"] .award-toast { animation: none !important; }
@@ -1658,9 +1661,7 @@ html[data-palette="paper"] .overlay.dock.chance-ui .arc-move-label,
 html[data-palette="simple"] .overlay.dock.chance-ui .arc-result,
 html[data-palette="simple"] .overlay.dock.chance-ui .arc-tldr-tog,
 html[data-palette="simple"] .overlay.dock.chance-ui .arc-size-tog,
-html[data-palette="simple"] .overlay.dock.chance-ui .arc-move-label,
-html[data-palette="paper"] .chess-diagram figcaption strong,
-html[data-palette="simple"] .chess-diagram figcaption strong { color: #f2c14a; }
+html[data-palette="simple"] .overlay.dock.chance-ui .arc-move-label { color: #f2c14a; }
 html[data-palette="paper"] .overlay.dock.chance-ui .arc-tldr-tog.on,
 html[data-palette="simple"] .overlay.dock.chance-ui .arc-tldr-tog.on { background: #f2c14a; color: #1a1610; }
 html[data-palette="paper"] .auth-card h2,

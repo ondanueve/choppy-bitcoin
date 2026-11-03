@@ -54,6 +54,9 @@ jobs:
       - name: Halving rainbow
         run: node tests/halving-rainbow.js
 
+      - name: Halving v4 (x3 earnings, sfx, speed, shake, no chess)
+        run: node tests/halving-v4.js
+
       - name: i18n audit
         run: node tools/i18n-audit.js
 

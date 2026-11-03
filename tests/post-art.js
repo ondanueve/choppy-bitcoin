@@ -25,8 +25,7 @@ const k = mk({
   old: "abc",
   casino: ["win", "lose", "c"],
   landfill: ["a-nokia", "a-nothing", "c"],
-  uncle2: ["a", "b-win"],
-  chess: ["win", "miss"]
+  uncle2: ["a", "b-win"]
 });
 check("letters", k("old", "b", ""), "b");
 check("letters unknown opt", k("old", "z", ""), "");
@@ -38,14 +37,11 @@ check("opt+variant", k("landfill", "a", "nokia"), "a-nokia");
 check("opt+variant, other opt has no art", k("landfill", "b", "nokia"), "");
 check("jackpot has no art", k("landfill", "a", "jackpot"), "");
 check("opt falls back from unknown variant", k("uncle2", "a", "x"), "a");
-check("chess ignores the typed move", k("chess", "move:Qh7", "win"), "win");
-check("chess miss", k("chess", "move:", "miss"), "miss");
-check("chess without variant", k("chess", "move:Qh7", ""), "");
 check("unknown card", k("nope", "a", "win"), "");
 check("missed file is skipped", mk({ casino: ["win", "lose"] }, new Set(["casino-win"]))("casino", "a", "win"), "");
 // Wiring: random branches must set S.chanceVar, and the result screen must pass it on.
 check("result screen passes the variant", /postArtHtml\(card\.id, S\.chanceOpt, S\.chanceVar\)/.test(src), true);
-for (const id of ["casino", "poker", "startup", "cousin", "usedcar", "landfill", "chess"]) {
+for (const id of ["casino", "poker", "startup", "cousin", "usedcar", "landfill"]) {
   const at = src.indexOf('card.id === "' + id + '") {', src.indexOf("function resolveChance("));
   check("resolveChance sets a variant for " + id, at > 0 && /S\.chanceVar = /.test(src.slice(at, at + 2600)), true);
 }
