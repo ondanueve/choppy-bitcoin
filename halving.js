@@ -11,8 +11,9 @@
   var LOOP = 128;
   var LOOK = 0.26;
   var SCALE = 2;
-  var SPRITE = 32;
-  var ANCHOR = 24;
+  var FW = 61;
+  var FH = 45;
+  var SPRITE_SRC = "halving-surfer.png?v=mp205";
 
   var BANDS = [
     { name: "deep red", hex: "#8E1A2F" },
@@ -41,11 +42,15 @@
 
   var bandCanvas = null;
   var bandKey = "";
-  var bandPad = 0;
-  var frames = null;
+  var sheet = null;
+  var sheetBad = false;
+  var tipX = null;
+  var tipY = 0;
+  var lastDt = 0;
 
   function tick(dt, active) {
     want = !!active;
+    if (dt > 0) lastDt = dt;
     if (!(dt > 0)) return intensity;
     if (want) intensity = Math.min(1, intensity + dt / FADE_IN);
     else intensity = Math.max(0, intensity - dt / FADE_OUT);
@@ -55,6 +60,7 @@
   function reset() {
     want = false;
     intensity = 0;
+    tipX = null;
     running = false;
     nextT = 0;
     stepI = 0;
@@ -75,32 +81,37 @@
     releaseJuke(A);
   }
 
-  function centerY(i, x, span, h) {
-    var u = span > 0 ? x / span : 0;
-    if (u < 0) u = 0;
-    var mid = h * 0.72 - h * 0.30 * (Math.log(1 + u * 8) / Math.log(9));
-    return mid + (i - 4) * h * 0.075;
+  // The bands are prerendered with the front tip at the right edge, on a canvas twice the field height.
+  // The tip row is h. The crest of the top band starts there and every band falls away to the left on a log curve.
+  function bandH(h) { return h * 0.05; }
+
+  function bandY(i, x, cw, h) {
+    var s = cw > 0 ? 1 - x / cw : 0;
+    if (s < 0) s = 0;
+    if (s > 1) s = 1;
+    var drop = h * 0.16 * (1 - Math.log(1 + 8 * (1 - s)) / Math.log(9));
+    return h - bandH(h) * 1.0 + i * bandH(h) * 0.92 + drop;
   }
 
   function traceBand(g, i, cw, h, inset) {
-    var bh = h * 0.086;
-    var yAt = function (x) { return centerY(i, x, cw, h) + inset; };
-    g.beginPath();
-    g.moveTo(0, yAt(0) - bh * 0.5);
+    var bh = bandH(h);
     var x;
-    for (x = 4; x <= cw; x += 4) g.lineTo(x, yAt(x) - bh * 0.5);
-    g.lineTo(cw, yAt(cw) + bh * 0.5);
-    for (x = cw; x >= 0; x -= 4) g.lineTo(x, yAt(x) + bh * 0.5);
+    g.beginPath();
+    g.moveTo(0, bandY(i, 0, cw, h) + inset - bh * 0.5);
+    for (x = 4; x < cw; x += 4) g.lineTo(x, bandY(i, x, cw, h) + inset - bh * 0.5);
+    g.lineTo(cw, bandY(i, cw, cw, h) + inset - bh * 0.5);
+    g.lineTo(cw, bandY(i, cw, cw, h) + inset + bh * 0.5);
+    for (x = cw - 4; x > 0; x -= 4) g.lineTo(x, bandY(i, x, cw, h) + inset + bh * 0.5);
+    g.lineTo(0, bandY(i, 0, cw, h) + inset + bh * 0.5);
     g.closePath();
   }
 
   function buildBands(w, h) {
     if (typeof document === "undefined" || !document.createElement) return null;
-    var pad = Math.round(w * 0.14);
-    var cw = w + pad * 2;
+    var cw = w;
     var c = document.createElement("canvas");
     c.width = cw;
-    c.height = h;
+    c.height = h * 2;
     var g = c.getContext("2d");
     if (!g) return null;
     var i;
@@ -108,182 +119,33 @@
       traceBand(g, i, cw, h, 0);
       g.fillStyle = BANDS[i].hex;
       g.fill();
-      traceBand(g, i, cw, h, -h * 0.018);
+      traceBand(g, i, cw, h, -h * 0.014);
       g.fillStyle = "rgba(255,255,255,0.16)";
       g.fill();
     }
+    var fade = g.createLinearGradient(cw - 36, 0, cw, 0);
+    fade.addColorStop(0, "rgba(0,0,0,0)");
+    fade.addColorStop(1, "rgba(0,0,0,1)");
+    g.globalCompositeOperation = "destination-out";
+    g.fillStyle = fade;
+    g.fillRect(cw - 36, 0, 36, h * 2);
+    g.globalCompositeOperation = "source-over";
     bandCanvas = c;
-    bandPad = pad;
     bandKey = w + "x" + h;
     return c;
   }
 
-  function disc(g, cx, cy, r) {
-    var y, half;
-    for (y = -r; y <= r; y++) {
-      half = Math.round(Math.sqrt(Math.max(0, r * r - y * y)));
-      g.fillRect(cx - half, cy + y, half * 2 + 1, 1);
-    }
+  function loadSheet() {
+    if (sheet || typeof Image === "undefined") return;
+    try {
+      sheet = new Image();
+      sheet.onerror = function () { sheetBad = true; };
+      sheet.src = SPRITE_SRC;
+    } catch (e) { sheet = null; sheetBad = true; }
   }
 
-  var BTC = [".##.#.", "#.#.#.", "#.#.#.", ".##.#.", "#.#.#.", "#.#.#.", ".##.#."];
-
-  function put(g, x, y) {
-    if (x < 0 || y < 0 || x >= SPRITE || y >= SPRITE) return;
-    g.fillRect(x, y, 1, 1);
-  }
-
-  function paintChoppy(g, frame) {
-    g.clearRect(0, 0, SPRITE, SPRITE);
-    var bob = [0, -1, 0, 1][frame & 3];
-    var lean = [0, 1, 0, -1][frame & 3];
-    var ox = lean;
-    var oy = bob;
-    var cx = 14 + ox;
-    var cy = 12 + oy;
-    var f = frame & 3;
-    var curls = [
-      [[24, 16], [25, 15], [26, 14], [27, 14], [28, 15], [29, 16], [29, 17], [28, 18], [27, 19], [26, 19], [25, 18], [26, 16], [27, 16], [27, 17]],
-      [[24, 15], [25, 14], [26, 13], [27, 13], [28, 14], [29, 15], [29, 16], [28, 17], [27, 18], [26, 18], [25, 17], [26, 15], [27, 15], [27, 16]],
-      [[24, 16], [25, 15], [26, 14], [27, 13], [28, 14], [29, 15], [30, 16], [29, 17], [28, 18], [27, 19], [26, 18], [26, 16], [27, 16], [28, 16]],
-      [[24, 17], [25, 16], [26, 15], [27, 15], [28, 16], [29, 17], [29, 18], [28, 19], [27, 20], [26, 20], [25, 19], [26, 17], [27, 17], [27, 18]]
-    ][f];
-    var i, p, x, y, row, col, line;
-    for (i = 0; i < curls.length; i++) {
-      p = curls[i];
-      g.fillStyle = i < 6 ? "#ffffff" : (i < 11 ? "#7ecee8" : "#409cc6");
-      put(g, p[0] + ox, p[1] + oy);
-    }
-    var by = 22 + oy;
-    for (x = 2 + ox; x < 25 + ox; x++) {
-      g.fillStyle = (x >= 6 + ox && x <= 14 + ox) ? "#ffecc4" : "#ecb85c";
-      put(g, x, by);
-      g.fillStyle = "#ecb85c";
-      put(g, x, by + 1);
-      g.fillStyle = "#7a4612";
-      put(g, x, by + 2);
-      g.fillStyle = "#4a280a";
-      put(g, x, by + 3);
-    }
-    var nose = [[25, 0], [26, 1], [27, 1], [28, 2]];
-    for (i = 0; i < nose.length; i++) {
-      x = nose[i][0] + ox;
-      y = by - nose[i][1];
-      g.fillStyle = "#ecb85c";
-      put(g, x, y);
-      g.fillStyle = "#7a4612";
-      put(g, x, y + 1);
-      g.fillStyle = "#4a280a";
-      put(g, x, y + 2);
-    }
-    g.fillStyle = "#1a0c06";
-    disc(g, cx + 1, cy + 1, 11);
-    disc(g, cx, cy, 11);
-    g.fillStyle = "#fff4d6";
-    disc(g, cx, cy, 10);
-    g.fillStyle = "#f2a900";
-    disc(g, cx, cy, 9);
-    g.fillStyle = "#b06c0c";
-    for (y = -2; y < 8; y++) {
-      var half = Math.round(Math.sqrt(Math.max(0, 64 - y * y)));
-      for (x = 2; x <= half; x++) put(g, cx + x, cy + y);
-    }
-    g.fillStyle = "#ffe7a0";
-    for (y = -7; y < -1; y++) {
-      for (x = -7; x < -1; x++) {
-        if (x * x + y * y <= 28) put(g, cx + x, cy + y);
-      }
-    }
-    g.fillStyle = "#ffb0a0";
-    for (x = cx - 9; x < cx + 10; x++) put(g, x, cy - 7);
-    g.fillStyle = "#e02420";
-    for (x = cx - 9; x < cx + 10; x++) {
-      put(g, x, cy - 6);
-      put(g, x, cy - 5);
-    }
-    put(g, cx - 10, cy - 6);
-    put(g, cx - 10, cy - 5);
-    var tails = [
-      [[-12, -5], [-13, -4], [-14, -3], [-13, -6], [-14, -7], [-12, -4]],
-      [[-12, -6], [-13, -7], [-14, -8], [-13, -5], [-14, -4], [-12, -7]],
-      [[-12, -5], [-13, -5], [-14, -4], [-15, -3], [-14, -6], [-13, -7]],
-      [[-12, -4], [-13, -3], [-14, -2], [-13, -5], [-14, -6], [-12, -3]]
-    ][f];
-    for (i = 0; i < tails.length; i++) {
-      put(g, cx + tails[i][0], cy + tails[i][1]);
-      put(g, cx + tails[i][0], cy + tails[i][1] + 1);
-    }
-    g.fillStyle = "#0e0a08";
-    for (x = cx - 7; x < cx - 1; x++) {
-      put(g, x, cy - 2);
-      put(g, x, cy - 1);
-      put(g, x, cy);
-    }
-    for (x = cx + 2; x < cx + 8; x++) {
-      put(g, x, cy - 2);
-      put(g, x, cy - 1);
-      put(g, x, cy);
-    }
-    put(g, cx - 1, cy - 1);
-    put(g, cx, cy - 1);
-    put(g, cx + 1, cy - 1);
-    put(g, cx - 8, cy - 1);
-    put(g, cx + 8, cy - 1);
-    g.fillStyle = "#ffffff";
-    put(g, cx - 6, cy - 2);
-    put(g, cx + 3, cy - 2);
-    g.fillStyle = "#ff929c";
-    put(g, cx - 8, cy + 3);
-    put(g, cx - 7, cy + 3);
-    put(g, cx + 8, cy + 3);
-    put(g, cx + 9, cy + 3);
-    g.fillStyle = "#160a04";
-    for (row = 0; row < BTC.length; row++) {
-      line = BTC[row];
-      for (col = 0; col < line.length; col++) {
-        if (line.charAt(col) === "#") put(g, cx - 3 + col, cy + 2 + row);
-      }
-    }
-    g.fillStyle = "#160a04";
-    put(g, cx - 9, by - 1);
-    put(g, cx + 8, by - 1);
-    g.fillStyle = "#f2a900";
-    put(g, cx - 8, by - 1);
-    put(g, cx - 8, by);
-    put(g, cx + 7, by - 1);
-    put(g, cx + 7, by);
-  }
-
-  function spriteFrames() {
-    if (frames) return frames;
-    if (typeof document === "undefined" || !document.createElement) return null;
-    var out = [];
-    var i, c, g;
-    for (i = 0; i < 4; i++) {
-      c = document.createElement("canvas");
-      c.width = SPRITE;
-      c.height = SPRITE;
-      g = c.getContext("2d");
-      if (g) paintChoppy(g, i);
-      out.push(c);
-    }
-    frames = out;
-    return out;
-  }
-
-  function gapNear(S, x) {
-    var pipes = S.pipes || [];
-    var best = null;
-    var bestD = 1e9;
-    var i, p, d;
-    for (i = 0; i < pipes.length; i++) {
-      p = pipes[i];
-      if (!p || p.finish || p.gapH == null) continue;
-      d = Math.abs((p.x || 0) + 24 - x);
-      if (d < bestD) { bestD = d; best = p; }
-    }
-    if (!best || bestD > 140) return null;
-    return { top: best.gapY - best.gapH * 0.5, bot: best.gapY + best.gapH * 0.5 };
+  function sheetReady() {
+    return !!(sheet && !sheetBad && sheet.complete && sheet.naturalWidth >= FW * 4);
   }
 
   function draw(ctx, S, reduce, palette) {
@@ -295,65 +157,48 @@
     var key = w + "x" + h;
     if (!bandCanvas || bandKey !== key) buildBands(w, h);
     if (!bandCanvas) return;
+    loadSheet();
 
     var t = (typeof S.lifeT === "number") ? S.lifeT : 0;
     var still = !!reduce;
-    var scroll = still ? 0 : Math.sin(t * 0.23) * bandPad * 0.85;
-    var dy = still ? 0 : Math.sin(t * 0.7) * h * 0.008;
+    var tip = S._tip;
+    var gx = tip && tip.x === tip.x ? tip.x : w * 0.6;
+    var gy = tip && tip.y === tip.y ? tip.y : h * 0.5;
+    if (gx < FW * SCALE * 0.5 + 4) gx = FW * SCALE * 0.5 + 4;
+    if (gx > w - 6) gx = w - 6;
+    if (tipX === null) { tipX = gx; tipY = gy; }
+    else {
+      var k = still ? 1 : 1 - Math.exp(-(lastDt || 0.016) / 0.1);
+      tipX += (gx - tipX) * k;
+      tipY += (gy - tipY) * k;
+    }
+    var dy = still ? 0 : Math.sin(t * 0.7) * h * 0.006;
     var light = palette === "simple" || palette === "paper";
-    var alpha = (light ? 0.40 : 0.33) * intensity;
+    var alpha = (light ? 0.50 : 0.42) * intensity;
 
+    var bx = Math.round(tipX - bandCanvas.width);
+    var by = Math.round(tipY + dy - h);
     ctx.save();
     ctx.globalAlpha = alpha;
-    var sx = Math.round(bandPad + scroll);
-    if (sx < 0) sx = 0;
-    if (sx + w > bandCanvas.width) sx = Math.max(0, bandCanvas.width - w);
-    ctx.drawImage(bandCanvas, sx, 0, w, h, 0, dy, w, h);
+    ctx.drawImage(bandCanvas, bx, by);
     ctx.restore();
 
-    var sheet = spriteFrames();
-    if (!sheet) return;
-    var travel = w * 0.64;
-    var x = still ? w * 0.32 : (w * 0.24 + ((t * (w / 20)) % travel));
-    var cacheX = sx + x;
-    var y = centerY(0, cacheX, bandCanvas.width, h) + dy;
-    var frame = still ? 0 : ((t * 7) | 0) & 3;
+    if (!sheetReady()) return;
+    var frame = still ? 0 : ((t * 6) | 0) & 3;
+    var bob = still ? 0 : Math.round(Math.sin(t * 4.2) * 2) * SCALE;
+    var dw = FW * SCALE;
+    var dh = FH * SCALE;
+    var dx = Math.round(tipX - dw * 0.5);
+    var dyy = Math.round(tipY + dy - dh + 4 * SCALE + bob);
+    var surA = Math.min(1, 0.95 * intensity);
     var birdX = S.bird && S.bird.x != null ? S.bird.x : w * 0.18;
     var birdY = S.bird && S.bird.y != null ? S.bird.y : h * 0.42;
-    var surA = Math.min(1, 0.94 * intensity);
-    if (Math.abs(x - birdX) < 84) {
-      var gap = gapNear(S, birdX);
-      if (gap && y > gap.top - 6 && y < gap.bot + 6) {
-        y = gap.top - 30;
-        if (y < 18) y = gap.bot + 26;
-      }
-      if (Math.abs(y - birdY) < 70) surA *= 0.35;
-    }
-    if (y < 14) y = 14;
-    if (y > h - 18) y = h - 18;
-
-    var dw = SPRITE * SCALE;
-    var dh = SPRITE * SCALE;
-    var dx = Math.round(x - (SPRITE * 0.5) * SCALE);
-    var destY = Math.round(y - ANCHOR * SCALE);
+    if (Math.abs(tipX - birdX) < dw * 0.6 && Math.abs(tipY - dh * 0.5 - birdY) < dh * 0.8) surA *= 0.35;
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     ctx.globalAlpha = surA;
-    ctx.drawImage(sheet[frame] || sheet[0], dx, destY, dw, dh);
-    if (!still) {
-      ctx.fillStyle = "rgba(255,246,194," + (0.7 * intensity) + ")";
-      var s, sx0, sy0;
-      for (s = 1; s <= 4; s++) {
-        sx0 = Math.round(x - 36 - s * 8);
-        sy0 = Math.round(y - 6 + ((frame + s) % 3) * 3);
-        ctx.fillRect(sx0, sy0, 2, 2);
-        ctx.fillRect(sx0 - 2, sy0, 2, 2);
-        ctx.fillRect(sx0 + 2, sy0, 2, 2);
-        ctx.fillRect(sx0, sy0 - 2, 2, 2);
-        ctx.fillRect(sx0, sy0 + 2, 2, 2);
-      }
-    }
+    ctx.drawImage(sheet, frame * FW, 0, FW, FH, dx, dyy, dw, dh);
     ctx.restore();
   }
 
@@ -534,6 +379,7 @@
     if (heldJuke && !cue && (muted || intensity <= 0)) releaseJuke(A);
   }
 
+  loadSheet();
   root.ChoppyHalving = {
     BANDS: BANDS,
     FADE_IN: FADE_IN,
