@@ -595,12 +595,12 @@
     priceDyn: "DYNAMIC",
     priceUsd: "USD",
     priceBtc: "BTC",
-    tut1: "You are the ₿. Tap or press space to flap through the candle gaps. A wick liquidates you. The floor only counts when you fully leave the screen.",
-    tut2: "Candles pay cash. Buy BTC on the dip, sell on the rip. Score is play-money net worth in BTC at the live in-game price.",
-    tut3a: "Bull pumps price.",
+    tut1: "You are the ₿. Tap or press space to flap through the candle gaps. A wick liquidates you.",
+    tut2: "Candles pay cash. Buy BTC on the dip, sell on the rip. Your score is your net worth in BTC.",
+    tut3a: "Bull pumps the price.",
     tut3b: "Bear dumps it.",
-    tut4a: "Black swan is a black crash that dumps hard and stretches the bear.",
-    tut4b: "Halving is a fat bull. It rides between candles, at the top or just above Buy/Sell.",
+    tut4a: "A black swan is a brutal crash.",
+    tut4b: "A halving is a big bull that rides between the candles.",
     halveTipUp: "Halving. Look up!",
     halveTipDown: "Halving. Look down!",
     aidTitle: "San Arnaldo",
@@ -608,19 +608,15 @@
     aidPay: "Accept help",
     aidShort: "Not enough BTC and cash. Together they cover {have}.",
     aidDecline: "Refuse",
-    tut5: "Cold storage saves a hit. Ten colds become one multisig life.",
+    tut5: "Cold storage absorbs a hit. Ten colds become one multisig life.",
     tut6: "Laser eyes eat a bear and unlock a perk.",
-    tut7: "Ranked is 0 cold and 0 multisig and counts for the board. Training is 9 cold and 999 multisig and does not. Versus does not count for ranked scores or awards.",
-    tut8: "Pick a perk and the menu vanishes like an Arc card — then tap ▶. DCA, A.I. bud, Jukebox, Marketplace and Arc sit on the HUD. Speed is the 1x button between Buy and Sell.",
-    tut9: "Options → Graphics: pick a look, then tap the hero in the preview to switch 2D / 3D.",
     tutBattle: "Battle tutorial",
-    tutHold: "Hold the beach",
-    tutB1: "On land you drive the tank. Sea battles put you in a ship — those maps keep water on at least two edges. The stick moves you. The right side of the screen fires.",
-    tutB2: "You start with 3 hearts. Each hit empties one. Empty hearts means you lose. The citadel shield is separate — if it breaks, the island falls. You carry 12 shots: empty them and you reload for 1.7 seconds. Stop firing and they refill on their own, and every kill gives a few back.",
-    tutB3: "Sand is beach. Grass and dirt are open. Brick breaks. Metal, rock and the lighthouse do not. Trees block too. The coast is jagged, except beside docks and roads. Tanks stay on land. Ships stay on water.",
-    tutB4: "One pickup at a time. After the field is empty, the next waits a random 5–15 seconds, then lasts 12.5 seconds. + restores a heart, or adds a fourth at 3/3. S stays: faster shot, then two bullets, then it breaks metal and one-shots heavies and trees. The star is 7.5s of invulnerability. F freezes enemies for 7.5s. X blows up every enemy. W wraps the citadel in metal for 7.5s, then that metal becomes ordinary brick.",
-    tutB5: "Fury, the long-range missile, sits above the stick. Hold it until the ring fills, move the red circle with the stick, then tap again to fire. After each strike it needs a few seconds to recharge. It reaches helicopters, and troops on the wrong ground: a tank in a sea battle, a ship in a land battle.",
-    tutB6: "Light, medium and heavy hulls. Some units come for you. Some go for the citadel. Up to 15% of them use the other element. KIA is destroyed over sent. A higher World number sends more troops, and each battle fields more than the one before.",
+    tutB1: "On land you drive a tank; at sea, a ship. The stick moves you and the right side of the screen fires.",
+    tutB2: "You have 3 hearts and the citadel has its own shield. Lose either and the battle is lost. Your 12 shots reload on their own, and kills give some back.",
+    tutB3: "Brick breaks. Metal, rock and the lighthouse do not. Tanks stay on land, ships on water.",
+    tutB4: "Pickups appear now and then: + heals, S upgrades your shot, the star makes you invulnerable, F freezes enemies, X blows them all up, W armors the citadel.",
+    tutB5: "Fury, the missile above the stick: hold until the ring fills, aim the red circle with the stick, tap to fire. It recharges between shots and also reaches helicopters.",
+    tutB6: "Some enemies come for you, others go for the citadel. Each battle sends more troops than the last. KIA is how many you destroyed out of those sent.",
     pwaOpt: "OFFLINE APP", pwaOn: "ON", pwaOff: "OFF",
     pwaUpdate: "A new version is ready.", pwaReload: "Reload", pwaLater: "Not now",
     pwaReloadOn: "Reload once to store the game on this device.",
@@ -658,8 +654,8 @@
       + line(badgeIco("heart"), "tutB2")
       + line(battleIcos(["sand", "grass", "dirt", "brick", "metal", "tree", "rock", "lh", "water"]), "tutB3")
       + line(battleIcos(["heal", "shot", "star", "freeze", "bomb", "wall"]), "tutB4")
-      + line(battleIcos(["tank", "fast", "heavy", "elite", "ship"]), "tutB6")
-      + line(badgeIco("heli") + badgeIco("aa"), "tutB5");
+      + line(badgeIco("heli") + badgeIco("aa"), "tutB5")
+      + line(battleIcos(["tank", "fast", "heavy", "elite", "ship"]), "tutB6");
   }
   function battleTutHtml(){ return "<div class=\"help battle-help\">" + battleTutInner() + "</div>"; }
   function battleTutParas() {
@@ -670,6 +666,7 @@
     S.bcBattleTut = true;
     try { localStorage.setItem("choppy-battle-tut", "1"); } catch (e) {}
   }
+  function unlockBattleTut() { markBattleTut(); }
   function battleTutSeen() {
     if (S.bcBattleTut) return true;
     try { if (localStorage.getItem("choppy-battle-tut") === "1") { S.bcBattleTut = true; return true; } } catch (e) {}
@@ -2776,7 +2773,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp201";
+    s.src = "chess-data.js?v=mp202";
     document.head.appendChild(s);
   }
   (function () {
@@ -3860,11 +3857,12 @@
       return repliesText();
     }
     if(card.id==="blocAssault"){
+      unlockBattleTut();
       if((S.bcBattlesWon||0)===0){
         card.kind="choice";
         card.opts=[
           {k:"go", label:"Defend the beach", labelEs:"Defender la playa"},
-          {k:"tut", label:"Review the battle tutorial", labelEs:"Revisar el tutorial de batalla"}
+          {k:"tut", label:"Battle tutorial", labelEs:"Tutorial de batalla"}
         ];
       }else{
         card.kind="report";
@@ -7409,6 +7407,7 @@
     }else S._battleJuke=false;
   }
   function startDefense(){
+    unlockBattleTut();
     recallShot();
     const level=Math.max(0,Math.min(8,S.bcBattlesWon|0));
     const bloc=(level/3)|0;
@@ -13328,6 +13327,9 @@
     if (panel === "help") {
       return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody() + kbHelpHtml();
     }
+    if (panel === "btut") {
+      return "<div class=\"opt-head\">" + optHead(t("tutBattle")) + "</div>" + battleTutHtml();
+    }
     if (panel === "market") {
       const mul = S.ranked ? 10 : 1;
       const cold = 1200 * mul, laser = 1800 * mul, msig = 9000 * mul;
@@ -13476,6 +13478,7 @@
       + "<button type=\"button\" class=\"cta opt-item" + ((S.have.aibud || 0) > 0 ? "" : " dim") + "\" id=\"opt-aibud\">" + t("aiLog") + "</button>"
       + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-pwa\">" + t("pwaOpt") + " · " + (pwaEnabled() ? t("pwaOn") : t("pwaOff")) + "</button>"
       + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-help\">" + t("tutorial") + "</button>"
+      + (battleTutSeen() ? "<button type=\"button\" class=\"cta opt-item\" id=\"opt-btut\">" + t("tutBattle") + "</button>" : "")
       + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-feed\">" + t("feedback") + "</button>"
       + "</div>";
   }
@@ -13574,6 +13577,8 @@
     };
     const optHelp = $("opt-help");
     if (optHelp) optHelp.onclick = (e) => { e.stopPropagation(); S.optPanel = "help"; renderOverlay(); };
+    const optBtut = $("opt-btut");
+    if (optBtut) optBtut.onclick = (e) => { e.stopPropagation(); S.optPanel = "btut"; renderOverlay(); };
     const optFeed = $("opt-feed");
     if (optFeed) optFeed.onclick = (e) => { e.stopPropagation(); S.optPanel = "feed"; renderOverlay(); };
     const feedSend = $("feed-send");
@@ -14182,7 +14187,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp201";
+      s.src = "mp.js?v=mp202";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
