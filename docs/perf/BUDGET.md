@@ -14,7 +14,7 @@ Brief 01 is not in this tree (`tests/smoke.js` and `.github/` are absent), so th
 | After this branch | 281168 |
 | Ceiling | 290000 |
 
-abcjs and `mp.js` are outside this sum. They load when the jukebox opens and when Versus opens. Adding either one back to `index.html` fails the intent of the budget even if the gzip sum still passes.
+abcjs, `mp.js`, and `halving.js` are outside this sum. They load when the jukebox opens, when Versus opens, and when a halving is in sight. Adding any of them back to `index.html` fails the intent of the budget even if the gzip sum still passes.
 
 The +1479 bytes are the proximity preloader, the lazy `mp.js` / abcjs hooks, and the frame-path rewrites in `game.js` (+1150 gzip) and `audio.js` (+329 gzip).
 
