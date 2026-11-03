@@ -69,7 +69,7 @@ eq(shellJs.bucket, "shell", "game.js bucket");
 eq(shellJs.strategy, "cache-first-versioned", "game.js strategy");
 eq(plan(ORIGIN + "/choppy-bitcoin/run-stats.js").strategy, "network-first", "untagged code is network-first");
 eq(plan(ORIGIN + "/choppy-bitcoin/game.js").strategy, "network-first", "untagged game.js is network-first");
-["i18n-extra.js","chess-data.js","mp.js","nft-preview.js","game.js","supabase-lib.js"].forEach((f) => eq(sw.precacheUrls().indexOf("/choppy-bitcoin/" + f + "?v=" + sw.CACHE_VERSION) !== -1, true, "precache " + f));
+["i18n-extra.js","chess-data.js","mp.js","halving.js","nft-preview.js","game.js","supabase-lib.js"].forEach((f) => eq(sw.precacheUrls().indexOf("/choppy-bitcoin/" + f + "?v=" + sw.CACHE_VERSION) !== -1, true, "precache " + f));
 ["index.html","game.js","about/index.html","profile/index.html","u/index.html","i18n.js"].forEach((f) => { const src = fs.readFileSync(path.join(ROOT, f), "utf8"); (src.match(/\.(?:js|css)\?v=mp\d+/g) || []).forEach((tag) => eq(tag.replace(/^.*\?/, "?"), "?v=" + sw.CACHE_VERSION, f + " tag matches CACHE_VERSION")); });
 eq(shellJs.store, true, "game.js store");
 

@@ -1492,6 +1492,7 @@
     if (S.phase !== "play") return;
     if (S.halveLeft > 0) S.halveLeft -= 1;
     if (S.halveLeft === 4) {
+      ensureHalving();
       const pool = A.HALVE_SOON || ["Halving in sight!"];
       say(pool[(Math.random() * pool.length) | 0], true, "halve");
     }
@@ -1541,6 +1542,7 @@
       if (A && A.jukeStop) A.jukeStop();
     }
     S.halveLeft = HALVE_GAP; S.halveBull = false; S.halveFloor = 0; S.spawnedPipes = 0; S.halveSide = "up";
+    halveReset();
     S.shownCandles = 0;
     S.swanBear = false; S.halveSpeechUntil = 0;
     S.cold = S.ranked ? 0 : 9;
@@ -1661,7 +1663,7 @@
     S.powerUntil = now + remain + bankGain(n, remain);
     S.power = type;
     S.tapeLive = { kind: dir > 0 ? "peak" : "bottom", price: S.price, i: S.tape.length };
-    if (k === "HALVE") S.halveBull = true;
+    if (k === "HALVE") { S.halveBull = true; ensureHalving(); }
     if (k === "SWAN") S.swanBear = true;
     syncWaveFlags();
     kickTheme();
@@ -1761,6 +1763,7 @@
   }
 
   function spawnHalve() {
+    ensureHalving();
     if (S.items.some((it) => it.type === "HALVE")) return;
     const r = 17;
     const up = S.halveSide !== "down";
@@ -1884,6 +1887,7 @@
   function die() {
     if (S.dead) return;
     S.dead = true;
+    halveReset();
     try { a11ySay(chanceLang() ? "Liquidado. Fin de la partida." : "Liquidated. Run over."); } catch (e) {}
     S.phase = "over";
     try { applyLaser(false); } catch (e) {}
@@ -7376,6 +7380,7 @@
     try{sessionStorage.removeItem("bc-shot");}catch(e){}
   }
   function parkMarketLoad(){
+    halveReset();
     if(field){
       field.classList.remove("is-play","bull","bear","swan-bear");
       fieldFx = "";
@@ -10043,6 +10048,7 @@
   function defenseInput(){}
   function setPhase(p) {
     S.phase = p;
+    if (p !== "play") halveReset();
     try {
       if (A) {
         if (p === "play") {
@@ -11759,9 +11765,45 @@
     }
   }
 
+  let hvLoad = null, hvClock = 0, hvNeedTheme = false;
+  function ensureHalving() {
+    if (window.ChoppyHalving || hvLoad) return;
+    hvLoad = 1;
+    try {
+      const s = document.createElement("script");
+      s.src = "halving.js?v=mp204";
+      s.onload = function () { hvLoad = 0; };
+      s.onerror = function () { hvLoad = null; };
+      (document.body || document.documentElement).appendChild(s);
+    } catch (e) { hvLoad = null; }
+  }
+  function halveReset() {
+    try { if (window.ChoppyHalving) window.ChoppyHalving.reset(); } catch (e) {}
+  }
+  function halveFrame(ctx) {
+    const on = S.phase === "play" && !!S.halveBull && !S.dead && !S.spectate;
+    const H = window.ChoppyHalving;
+    if (H) {
+      const now = performance.now();
+      const dt = hvClock ? Math.min(0.1, (now - hvClock) / 1000) : 0;
+      hvClock = now;
+      try {
+        if (!on && (S.phase !== "play" || S.dead)) H.reset();
+        else H.tick(dt, on);
+        H.syncTheme(A);
+        if (H.intensity() > 0) H.draw(ctx, S, !!REDUCE_MOTION, PALETTE_ID);
+      } catch (e) {}
+    }
+    if (on) hvNeedTheme = true;
+    if (hvNeedTheme && !on && S.phase === "play" && (!H || H.intensity() <= 0)) {
+      hvNeedTheme = false;
+      try { kickTheme(); } catch (e) {}
+    }
+  }
   function draw(ctx) {
     const wash = powerWash();
     drawWorldBg(ctx, wash);
+    halveFrame(ctx);
     drawTape(ctx, S.tape, S.H * 0.196, S.H * 0.804, palRgba(GREEN, 0.58), palRgba(RED, 0.58));
 
     const m = metrics();
@@ -11852,7 +11894,8 @@
       else paintHaloText(ctx, label, f.x, f.y, f.color || PAL.fg);
     }
     ctx.globalAlpha = 1;
-    if (wash) {
+    const hvVeil = window.ChoppyHalving && window.ChoppyHalving.intensity && window.ChoppyHalving.intensity() > 0.04;
+    if (wash && !hvVeil) {
       const a = PALETTE_ID === "simple" ? (S.swanBear ? 0.2 : 0.14) : 0.22;
       ctx.fillStyle = palRgba(wash, a);
       ctx.fillRect(0, 0, S.W, S.H);

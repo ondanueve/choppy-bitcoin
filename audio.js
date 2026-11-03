@@ -6,6 +6,7 @@
   let jukeOn = false;
   let jukeGen = 0;
   let muteTheme = localStorage.getItem("choppy-mute-theme") === "1";
+  let halveHold = false;
   let muteSfx = localStorage.getItem("choppy-mute-sfx") === "1";
   let muteVoice = localStorage.getItem("choppy-mute-voice") === "1";
 
@@ -67,6 +68,7 @@
       muteTheme = !!v;
       localStorage.setItem("choppy-mute-theme", muteTheme ? "1" : "0");
       if (muteTheme && musicInterval != null) { /* keep clock, skip notes */ }
+      try { if (A._halving && A._halving.onMute) A._halving.onMute(); } catch (e) {}
     },
     setMuteSfx(v) {
       muteSfx = !!v;
@@ -289,7 +291,7 @@
     musicInterval = setInterval(() => {
       if (!musicIsPlay()) return;
       if (ctx && ctx.state === "suspended") try { ctx.resume(); } catch (e) {}
-      if (muteTheme) { musicStep++; return; }
+      if (muteTheme || halveHold) { musicStep++; return; }
       const p = musicGetPower();
       const juke = !!(musicJuke && musicJuke());
       if (juke && p !== "BULL" && p !== "BEAR") { musicStep++; return; }
@@ -1882,6 +1884,14 @@ E,2 [E,G,B,]2 E,2 [E,G,B,]2 | C,2 [C,E,G,]2 C,2 [E,G,C]2 | B,,2 [D,F,A,]2 B,,2 [
       catch (e) { g.gain.value = jukeVol; }
     }
     return jukeVol;
+  };
+  A._halving = {
+    ac: function () { return ctx; },
+    hold: function (v) { if (v != null) halveHold = !!v; return halveHold; },
+    muted: function () { return muteTheme; },
+    vol: function () { return jukeVol; },
+    beep: beep,
+    onMute: null
   };
 
   function stopJukeSource() {

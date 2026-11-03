@@ -16,6 +16,7 @@ const PUBLISHED_JS = [
   "game.js",
   "audio.js",
   "mp.js",
+  "halving.js",
   "auth.js",
   "supabase-lib.js",
   "run-stats.js",

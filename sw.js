@@ -38,6 +38,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "i18n-extra.js",
     "chess-data.js",
     "mp.js",
+    "halving.js",
     "nft-preview.js"
   ];
   // Code files the pages request with ?v=CACHE_VERSION. The cache key keeps that tag,
