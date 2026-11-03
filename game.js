@@ -3156,7 +3156,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin16", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin16", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3315,7 +3315,7 @@
     "cousin-lose":"post6", "usedcar-works":"post6", "usedcar-lemon":"post6", "stateVisit-a":"post6",
     "stateVisit-b":"post6", "extensionCord-a":"post6", "extensionCord-b":"post6", "landfill-nokia":"post6",
     "landfill-nothing":"post6", "landfill-c":"post6", "baby-a":"post6", "baby-c":"post6",
-    "nicoWedding-a":"post6", "nicoWedding-c":"post6"
+    "nicoWedding-a":"post7", "nicoWedding-c":"post6"
   };
   const POST_ART_MISS = new Set();
   function postArtKeys(id) {
@@ -11654,7 +11654,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp207";
+      s.src = "halving.js?v=mp208";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14106,7 +14106,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp207";
+      s.src = "mp.js?v=mp208";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
