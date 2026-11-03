@@ -6,6 +6,8 @@
   const POWER_S = 5;
   const WAVE_UP = 3;
   const WAVE_BACK = 2;
+  const HALVE_UP = 26;
+  const HALVE_BACK = 6;
   const HALVE_N = 21;
   const HALVE_GAP = 210;
   const BTC_CAP = 21e6;
@@ -1353,7 +1355,7 @@
 
   function sayEn(en, cap, urgent, kind) {
     say(en, urgent, kind);
-    if (cap) S.ticker = cap;
+    if (cap) { S.ticker = cap; S.tickerT = Math.max(S.tickerT || 0, 3); }
   }
 
   function pickLine(pool) {
@@ -1433,6 +1435,24 @@
     return S.items.filter((it) => it.pipe === pipe);
   }
 
+  // Everything the halving held back (its 3 perks, other perks, chance cards) comes only after the rainbow sequence ends.
+  function halveAfter() {
+    if (S.phase !== "play" || S.halveBull) return;
+    const H = window.ChoppyHalving;
+    if (H && H.intensity() > 0) return;
+    if ((S.halvePerks | 0) > 0) {
+      S.halvePerks = 0;
+      S.perkChain = 3;
+      openPerkOffer("halve", true);
+      if (S.phase !== "perk") S.perkChain = 0;
+      return;
+    }
+    if (S.perkLater) { S.perkLater = false; if (S.ranked) tryRankedPerk(false); else openPerkOffer(); }
+    if (S.cardLater && S.phase === "play") { S.cardLater = false; dealChance(); }
+  }
+
+  function halveLock() { return !!S.halveBull || (S.halvePerks | 0) > 0; }
+
   function pinItem(it) {
     if (it.pipe && S.pipes.indexOf(it.pipe) >= 0) {
       const box = wickAxis(it.pipe, it.r);
@@ -1444,7 +1464,7 @@
       it.pipe = null;
       it.freeX = true;
     }
-    if (it.type === "HALVE") it.y = halveSlotY(it.halveUp, it.r);
+    if (it.type === "HALVE" && !it.pipe) it.y = halveSlotY(it.halveUp, it.r);
     return true;
   }
 
@@ -1470,33 +1490,40 @@
     const isFinish = !!(raceN && S.spawnedPipes === raceN);
     const pipe = { x, gapY, gapH, green: wrng() > 0.45, scored: false, seen: false, finish: isFinish };
     S.pipes.push(pipe);
-    if (!isFinish && wrng() < 0.52 && !itemsOnPipe(pipe).length) {
+    const roll = !isFinish && wrng() < 0.52;
+    if (S.halvePend && !isFinish) {
+      S.halvePend = false;
+      const up = S.halveSide !== "down";
+      const box = wickAxis(pipe, 17);
+      S.items.push({
+        pipe, x: box.x, y: box.lo + (box.hi - box.lo) * (up ? 0.18 : 0.82), lo: box.lo, hi: box.hi,
+        type: "HALVE", r: 17, halveUp: up, freeX: false
+      });
+      S.drift = (S.drift != null ? S.drift : DRIFT0) * DRIFT_GROW;
+      S.halveSpawned = (S.halveSpawned || 0) + 1;
+      A.sfx.cap();
+    } else if (roll && !itemsOnPipe(pipe).length) {
       const type = pickItem();
       const r = type === "SWAN" ? 17 : 14;
       const box = wickAxis(pipe, r);
       const span = Math.max(8, box.hi - box.lo);
       const y = box.lo + wrng() * span;
-      S.items.push({
-        pipe,
-        x: box.x,
-        y,
-        lo: box.lo,
-        hi: box.hi,
-        vy: (wrng() < 0.5 ? -1 : 1) * (22 + wrng() * 16),
-        type, r, freeX: false,
-      });
+      const vy = (wrng() < 0.5 ? -1 : 1) * (22 + wrng() * 16);
+      if (!(halveLock() && (type === "BULL" || type === "BEAR" || type === "SWAN"))) {
+        S.items.push({ pipe, x: box.x, y, lo: box.lo, hi: box.hi, vy, type, r, freeX: false });
+      }
     }
   }
 
   function tickHalve() {
     if (S.phase !== "play") return;
     if (S.halveLeft > 0) S.halveLeft -= 1;
-    if (S.halveLeft === 4) {
-      ensureHalving();
+    if (S.halveLeft === 6) ensureHalving();
+    if (S.halveLeft === 5) {
       const pool = A.HALVE_SOON || ["Halving in sight!"];
       say(pool[(Math.random() * pool.length) | 0], true, "halve");
     }
-    if (S.halveLeft === 1) {
+    if (S.halveLeft === 3) {
       S.halveSide = wrng() < 0.5 ? "up" : "down";
       if (S.aibudOn && (S.have.aibud || 0) >= 1) {
         sayEn(
@@ -1542,6 +1569,7 @@
       if (A && A.jukeStop) A.jukeStop();
     }
     S.halveLeft = HALVE_GAP; S.halveBull = false; S.halveFloor = 0; S.spawnedPipes = 0; S.halveSide = "up";
+    S.halvePend = false; S.halvePerks = 0; S.perkLater = false; S.cardLater = false;
     halveReset();
     S.shownCandles = 0;
     S.swanBear = false; S.halveSpeechUntil = 0;
@@ -1592,9 +1620,11 @@
     return Math.max(0.18, Math.min(3.2, 1 + sum));
   }
 
-  function waveDur() { return WAVE_UP + WAVE_BACK; }
-  function bankGain(n, remain) {
-    const add = waveDur();
+  function waveUpOf(w) { return w && w.kind === "HALVE" ? HALVE_UP : WAVE_UP; }
+  function waveBackOf(w) { return w && w.kind === "HALVE" ? HALVE_BACK : WAVE_BACK; }
+  function waveDur(w) { return waveUpOf(w) + waveBackOf(w); }
+  function bankGain(n, remain, w) {
+    const add = waveDur(w);
     if (n <= 1) return add;
     const tax = 1 - 1 / (n - 1);
     const room = Math.max(0, add - remain);
@@ -1605,7 +1635,7 @@
     return Math.max(0, (S.powerUntil || 0) - (now != null ? now : S.lifeT));
   }
   function waveAge(w, now) { return (now != null ? now : S.lifeT) - w.t0; }
-  function waveLive(w, now) { return waveAge(w, now) < waveDur(); }
+  function waveLive(w, now) { return waveAge(w, now) < waveDur(w); }
   function liveWaves(now) { return (S.waves || []).filter((w) => waveLive(w, now)); }
 
   function waveK(w, now) {
@@ -1613,13 +1643,14 @@
     if (t <= 0) return 0;
     const dir = w.dir;
     const k = crashScale(w.kind, dir) * stackW(w);
-    if (t <= WAVE_UP) {
-      const u = Math.min(1, t / WAVE_UP);
+    const up = waveUpOf(w);
+    if (t <= up) {
+      const u = Math.min(1, t / up);
       const e = u * u * (3 - 2 * u);
       return dir * w.amp * e * k;
     }
-    if (t < waveDur()) {
-      const u = Math.min(1, (t - WAVE_UP) / WAVE_BACK);
+    if (t < waveDur(w)) {
+      const u = Math.min(1, (t - up) / waveBackOf(w));
       const e = u * u * (3 - 2 * u);
       return dir * (w.amp + (w.resid - w.amp) * e) * k;
     }
@@ -1656,11 +1687,13 @@
       S.cycleMinI = S.tape.length;
       S.waves = [];
     }
-    S.waves.push({ type: type, kind: k, dir: dir, amp: amp, resid: resid, t0: S.lifeT, marked: false });
+    const nw = { type: type, kind: k, dir: dir, amp: amp, resid: resid, t0: S.lifeT, marked: false };
+    S.waves.push(nw);
     const now = S.lifeT;
     const n = S.waves.length;
     const remain = n <= 1 ? 0 : Math.max(0, (S.powerUntil || now) - now);
-    S.powerUntil = now + remain + bankGain(n, remain);
+    S.powerUntil = now + remain + bankGain(n, remain, nw);
+    if (k === "HALVE") S.powerUntil = Math.max(S.powerUntil, now + waveDur(nw));
     S.power = type;
     S.tapeLive = { kind: dir > 0 ? "peak" : "bottom", price: S.price, i: S.tape.length };
     if (k === "HALVE") { S.halveBull = true; ensureHalving(); }
@@ -1706,7 +1739,7 @@
     let follow = null;
     for (const w of (S.waves || [])) {
       const t = waveAge(w, now);
-      if (t >= WAVE_UP) stampWaveMark(w);
+      if (t >= waveUpOf(w)) stampWaveMark(w);
       else if (t >= 0) follow = w;
     }
     if (follow) {
@@ -1764,27 +1797,8 @@
 
   function spawnHalve() {
     ensureHalving();
-    if (S.items.some((it) => it.type === "HALVE")) return;
-    const r = 17;
-    const up = S.halveSide !== "down";
-    const y = halveSlotY(up, r);
-    const m = metrics();
-    let x = S.W + m.spacing * 0.5;
-    const pipes = S.pipes;
-    if (pipes.length >= 2) {
-      const a = pipes[pipes.length - 2];
-      const b = pipes[pipes.length - 1];
-      x = (pipeWx(a) + pipeWx(b)) * 0.5;
-    } else if (pipes.length === 1) {
-      x = pipeWx(pipes[0]) + m.spacing * 0.5;
-    }
-    S.items.push({
-      pipe: null, x, y, lo: y, hi: y,
-      type: "HALVE", r, halveUp: up, freeX: true
-    });
-    S.drift = (S.drift != null ? S.drift : DRIFT0) * DRIFT_GROW;
-    S.halveSpawned = (S.halveSpawned || 0) + 1;
-    A.sfx.cap();
+    if (S.halvePend || S.items.some((it) => it.type === "HALVE")) return;
+    S.halvePend = true;
   }
 
   function missHalve() {
@@ -1799,6 +1813,7 @@
     const color = it.type === "BULL" || it.type === "HALVE" ? GREEN : it.type === "BEAR" ? RED : it.type === "COLD" ? "#33c6e8" : it.type === "LASER" ? "#e8902a" : "#c9a0ff";
     burst(it.x, it.y, color, 12);
     grantUsd(500, it.x, it.y - 18, "power");
+    if (halveLock() && (it.type === "SWAN" || it.type === "BULL" || it.type === "BEAR")) { A.sfx.coin(); return; }
     if (it.type === "SWAN") {
       const pool = S.cold >= 1
         ? A.SWAN
@@ -1841,14 +1856,13 @@
       const out = creditBtc(gift);
       if (out.take > 0) pop(it.x, it.y - 36, "+" + fmtAmt(out.take, "btc"), BTC, "power");
       if (out.cash > 0) pop(it.x, it.y - 50, "+" + fmtAmt(out.cash, "usd"), GREEN, "power");
-      const floorFrom = S.power === "BULL" ? (S.priceBase || S.price) : S.price;
-      S.halveFloor = Math.max(S.halveFloor, floorFrom + halveMinRise());
+      if (S.waves && S.waves.length) endCycle();
+      S.halveFloor = Math.max(S.halveFloor, S.price + halveMinRise());
+      for (const o of S.items) if (o.type === "BULL" || o.type === "BEAR" || o.type === "SWAN") { o.pipe = null; o.freeX = true; o.x = -100; }
       beginCycle("BULL", "HALVE");
       say("Halving number " + S.halvings, true, "halve");
       A.sfx.cap();
-      S.perkChain = 3;
-      openPerkOffer("halve", true);
-      if (S.phase !== "perk") S.perkChain = 0;
+      S.halvePerks = 3;
       return;
     }
     beginCycle(it.type);
@@ -2777,7 +2791,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp205";
+    s.src = "chess-data.js?v=mp206";
     document.head.appendChild(s);
   }
   (function () {
@@ -3886,7 +3900,7 @@
   function dueAssault(){
     if(!(S.bcAssaultAt>0)) return false;
     if((S.candles||0)<S.bcAssaultAt) return false;
-    if(S.phase!=="play" || S.bcVictory) return false;
+    if(S.phase!=="play" || S.bcVictory || halveLock()) return false;
     if(S.bcDefense && !S.bcDefense.done) return false;
     const phase=S.phase;
     window.__arcForce="blocAssault";
@@ -4382,6 +4396,10 @@
     if(S.bcOg&&!S.bcArcClosed&&(S.candles||0)>0&&(S.candles||0)%21===0&&S.bcNodeTick!==(S.candles||0)){S.bcNodeTick=S.candles||0;S.bcNodes=Math.min(100,(S.bcNodes||0)+(S.bcSettlement?2:1));if(S.bcMine)creditBtc(.01);say("Liberty Nodes "+S.bcNodes+"/100",false,"ui");}
     if ((S.have.job || 0) > 0 && S.candles > 0 && S.candles % 21 === 0) payJob();
     if (S.mp) return;
+    if (halveLock()) {
+      if (S.chanceAt && S.chanceAt.indexOf(S.candles) >= 0) S.cardLater = true;
+      return;
+    }
     if (dueAssault()) return;
     const every = S.testArcEvery | 0;
     if (every > 0) {
@@ -4429,6 +4447,7 @@
     if (!S.ranked) return false;
     if (S.phase === "perk") return false;
     if ((S.lasers || 0) < (S.nextOffer || 1)) return false;
+    if (halveLock()) { S.perkLater = true; return false; }
     if (fromMarket || S.phase === "paused") {
       S.perkResume = { phase: "paused", panel: S.optPanel || "market" };
     } else {
@@ -4441,6 +4460,7 @@
 
   function openPerkOffer(why, forceUi) {
     if (S.mp) return;
+    if (why !== "halve" && halveLock()) { S.perkLater = true; return; }
     const left = perkOpen();
     if (!left.length) return;
     rollPerks();
@@ -10369,6 +10389,7 @@
         S.items.splice(j, 1);
       }
     }
+    halveAfter();
     const n = net();
     if (n > S.peakNet) S.peakNet = n;
     const fx = S.power === "BULL" ? "b" : S.power === "BEAR" ? (S.swanBear ? "s" : "e") : "";
@@ -11772,7 +11793,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp205";
+      s.src = "halving.js?v=mp206";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -11789,9 +11810,12 @@
       const dt = hvClock ? Math.min(0.1, (now - hvClock) / 1000) : 0;
       hvClock = now;
       try {
-        if (!on && (S.phase !== "play" || S.dead)) H.reset();
-        else H.tick(dt, on);
-        H.syncTheme(A);
+        if (!on && S.phase !== "play" && !S.dead && S.halveBull && H.pause) H.pause();
+        else {
+          if (!on && (S.phase !== "play" || S.dead)) H.reset();
+          else H.tick(dt, on);
+          H.syncTheme(A);
+        }
         if (H.intensity() > 0) H.draw(ctx, S, !!REDUCE_MOTION, PALETTE_ID);
       } catch (e) {}
     }
@@ -12258,7 +12282,7 @@
     const live = liveWaves(now);
     const leftOf = (pred) => {
       let left = 0;
-      for (const w of live) if (pred(w)) left = Math.max(left, w.t0 + waveDur() - now);
+      for (const w of live) if (pred(w)) left = Math.max(left, w.t0 + waveDur(w) - now);
       return left;
     };
     const hLeft = leftOf((w) => w.kind === "HALVE");
@@ -14231,7 +14255,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp205";
+      s.src = "mp.js?v=mp206";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
