@@ -6,14 +6,13 @@
 
   var FADE_IN = 0.6;
   var FADE_OUT = 0.8;
-  var BPM = 150;
-  var STEP = 60 / BPM / 2;
-  var LOOP = 128;
-  var LOOK = 0.26;
+  var BPM = 156;
+  var STEP = 60 / BPM / 4;
+  var LOOK = 0.6;
   var SCALE = 2;
   var FW = 61;
   var FH = 45;
-  var SPRITE_SRC = "halving-surfer.png?v=mp205";
+  var SPRITE_SRC = "halving-surfer.png?v=mp206";
 
   var BANDS = [
     { name: "deep red", hex: "#8E1A2F" },
@@ -26,10 +25,6 @@
     { name: "teal-green", hex: "#149A84" },
     { name: "blue", hex: "#2A6FE0" }
   ];
-
-  var DEG = [0, 293.66, 329.63, 392, 440, 493.88];
-  var LEAD = "12345432134543212345543212354321";
-  var PAD = [1, 5, 3, 4];
 
   var intensity = 0;
   var want = false;
@@ -82,27 +77,41 @@
   }
 
   // The bands are prerendered with the front tip at the right edge, on a canvas twice the field height.
-  // The tip row is h. The crest of the top band starts there and every band falls away to the left on a log curve.
+  // The tip row is h. Every band narrows toward the tip and all nine centerlines meet at that one point,
+  // right under the surfer; away from the tip they fan out and fall away to the left on a log curve.
   function bandH(h) { return h * 0.05; }
 
-  function bandY(i, x, cw, h) {
+  function converge(x, cw) {
+    var u = (cw - x) / (cw * 0.42);
+    if (u < 0) u = 0;
+    if (u > 1) u = 1;
+    return u * u * (3 - 2 * u);
+  }
+
+  function bandMid(i, x, cw, h) {
     var s = cw > 0 ? 1 - x / cw : 0;
     if (s < 0) s = 0;
     if (s > 1) s = 1;
     var drop = h * 0.16 * (1 - Math.log(1 + 8 * (1 - s)) / Math.log(9));
-    return h - bandH(h) * 1.0 + i * bandH(h) * 0.92 + drop;
+    return h + drop + (i - (BANDS.length - 1) / 2) * bandH(h) * 0.92 * converge(x, cw);
   }
 
-  function traceBand(g, i, cw, h, inset) {
+  // part < 1 traces only the top share of the band (the highlight).
+  function traceBand(g, i, cw, h, part) {
     var bh = bandH(h);
     var x;
+    var f;
+    var top;
     g.beginPath();
-    g.moveTo(0, bandY(i, 0, cw, h) + inset - bh * 0.5);
-    for (x = 4; x < cw; x += 4) g.lineTo(x, bandY(i, x, cw, h) + inset - bh * 0.5);
-    g.lineTo(cw, bandY(i, cw, cw, h) + inset - bh * 0.5);
-    g.lineTo(cw, bandY(i, cw, cw, h) + inset + bh * 0.5);
-    for (x = cw - 4; x > 0; x -= 4) g.lineTo(x, bandY(i, x, cw, h) + inset + bh * 0.5);
-    g.lineTo(0, bandY(i, 0, cw, h) + inset + bh * 0.5);
+    for (x = 0; x <= cw; x += 4) {
+      f = bh * converge(x, cw);
+      top = bandMid(i, x, cw, h) - f * 0.5;
+      if (x === 0) g.moveTo(x, top); else g.lineTo(x, top);
+    }
+    for (x = cw; x >= 0; x -= 4) {
+      f = bh * converge(x, cw);
+      g.lineTo(x, bandMid(i, x, cw, h) - f * 0.5 + f * part);
+    }
     g.closePath();
   }
 
@@ -116,20 +125,13 @@
     if (!g) return null;
     var i;
     for (i = 0; i < BANDS.length; i++) {
-      traceBand(g, i, cw, h, 0);
+      traceBand(g, i, cw, h, 1);
       g.fillStyle = BANDS[i].hex;
       g.fill();
-      traceBand(g, i, cw, h, -h * 0.014);
+      traceBand(g, i, cw, h, 0.3);
       g.fillStyle = "rgba(255,255,255,0.16)";
       g.fill();
     }
-    var fade = g.createLinearGradient(cw - 36, 0, cw, 0);
-    fade.addColorStop(0, "rgba(0,0,0,0)");
-    fade.addColorStop(1, "rgba(0,0,0,1)");
-    g.globalCompositeOperation = "destination-out";
-    g.fillStyle = fade;
-    g.fillRect(cw - 36, 0, 36, h * 2);
-    g.globalCompositeOperation = "source-over";
     bandCanvas = c;
     bandKey = w + "x" + h;
     return c;
@@ -202,115 +204,217 @@
     ctx.restore();
   }
 
-  function beepAt(h, freq, dur, type, gain, slide, delay) {
-    if (!h || !h.beep || !(gain > 0) || !(freq > 0)) return;
-    try { h.beep(freq, dur, type, gain, slide, delay, "theme"); } catch (e) {}
+  // ---- Chiptune: "Sunrise Over the Torii", an original taiko-and-shamisen fanfare in D yo scale.
+  // 24 bars at 156 BPM (about 37 s): 4-bar power-up fanfare, 8-bar verse, 8-bar chorus, 4-bar climax.
+  // After the first pass it loops from the verse. Voices go through one gain bus and a compressor into ctx.destination.
+  var SEMI = { m: -12, n: -10, o: -7, p: -5, d: 0, e: 2, g: 5, a: 7, b: 9, D: 12, E: 14, G: 17, A: 19, B: 21, Q: 24, R: 26 };
+  var D4 = 293.66;
+  var ROOT_D = -24, ROOT_G = -19, ROOT_A = -17, ROOT_B = -15;
+  var BARS = [];
+  (function () {
+    function add(sec, lead, root) { BARS.push({ sec: sec, lead: lead, root: root }); }
+    var intro = ["dgbDgbDGbDGAbDGA", "DGAQ-.A.Q.R.Q---", "QQ.QQ.R.Q.A.G.A.", "A---------QQQR.."];
+    var introRoots = [ROOT_D, ROOT_D, ROOT_G, ROOT_A];
+    var verse = ["D.DE.D.b.D.-A.b-", "D.DE.D.b.D.-A---", "G.GA.G.D.G.-E.D-", "A.AQ.A.G.E.-D.E-",
+      "D.DE.D.b.D.-A.b-", "b.bD.b.A.G.-A.b-", "G.GA.G.E.D.-E.G-", "A.GA.D.EG.AGEG.A"];
+    var chorus = ["DEGAGEDE.DEGAGE.", "GAQAGAQ.A.G.E.D.", "GAQ.GAQ.AQR.QAGA", "QR.QA.GA.QRQAGAE",
+      "DEGAGEDE.DEGAGE.", "bDEGEDbD.bDEGED.", "GAQ.GAQ.AQR.QAGA", "QRQAGAQR-.-.QR.Q"];
+    var span = [ROOT_D, ROOT_D, ROOT_G, ROOT_A, ROOT_D, ROOT_B, ROOT_G, ROOT_A];
+    var climax = ["QQ.QR.QQ.A.Q.R--", "RR.RQ.AA.Q.R.Q--", "AQ.AQ.RQ.RQ.AQRQ", "Q---------A.G.D."];
+    var climaxRoots = [ROOT_G, ROOT_A, ROOT_D, ROOT_D];
+    var i;
+    for (i = 0; i < 4; i++) add("i", intro[i], introRoots[i]);
+    for (i = 0; i < 8; i++) add("v", verse[i], span[i]);
+    for (i = 0; i < 8; i++) add("c", chorus[i], span[i]);
+    for (i = 0; i < 4; i++) add("x", climax[i], climaxRoots[i]);
+  })();
+  var TOTAL = BARS.length * 16;
+  var LOOP_AT = 64;
+  var BASS_PAT = [0, 0, 12, 0, 0, 12, 7, 12];
+  var PLUCK = [0, 7, 12, 7];
+
+  var bus = null;
+  var busAc = null;
+  var noiseBuf = null;
+
+  function hz(s) { return D4 * Math.pow(2, s / 12); }
+
+  function getBus(ac) {
+    if (bus && busAc === ac) return bus;
+    try {
+      var g = ac.createGain();
+      g.gain.value = 0.9;
+      var comp = ac.createDynamicsCompressor ? ac.createDynamicsCompressor() : null;
+      if (comp) {
+        try {
+          comp.threshold.value = -16;
+          comp.knee.value = 12;
+          comp.ratio.value = 5;
+          comp.attack.value = 0.004;
+          comp.release.value = 0.16;
+        } catch (e0) {}
+        g.connect(comp);
+        comp.connect(ac.destination);
+      } else g.connect(ac.destination);
+      bus = g;
+      busAc = ac;
+      noiseBuf = null;
+    } catch (e) { bus = null; }
+    return bus;
   }
 
-  function noiseAt(h, when, dur, gain) {
-    var ac = h.ac && h.ac();
-    if (!ac || !ac.createBuffer || !(ac.sampleRate > 0) || !(gain > 0)) return;
+  function setBusLevel(ac, v) {
+    if (!bus) return;
+    try { bus.gain.setTargetAtTime(v, ac.currentTime, 0.03); }
+    catch (e) { try { bus.gain.value = v; } catch (e2) {} }
+  }
+
+  function tone(ac, t, f, dur, type, gain, f2) {
+    if (!(gain > 0) || !(f > 0)) return;
     try {
-      var n = Math.max(8, Math.floor(ac.sampleRate * dur));
-      var buf = ac.createBuffer(1, n, ac.sampleRate);
-      var d = buf.getChannelData(0);
-      var i;
-      for (i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
-      var src = ac.createBufferSource();
-      src.buffer = buf;
-      var f = ac.createBiquadFilter();
-      f.type = "lowpass";
-      f.frequency.setValueAtTime(220, when);
-      f.frequency.exponentialRampToValueAtTime(70, when + dur);
+      var o = ac.createOscillator();
       var g = ac.createGain();
-      g.gain.setValueAtTime(gain, when);
-      g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-      src.connect(f);
-      f.connect(g);
-      g.connect(ac.destination);
-      src.start(when);
-      src.stop(when + dur + 0.02);
+      o.type = type;
+      o.frequency.setValueAtTime(f, t);
+      if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(30, f2), t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.007);
+      g.gain.setValueAtTime(gain * 0.8, t + Math.max(0.01, dur * 0.6));
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+      g.connect(bus);
+      o.start(t);
+      o.stop(t + dur + 0.03);
     } catch (e) {}
   }
 
-  function schedule(h, when, step) {
-    var ac = h.ac();
-    if (!ac) return;
-    var now = isFinite(ac.currentTime) ? ac.currentTime : 0;
-    var delay = when - now;
-    if (delay < 0) delay = 0;
-    var vol = h.vol ? h.vol() : 0.8;
-    if (!(vol > 0)) return;
-    vol *= 0.85;
-    if (!(intensity > 0)) return;
-    var bar = (step / 8) | 0;
-    var e = step % 8;
-    var fill = (bar % 4) === 3;
-    if (e === 0 || e === 4 || (fill && (e === 5 || e === 7))) {
-      var f0 = e === 0 ? 86 : 72;
-      beepAt(h, f0, 0.16, "sine", 0.1 * vol, 40, delay);
-      noiseAt(h, now + delay, 0.09, 0.07 * vol);
-    }
-    if (e === 2 || e === 6 || (fill && e >= 4)) {
-      beepAt(h, 880, 0.03, "square", 0.028 * vol, null, delay);
-    }
-    if (e === 0) beepAt(h, 146.83, 0.32, "sine", 0.035 * vol, null, delay);
-    if ((e & 1) === 0) {
-      var ni = (bar % 8) * 4 + (e >> 1);
-      var deg = LEAD.charCodeAt(ni) - 48;
-      if (deg >= 1 && deg <= 5) {
-        var freq = DEG[deg] * 2;
-        beepAt(h, freq * 1.035, 0.11, "triangle", 0.048 * vol, freq, delay);
-        if (bar >= 8) beepAt(h, freq * 2, 0.08, "triangle", 0.016 * vol, freq * 2, delay + 0.02);
+  function noise(ac, t, dur, gain, ftype, fhz) {
+    if (!(gain > 0) || !ac.createBuffer || !(ac.sampleRate > 0)) return;
+    try {
+      if (!noiseBuf) {
+        var n = Math.floor(ac.sampleRate * 0.8);
+        noiseBuf = ac.createBuffer(1, n, ac.sampleRate);
+        var d = noiseBuf.getChannelData(0);
+        for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
       }
+      var s = ac.createBufferSource();
+      s.buffer = noiseBuf;
+      var f = ac.createBiquadFilter();
+      f.type = ftype;
+      f.frequency.value = fhz;
+      var g = ac.createGain();
+      g.gain.setValueAtTime(gain, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f);
+      f.connect(g);
+      g.connect(bus);
+      s.start(t);
+      s.stop(t + dur + 0.02);
+    } catch (e) {}
+  }
+
+  function schedule(ac, t, step, vol) {
+    if (!bus || !(vol > 0)) return;
+    var bi = (step / 16) | 0;
+    var e = step % 16;
+    var B = BARS[bi];
+    var sec = B.sec;
+    var drive = sec !== "i" || bi >= 2;
+    var big = sec === "c" || sec === "x";
+    var dur = STEP;
+
+    var ch = B.lead.charAt(e);
+    if (SEMI.hasOwnProperty(ch)) {
+      var len = 1;
+      while (e + len < 16 && B.lead.charAt(e + len) === "-") len++;
+      var s = SEMI[ch];
+      var ld = Math.max(0.07, len * dur * 0.94);
+      tone(ac, t, hz(s), ld, "square", 0.085, null);
+      tone(ac, t, hz(s) * 1.004, ld, "square", 0.03, null);
+      if (big || sec === "i") tone(ac, t, hz(s - 12), ld, "sawtooth", 0.04, null);
+      if (len >= 3) tone(ac, t + dur * 0.5, hz(s) * 2, ld * 0.7, "triangle", 0.02, null);
     }
-    if (fill && e >= 4) {
-      var fd = [3, 4, 5, 4][e - 4];
-      beepAt(h, DEG[fd] * 2, 0.07, "square", 0.026 * vol, DEG[fd] * 1.5, delay);
+
+    if (drive && (e & 1) === 0) {
+      var bo = B.root + BASS_PAT[e >> 1];
+      tone(ac, t, hz(bo), dur * 1.8, "triangle", 0.15, null);
+    } else if (!drive && (e === 0 || e === 8)) {
+      tone(ac, t, hz(B.root + 12), dur * 5, "triangle", 0.13, null);
     }
-    if (e === 0 && (bar % 2) === 0) {
-      var pd = PAD[(bar >> 1) % PAD.length];
-      beepAt(h, DEG[pd] * 2, 0.55, "sine", 0.02 * vol, null, delay);
+
+    if (drive && (e & 1) === 1) {
+      var ps = B.root + 36 + PLUCK[(e >> 1) & 3];
+      tone(ac, t, hz(ps), 0.1, "triangle", 0.05, hz(ps) * 0.96);
+    }
+
+    var fill = (sec === "i" && bi === 3) || (bi === 11) || (bi === 19) || (bi === 23);
+    if ((e & 3) === 0) {
+      tone(ac, t, 140, 0.2, "sine", e === 0 ? 0.3 : 0.22, 42);
+      if (big || e === 0) noise(ac, t, 0.12, 0.08, "lowpass", 300);
+    }
+    if (drive && (e === 4 || e === 12)) noise(ac, t, 0.11, big ? 0.16 : 0.11, "highpass", 1500);
+    if (drive && (big ? true : (e & 1) === 0) && (e & 3) !== 0 && e !== 4 && e !== 12) noise(ac, t, 0.035, 0.035, "highpass", 6500);
+    if (fill && e >= 8 && (e >= 12 || (e & 1) === 0)) noise(ac, t, 0.09, 0.07 + (e - 8) * 0.012, "highpass", 1100);
+    if (e === 0 && (bi === 4 || bi === 12 || bi === 20)) {
+      noise(ac, t, 0.8, 0.13, "highpass", 4200);
+      tone(ac, t, hz(-12), 0.5, "sawtooth", 0.05, null);
     }
   }
 
-  function cadence(h) {
-    var vol = (h.vol ? h.vol() : 0.8) * 0.85;
-    if (!(vol > 0)) return;
-    beepAt(h, 587.33, 0.16, "triangle", 0.05 * vol, null, 0.02);
-    beepAt(h, 493.88, 0.16, "triangle", 0.045 * vol, null, 0.18);
-    beepAt(h, 293.66, 0.4, "sine", 0.04 * vol, null, 0.34);
+  // The finale: a rising "ta-da" and one long D major chord.
+  function finale(ac, t0) {
+    if (!bus) return;
+    var up = [12, 17, 19, 24];
+    var i;
+    for (i = 0; i < up.length; i++) tone(ac, t0 + i * 0.09, hz(up[i]), i === 3 ? 1.3 : 0.12, "square", i === 3 ? 0.09 : 0.075, null);
+    tone(ac, t0 + 0.27, hz(12), 1.3, "square", 0.04, null);
+    tone(ac, t0 + 0.27, hz(19), 1.3, "triangle", 0.05, null);
+    tone(ac, t0 + 0.27, hz(-12), 1.3, "sawtooth", 0.05, null);
+    tone(ac, t0 + 0.27, hz(ROOT_D), 1.2, "triangle", 0.16, null);
+    tone(ac, t0 + 0.27, 140, 0.3, "sine", 0.3, 42);
+    noise(ac, t0 + 0.27, 0.9, 0.13, "highpass", 4200);
+  }
+
+  function liveAc(h) {
+    var ac = h && h.ac && h.ac();
+    if (!ac || !ac.createGain || !ac.createOscillator || !ac.destination) return null;
+    if (ac.state && ac.state !== "running" && ac.state !== "closed" && ac.resume) {
+      try { ac.resume(); } catch (e) {}
+    }
+    return ac;
   }
 
   function pump(A) {
     if (!running || !A || !A._halving) return;
     var h = A._halving;
-    if (!h.beep || !h.ac) return;
     if (h.muted && h.muted()) return;
     if (!(intensity > 0)) return;
-    var ac = h.ac();
-    if (!ac) return;
+    var ac = liveAc(h);
+    if (!ac || !getBus(ac)) return;
+    var vol = h.vol ? h.vol() : 0.8;
+    if (!(vol > 0)) return;
+    setBusLevel(ac, vol * (0.35 + 0.65 * Math.min(1, intensity * 1.5)));
     var now = isFinite(ac.currentTime) ? ac.currentTime : 0;
+    if (nextT < now) nextT = now + 0.03;
     var horizon = now + LOOK;
     var guard = 0;
-    while (nextT < horizon && guard++ < 16) {
-      try { schedule(h, nextT, stepI); } catch (e) {}
-      stepI = (stepI + 1) % LOOP;
+    while (nextT < horizon && guard++ < 64) {
+      try { schedule(ac, nextT, stepI, vol); } catch (e) {}
+      stepI++;
+      if (stepI >= TOTAL) stepI = LOOP_AT;
       nextT += STEP;
     }
   }
 
   function armTimer(A) {
     if (timer || !running) return;
-    var h = A && A._halving;
-    var ac = h && h.ac && h.ac();
-    if (!ac || !(ac.sampleRate > 0) || typeof setTimeout !== "function") return;
+    if (typeof setTimeout !== "function") return;
     timer = setTimeout(function () {
       timer = null;
       if (!running) return;
       try { pump(A); } catch (e) {}
       if (running) armTimer(A);
-    }, 70);
+    }, 60);
   }
 
   function releaseJuke(A) {
@@ -330,7 +434,7 @@
   function startTheme(A) {
     running = true;
     var h = A._halving;
-    var ac = h && h.ac && h.ac();
+    var ac = liveAc(h);
     var now = ac && isFinite(ac.currentTime) ? ac.currentTime : 0;
     if (!(nextT > now)) nextT = now + 0.05;
     if (!heldJuke) {
@@ -350,6 +454,15 @@
     armTimer(A);
   }
 
+  // Pause or menu overlay: keep the sequence and its place in the song, just stop scheduling notes.
+  function pause() {
+    running = false;
+    if (timer) {
+      try { clearTimeout(timer); } catch (e) {}
+      timer = null;
+    }
+  }
+
   function syncTheme(A) {
     if (!A) return;
     boundA = A;
@@ -364,6 +477,7 @@
       try { h.hold(intensity > 0 && !muted && !cue); } catch (e) {}
     }
     if (live) {
+      if (h && !h.ac()) { try { if (A.unlock) A.unlock(); } catch (e5) {} }
       if (!running) startTheme(A);
       else pump(A);
       return;
@@ -374,7 +488,13 @@
         try { clearTimeout(timer); } catch (e2) {}
         timer = null;
       }
-      if (!muted && !cue && intensity > 0 && h && h.beep) cadence(h);
+      if (!muted && !cue && intensity > 0 && h) {
+        var ac = liveAc(h);
+        if (ac && getBus(ac)) {
+          setBusLevel(ac, (h.vol ? h.vol() : 0.8));
+          finale(ac, (isFinite(ac.currentTime) ? ac.currentTime : 0) + 0.02);
+        }
+      }
     }
     if (heldJuke && !cue && (muted || intensity <= 0)) releaseJuke(A);
   }
@@ -388,6 +508,7 @@
     reset: reset,
     intensity: function () { return intensity; },
     draw: draw,
+    pause: pause,
     syncTheme: syncTheme
   };
 })();
