@@ -10,7 +10,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 (function () {
   "use strict";
 
-  var CACHE_VERSION = "mp204";
+  var CACHE_VERSION = "mp205";
   var SCOPE_PATH = "/choppy-bitcoin/";
   var ART_MAX_COUNT = 40;
   var ART_MAX_BYTES = 30 * 1024 * 1024;
@@ -39,6 +39,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "chess-data.js",
     "mp.js",
     "halving.js",
+    "halving-surfer.png",
     "nft-preview.js"
   ];
   // Code files the pages request with ?v=CACHE_VERSION. The cache key keeps that tag,

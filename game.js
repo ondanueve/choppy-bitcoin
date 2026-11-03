@@ -2777,7 +2777,7 @@
     const s = document.createElement("script");
     s.id = "chess-data-js";
     s.async = true;
-    s.src = "chess-data.js?v=mp204";
+    s.src = "chess-data.js?v=mp205";
     document.head.appendChild(s);
   }
   (function () {
@@ -10667,6 +10667,7 @@
     const pyLo = y0 - 16, pyHi = y1 + 16;
     const py = (v) => { const y = y1 - (v - S.tapeLo) * inv; return y < pyLo ? pyLo : y > pyHi ? pyHi : (y === y ? y : y1); };
 
+    S._tip = { x: 10 + (vis.length - 1) * stepX - offsetX + cw * 0.5, y: py(lastC) };
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, y0 - 12, S.W, y1 - y0 + 24);
@@ -11771,7 +11772,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp204";
+      s.src = "halving.js?v=mp205";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14230,7 +14231,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp204";
+      s.src = "mp.js?v=mp205";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
