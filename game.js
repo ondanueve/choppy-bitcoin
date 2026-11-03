@@ -8,6 +8,7 @@
   const WAVE_BACK = 2;
   const HALVE_UP = 26;
   const HALVE_BACK = 6;
+  const HALVE_SPEED = 1.05;
   const HALVE_N = 21;
   const HALVE_GAP = 210;
   const BTC_CAP = 21e6;
@@ -1364,6 +1365,7 @@
     const m = metrics();
     let speed = m.speed * scrollMul();
     if (S.power === "BULL" || S.power === "BEAR" || S.laserOn) speed *= 1.28;
+    if (S.halveBull) speed *= HALVE_SPEED;
     let soon = false;
     for (const it of S.items) {
       const eta = (it.x - S.bird.x) / Math.max(40, speed);
@@ -1449,6 +1451,16 @@
     }
     if (S.perkLater) { S.perkLater = false; if (S.ranked) tryRankedPerk(false); else openPerkOffer(); }
     if (S.cardLater && S.phase === "play") { S.cardLater = false; dealChance(); }
+  }
+
+  // While the halving bull runs, candles and power-ups pay triple.
+  function halveEarn() { return S.halveBull ? 3 : 1; }
+
+  // Halving bull sound set: louder, sparkly and over the top (lazy in halving.js). Falls back to the normal sound.
+  function halveSfx(kind, plain) {
+    const H = window.ChoppyHalving;
+    try { if (S.halveBull && H && H.sfx && H.sfx(A, kind)) return; } catch (e) {}
+    if (A.sfx[plain]) A.sfx[plain]();
   }
 
   function halveLock() { return !!S.halveBull || (S.halvePerks | 0) > 0; }
@@ -1565,7 +1577,7 @@
       S.perkResume = null; S.perkFib = 0;
       S.jukeList = []; S.jukeUnlock = []; S.jukeTrack = 0; S.jukeOn = false; S.jukeShuffle = false; S.jukeRepeat = "off"; S.jukeOff = {};
       S.aibudOn = false; S.aibudLit = {}; S.aibudLitAt = {}; S.iaLog = []; S.iaProfit = 0; S.aibudSpeechUntil = 0; S.aiAcc = 0; S.aiTimingStart = null; S.aiTimingLast = 0; S.aiTradeAt = -999;
-      S.jobName = ""; S.jobTrack = null; S.jobOffer = null; S.chanceAt = []; S.chanceUntil = 0; S.chanceUsed = {}; S.chessPick = -1; S.winKind = ""; S.indepEnded = false; S.bcFourthDone = false; S.chanceCard = null; S.chanceNote = ""; S.chanceReadyNote = ""; S.chanceSettled = false; S.chanceMet = {}; S.chanceLead = ""; S.arcHold = false; S.arcTldr = ""; S.arcPending = null; S.hasRing=false; S.engaged=false; S.familyClosed=false; S.familyPath=false; S.arcSeen=[]; S.arcBias=""; S.bcBook=false; S.bcBookOffer=false; S.bcIslandOffer=0; S.bcIsland=false; S.bcOg=false; S.bcNodes=0; S.bcNodeTick=0; S.bcSettlement=false; S.bcPower=false; S.bcMine=false; S.bcCitadel=false; S.bcArmyUnlocked=false; S.bcArmy=0; S.bcArmyTier=0; S.bcWorld=20; S.bcIndependent=false; S.bcVictory=false; S.bcArcClosed=false; S.bcDefense=null; S.bcDefensePending=false; S.bcArmySpend=0; S.bcBattlesWon=0; S.bcPerks={}; S.bcAidUsed=0; S.bcAssaultAt=0; S.bcMapPlan=null; S.bcMapSeed=0; S.bcReactions=null; S.bcPeacePct=0; S.bcArtPick={}; rollBlocs(); S.bcRepliesDone=false; S.indepNoted=false; S.indepAt=0; S.bcCountryName=""; S.bcNameAsk=false; S.bcShotTier=0; S.bcShotSpread=0; S.bcRuinTiles=0; S.bcRuinGone=0; S.bcRebuild=null; S.awRunCounted=false;
+      S.jobName = ""; S.jobTrack = null; S.jobOffer = null; S.chanceAt = []; S.chanceUntil = 0; S.chanceUsed = {}; S.winKind = ""; S.indepEnded = false; S.bcFourthDone = false; S.chanceCard = null; S.chanceNote = ""; S.chanceReadyNote = ""; S.chanceSettled = false; S.chanceMet = {}; S.chanceLead = ""; S.arcHold = false; S.arcTldr = ""; S.arcPending = null; S.hasRing=false; S.engaged=false; S.familyClosed=false; S.familyPath=false; S.arcSeen=[]; S.arcBias=""; S.bcBook=false; S.bcBookOffer=false; S.bcIslandOffer=0; S.bcIsland=false; S.bcOg=false; S.bcNodes=0; S.bcNodeTick=0; S.bcSettlement=false; S.bcPower=false; S.bcMine=false; S.bcCitadel=false; S.bcArmyUnlocked=false; S.bcArmy=0; S.bcArmyTier=0; S.bcWorld=20; S.bcIndependent=false; S.bcVictory=false; S.bcArcClosed=false; S.bcDefense=null; S.bcDefensePending=false; S.bcArmySpend=0; S.bcBattlesWon=0; S.bcPerks={}; S.bcAidUsed=0; S.bcAssaultAt=0; S.bcMapPlan=null; S.bcMapSeed=0; S.bcReactions=null; S.bcPeacePct=0; S.bcArtPick={}; rollBlocs(); S.bcRepliesDone=false; S.indepNoted=false; S.indepAt=0; S.bcCountryName=""; S.bcNameAsk=false; S.bcShotTier=0; S.bcShotSpread=0; S.bcRuinTiles=0; S.bcRuinGone=0; S.bcRebuild=null; S.awRunCounted=false;
       if (A && A.jukeStop) A.jukeStop();
     }
     S.halveLeft = HALVE_GAP; S.halveBull = false; S.halveFloor = 0; S.spawnedPipes = 0; S.halveSide = "up";
@@ -1812,8 +1824,9 @@
   function collect(it) {
     const color = it.type === "BULL" || it.type === "HALVE" ? GREEN : it.type === "BEAR" ? RED : it.type === "COLD" ? "#33c6e8" : it.type === "LASER" ? "#e8902a" : "#c9a0ff";
     burst(it.x, it.y, color, 12);
-    grantUsd(500, it.x, it.y - 18, "power");
-    if (halveLock() && (it.type === "SWAN" || it.type === "BULL" || it.type === "BEAR")) { A.sfx.coin(); return; }
+    const sfx = (n) => { if (it.type !== "HALVE") halveSfx("power", n); else A.sfx[n](); };
+    grantUsd(500 * halveEarn(), it.x, it.y - 18, "power");
+    if (halveLock() && (it.type === "SWAN" || it.type === "BULL" || it.type === "BEAR")) { sfx("coin"); return; }
     if (it.type === "SWAN") {
       const pool = S.cold >= 1
         ? A.SWAN
@@ -1832,7 +1845,7 @@
       if (S.laserOn) S.laserT += POWER_S; else applyLaser(true);
       const line = drawLine(A.LASER && A.LASER.length ? A.LASER : ["Laser eyes!"], 0.15);
       say(line || "Laser eyes!", true);
-      A.sfx.power();
+      sfx("power");
       if (S.ranked) tryRankedPerk(false);
       return;
     }
@@ -1843,11 +1856,11 @@
         const line = Math.random() < 0.5 ? "Multisig enabled" : "Security improved to multisig";
         say(line, true);
       } else say("Cold storage secured!");
-      A.sfx.coin();
+      sfx("coin");
       return;
     }
     if (it.type === "BEAR" && S.laserOn) {
-      A.sfx.wave();
+      sfx("wave");
       return;
     }
     if (it.type === "HALVE") {
@@ -1868,8 +1881,8 @@
     beginCycle(it.type);
     const line = drawLine(it.type === "BULL" ? A.BULL : A.BEAR, 0.15);
     if (line) say(line, true, "cycle");
-    if (it.type === "BULL") A.sfx.wave();
-    else A.sfx.hit();
+    if (it.type === "BULL") sfx("wave");
+    else sfx("hit");
   }
 
   function hitFatal() {
@@ -2366,7 +2379,7 @@
     hospital: ["lena"], startup: ["nico"], tow: [], courage: ["marek", "lena"],
     ring: ["lena"], date: ["lena"], proposal: ["lena"], wedding: ["lena", "nico", "paco"],
     honeymoon: ["lena", "paco"], pregnancy: ["lena"], baby: ["lena", "paco"], cousin: ["nico"],
-    speeding: [], wallet: [], potluck: ["lena", "paco"], usedcar: ["nico"], tetris: ["marek"], chess: ["marek"],
+    speeding: [], wallet: [], potluck: ["lena", "paco"], usedcar: ["nico"], tetris: ["marek"],
     unclemike: ["mike"]
   };
   function cleanCountryName(raw){
@@ -2466,7 +2479,6 @@
     potluck: { en: "Lena signs you and Paco up for the neighborhood potluck. He eats half of what you brought before you arrive.", es: "Lena los anota a ti y a Paco en la comida comunitaria del vecindario. Paco se come la mitad de lo que prepararon antes de llegar." },
     usedcar: { en: "Nico has found a 2009 Honda Fit. He looks under the hood, sees Sharpie, and calls it basically new.", es: "Nico encontró un Honda Fit 2009. Mira debajo del capó, ve una marca de Sharpie y lo considera básicamente nuevo." },
     tetris: { en: "Marek takes you to a bar with a Tetris cabinet nobody uses. He plays, then says it is your turn.", es: "Marek te lleva a un bar con una máquina de Tetris que nadie usa. Juega un rato y luego te cede el turno." },
-    chess: { en: "Marek sets up a famous historical chess position and offers a bitcoin if you find the winning move. A miss costs nothing.", es: "Marek arma una posición histórica famosa y te ofrece un bitcoin si encuentras la jugada ganadora. Fallar no cuesta nada." },
     unclemike: { en: "Dinner with Uncle Mike is excellent until the check. He will not tip, because he thinks the restaurant should pay its staff. The waiter is still standing there.", es: "La cena con el tío Mike es excelente hasta que llega la cuenta. Se niega a dejar propina porque cree que el restaurante debería pagarle sueldos dignos a los empleados. El mesero sigue esperando de pie." },
 
   };
@@ -2474,7 +2486,6 @@
     if (!card) return "";
     if (card.id === "blocReplies" || card.id === "blocAssault" || card.id === "blocTriumph" || card.id === "battleWon") return stampNation(warTldr(card.id));
     if (card.id === "firstBloc" || card.id === "rearmament" || card.id === "threeColors") return stampNation(blocIntroTldr(card.id, chanceLang()));
-    if (card.id === "chess") { const cp = chessProblem(); return chanceLang() ? cp.tldrEs : cp.tldr; }
     const row = card.tldr || CHANCE_TLDR[card.id];
     if (!row) return "";
     let line = chanceLang() ? (row.es || row.en) : row.en;
@@ -2719,10 +2730,6 @@
         { k: "a", label: "Put money in", labelEs: "Insertar monedas" },
         { k: "b", label: "Watch Marek play", labelEs: "Mirar a Marek jugar" }
       ] },
-    { id: "chess", kind: "choice", after: ["tetris", "poker"], input: "move", when: () => { loadChessData(); return CHESS_POOL.length > 0; },
-      title: "Marek's Chess Problem", titleEs: "El problema de ajedrez de Marek",
-      body: "Marek clears the wine glasses off the table and sets up a chessboard from memory.\n\n\"Paris, 1858. The opera house, during The Barber of Seville. Paul Morphy is twenty-one, American, and the guest of the Duke of Brunswick in his private box. The duke and Count Isouard play him together, consulting on every move. Morphy sits with his back to the stage and keeps turning to hear the singers, so he doesn't take long.\"\n\nHe places the last piece: the position after 14...Qe6.\n\n\"White to move. Morphy needed three more moves to finish it. Type the first one. Find it and the bitcoin is yours. Miss it and you owe me nothing but an apology to Morphy.\"",
-      bodyEs: "Marek retira las copas de la mesa y arma un tablero de ajedrez de memoria.\n\n\"París, 1858. La ópera, durante El barbero de Sevilla. Paul Morphy tiene veintiún años, es estadounidense y es invitado del duque de Brunswick en su palco. El duque y el conde Isouard juegan juntos contra él y discuten cada jugada. Morphy está de espaldas al escenario y se da vuelta a cada rato para escuchar a los cantantes, así que no se demora\".\n\nColoca la última pieza: la posición después de 14...De6.\n\n\"Juegan las blancas. A Morphy le bastaron tres jugadas más para terminar. Escribe la primera. Si la encuentras, el bitcoin es tuyo. Si fallas, solo le debes una disculpa a Morphy\"." },
     { id: "unclemike", kind: "choice",
       title: "Fancy Dinner with Uncle Mike", titleEs: "Cena elegante con el tío Mike",
       body: "Uncle Mike is in town, so you meet him at a fancy restaurant. The food is excellent and the wine is excellent, right up until the check arrives: $180 before tip. He studies it, looks at the tip line, and puts the pen down. Why, he wants to know, is he paying their salary? You tell him the tip is expected. That, he says, is the problem, and he goes on about restaurants that should pay their people instead of leaving it to the customers. You agree with him. You also want to go home. The waiter is still standing there, and you look at the tip line again.",
@@ -2771,125 +2778,6 @@
     
   ];
   CHANCE_CARDS.push(...JOB_ARC_CARDS);
-  // Marek's chess card: a pool of seven historical positions (all verified with python-chess + Stockfish 17.1).
-  // One is picked per appearance; the pick lives in S.chessPick and the last four picks (across runs) are
-  // kept in localStorage so the same problem never comes back too soon.
-  let CHESS_POOL = [];
-  // Board diagram of the chess problem, drawn at runtime from its FEN as inline SVG (no downloads, crisp on any screen).
-  // Oriented from the side to move, with coordinates and the previous move highlighted; it never shows the answer.
-  // Piece shapes: Colin M.L. Burnett's set (BSD/GPL/GFDL tri-licensed), as shipped in python-chess.
-  let CHESS_PIECE_SVG = {};
-  // Pool + piece shapes live in chess-data.js (lazy). Until it arrives the chess card is not eligible.
-  function chessDataTake() {
-    const d = window.ChoppyChessData;
-    if (d && d.pool && d.pool.length) { CHESS_POOL = d.pool; CHESS_PIECE_SVG = d.svg || {}; }
-  }
-  window.ChoppyChessReady = chessDataTake;
-  function loadChessData() {
-    chessDataTake();
-    if (CHESS_POOL.length || document.getElementById("chess-data-js")) return;
-    const s = document.createElement("script");
-    s.id = "chess-data-js";
-    s.async = true;
-    s.src = "chess-data.js?v=mp206";
-    document.head.appendChild(s);
-  }
-  (function () {
-    const go = () => (window.requestIdleCallback || ((f) => setTimeout(f, 2000)))(loadChessData);
-    if (document.readyState === "complete") go(); else window.addEventListener("load", go, { once: true });
-  })();
-  function chessDiagramHtml(cp, es) {
-    if (!cp || !cp.fen) return "";
-    const rows = cp.fen.split(" ")[0].split("/");
-    const blackView = cp.side === "b";
-    const SQ = 45, M = 20, N = 8 * SQ;
-    const hi = new Set(cp.last ? [cp.last.slice(0, 2), cp.last.slice(2, 4)] : []);
-    let sq = "", pcs = "", coords = "";
-    for (let r = 0; r < 8; r++) {
-      let f = 0;
-      for (const ch of rows[r]) {
-        if (/[1-8]/.test(ch)) { f += +ch; continue; }
-        const x = (blackView ? 7 - f : f) * SQ + M, y = (blackView ? 7 - r : r) * SQ;
-        pcs += "<g transform=\"translate(" + x + " " + y + ")\">" + (CHESS_PIECE_SVG[ch] || "") + "</g>";
-        f++;
-      }
-    }
-    for (let rank = 0; rank < 8; rank++) for (let file = 0; file < 8; file++) {
-      const name = "abcdefgh"[file] + (8 - rank);
-      const x = (blackView ? 7 - file : file) * SQ + M, y = (blackView ? 7 - rank : rank) * SQ;
-      const light = (rank + file) % 2 === 0;
-      sq += "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + SQ + "\" height=\"" + SQ + "\" fill=\"" + (hi.has(name) ? (light ? "#e9d77a" : "#c4a94a") : (light ? "#f0d9b5" : "#b58863")) + "\"/>";
-    }
-    for (let i = 0; i < 8; i++) {
-      const file = blackView ? "hgfedcba"[i] : "abcdefgh"[i], rank = blackView ? i + 1 : 8 - i;
-      coords += "<text x=\"" + (M + i * SQ + SQ / 2) + "\" y=\"" + (N + 15) + "\" text-anchor=\"middle\">" + file + "</text>"
-        + "<text x=\"" + (M / 2) + "\" y=\"" + (i * SQ + SQ / 2 + 5) + "\" text-anchor=\"middle\">" + rank + "</text>";
-    }
-    const who = cp.side === "w" ? (es ? "Juegan las blancas" : "White to move") : (es ? "Juegan las negras" : "Black to move");
-    const lastTxt = cp.last ? (es ? " · última jugada: " : " · last move: ") + cp.last.slice(0, 2) + "–" + cp.last.slice(2, 4) : "";
-    const alt = (es ? "Diagrama de la posición. " : "Position diagram. ") + who + ".";
-    return "<figure class=\"chess-diagram\" data-fen=\"" + cp.fen + "\">"
-      + "<svg viewBox=\"0 0 " + (N + M) + " " + (N + M) + "\" role=\"img\" aria-label=\"" + alt + "\" xmlns=\"http://www.w3.org/2000/svg\">"
-      + sq + "<rect x=\"" + M + "\" y=\"0\" width=\"" + N + "\" height=\"" + N + "\" fill=\"none\" stroke=\"#5a4632\" stroke-width=\"1.5\"/>"
-      + "<g class=\"chess-coords\" font-family=\"system-ui, sans-serif\" font-size=\"13\" font-weight=\"600\" fill=\"#e8dcc8\">" + coords + "</g>"
-      + pcs + "</svg>"
-      + "<figcaption><strong>" + who + "</strong>" + lastTxt + "</figcaption></figure>";
-  }
-  // Per-slug art version: bump one entry when that illustration is redrawn. A slug listed here must have
-  // chance/chess-<slug>-wide.jpg (1920x800); a missing file falls back to chance/chess-wide.jpg.
-  const CHESS_ART_VER = { opera: "chs1", immortal: "chs1", evergreen: "chs1", saavedra: "chs2", kinghunt: "chs2", goldcoins: "chs2", century: "chs2" };
-  const CHESS_ART_READY = new Set(Object.keys(CHESS_ART_VER));
-  const CHESS_HIST_KEY = "choppy-chess-hist";
-  const CHESS_GAP = 4;  // never repeat any of the last four problems
-  let chessHistMem = [];
-  function chessHistory() {
-    let h = chessHistMem;
-    try { const raw = JSON.parse(localStorage.getItem(CHESS_HIST_KEY) || "[]"); if (Array.isArray(raw)) h = raw; } catch (e) {}
-    return h.filter((s) => CHESS_POOL.some((p) => p.slug === s));
-  }
-  function pickChessProblem() {
-    if (S.chessPick != null && S.chessPick >= 0 && S.chessPick < CHESS_POOL.length) return S.chessPick;
-    const hist = chessHistory();
-    const recent = hist.slice(-CHESS_GAP);
-    let free = CHESS_POOL.map((p, i) => i).filter((i) => recent.indexOf(CHESS_POOL[i].slug) < 0);
-    if (!free.length) free = CHESS_POOL.map((p, i) => i);
-    const i = free[(Math.random() * free.length) | 0];
-    S.chessPick = i;
-    const next = hist.concat([CHESS_POOL[i].slug]).slice(-(CHESS_POOL.length - 1));
-    chessHistMem = next;
-    try { localStorage.setItem(CHESS_HIST_KEY, JSON.stringify(next)); } catch (e) {}
-    return i;
-  }
-  function chessProblem() {
-    const i = S.chessPick;
-    return CHESS_POOL[(i != null && i >= 0 && i < CHESS_POOL.length) ? i : 0];
-  }
-  // Normalizes a typed move: lowercase, no move number, no x/×/:/-/=/+/#/!/? or spaces.
-  function chessNorm(raw) {
-    return String(raw || "").toLowerCase().replace(/^\s*\d*\s*\.+\s*/, "").replace(/[\s+#!?×x:\-=()]/g, "");
-  }
-  // Every reasonable way to write the key move: SAN in English or Spanish letters, long algebraic, coordinates.
-  function chessAnswers(p) {
-    const es = { k: "r", q: "d", r: "t", b: "a", n: "c" };
-    const san = String(p.key).replace(/[+#!?x=]/g, "");
-    const from = p.uci.slice(0, 2), to = p.uci.slice(2, 4), promo = p.uci.slice(4);
-    const out = new Set();
-    const m = san.match(/^([KQRBN])/);
-    if (m) {
-      const pc = m[1].toLowerCase();
-      [pc, es[pc]].forEach((l) => { out.add(l + san.slice(1).toLowerCase()); out.add(l + from + to); });
-      out.add(from + to);
-    } else if (promo) {
-      [promo, es[promo]].forEach((l) => { out.add(to + l); out.add(from + to + l); });
-    } else {
-      out.add(san.toLowerCase()); out.add(from + to);
-    }
-    return out;
-  }
-  function chessMoveOk(raw, prob) {
-    const p = prob || chessProblem();
-    return chessAnswers(p).has(chessNorm(raw));
-  }
   function resolveChance(card, opt) {
     const es = chanceLang();
     const say = (en, esTxt) => (es && esTxt ? esTxt : en);
@@ -3211,22 +3099,6 @@
       S.chanceVar = "lose";
       return say("A long bar would have saved you. −" + costLabel(stake) + ".", "Una pieza larga te habría salvado. −" + costLabel(stake) + ".");
     }
-    if (card.id === "chess") {
-      const cp = chessProblem();
-      const line = es ? cp.lineEs : cp.line;
-      const typed = String(opt || "").replace(/^move:/, "").trim().slice(0, 16).replace(/[<>&"]/g, "");
-      if (chessMoveOk(typed, cp)) {
-        S.chanceVar = "win";
-        const out = creditBtc(1);
-        try { noteChessSolved(S.chessPick); } catch (e) {}
-        return say("Marek looks at the board for a long moment, then plays it out for you: " + line + " " + cp.win + " He slides the bitcoin across the table. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " and +" + money(out.cash) : "") + ".",
-          "Marek mira el tablero un largo rato y luego lo juega por ti: " + line + " " + cp.winEs + " Te pasa el bitcoin por la mesa. +" + out.take.toFixed(4) + " BTC" + (out.cash ? " y +" + money(out.cash) : "") + ".");
-      }
-      // a wrong move costs nothing: Marek shows the line and waves off the bet
-      S.chanceVar = "miss";
-      return say((typed ? "Marek shakes his head at " + typed : "Marek waits, then shrugs") + " and shows you the line: " + line + " " + cp.miss,
-        (typed ? "Marek niega con la cabeza ante " + typed : "Marek espera y luego se encoge de hombros") + " y te muestra la línea: " + line + " " + cp.missEs);
-    }
     if (card.id === "unclemike") {
       const bill = opt === "a" ? 216 : opt === "c" ? 198 : 180;
       cutBill(bill);
@@ -3264,7 +3136,7 @@
     "firstBloc", "somethingBetter", "temporaryMeasures", "timeTraveler", "nobodyKnows",
     "theOg", "obviously", "peopleAsking", "placeNow", "principality",
     "stateVisit", "protectIsland", "rearmament", "threeColors", "notYet",
-    "theAnswer", "festival", "chess", "poker", "wine",
+    "theAnswer", "festival", "poker", "wine",
     "courage", "tetris", "theQuestion", "fourthColor",
     "jobCareerdivingTier4", "jobCareerdivingTier6", "jobCareerscienceTier2",
     "jobCareerscienceTier4", "jobCareerscienceTier6", "jobCareerlawTier2",
@@ -3280,12 +3152,11 @@
     fourthColor: "gpt5",
     notYet: "gpt5",
     theAnswer: "gpt5",
-    festival: "gpt5",
-    chess: "board1"
+    festival: "gpt5"
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin16", chess: "cin16", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin16", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3300,10 +3171,6 @@
       return { id, artId, src: card.art, wide: isWide, isVideo: false };
     }
 
-    if (id === "chess" && typeof S !== "undefined" && S && S.chessPick != null && S.chessPick >= 0) {
-      const cp = CHESS_POOL[S.chessPick];
-      if (cp && CHESS_ART_READY.has(cp.slug)) return { id, artId: "chess-" + cp.slug, src: "chance/chess-" + cp.slug + "-wide.jpg?v=" + (CHESS_ART_VER[cp.slug] || "chs1"), fallbackSrc: "chance/chess-wide.jpg?v=" + (WIDE_JPG_VER.chess || "cin14"), wide: true, isVideo: false };
-    }
     if (ARC_VID[id]) {
       const poster = "chance/" + artId + ".jpg?v=mp86";
       return { id, artId, src: "chance/" + id + ".mp4", poster, wide: false, isVideo: true };
@@ -3435,7 +3302,7 @@
     protectIsland:"abc", citadelQuestion:"ab", anOffer:"ab", theQuestion:"a",
     unclemike:"abc", casino:["win","lose","c"], poker:["win","bust","c"], startup:["win","lose"], cousin:["win","lose"],
     usedcar:["works","lemon"], stateVisit:"ab", extensionCord:"ab", landfill:["nokia","nothing","c"], baby:"ac",
-    nicoWedding:"ac", chess:["win","miss"]
+    nicoWedding:"ac"
   };
   // Cache tags per post image: bump only the files that change (default post3).
   const POST_ART_VER = {
@@ -3448,18 +3315,18 @@
     "cousin-lose":"post6", "usedcar-works":"post6", "usedcar-lemon":"post6", "stateVisit-a":"post6",
     "stateVisit-b":"post6", "extensionCord-a":"post6", "extensionCord-b":"post6", "landfill-nokia":"post6",
     "landfill-nothing":"post6", "landfill-c":"post6", "baby-a":"post6", "baby-c":"post6",
-    "nicoWedding-a":"post6", "nicoWedding-c":"post6", "chess-win":"post6", "chess-miss":"post6"
+    "nicoWedding-a":"post6", "nicoWedding-c":"post6"
   };
   const POST_ART_MISS = new Set();
   function postArtKeys(id) {
     const l = POST_ART[id];
     return !l ? [] : Array.isArray(l) ? l.slice() : String(l).split("");
   }
-  // Lookup chain: "<opt>-<variant>" -> "<variant>" -> "<opt>"; chess has no letter option (its opt is "move:<text>"), so only the variant counts.
+  // Lookup chain: "<opt>-<variant>" -> "<variant>" -> "<opt>".
   function postArtKey(id, opt, vari) {
     const list = postArtKeys(id);
     if (!list.length) return "";
-    const o = id === "chess" ? "" : String(opt || "");
+    const o = String(opt || "");
     const v = String(vari || "");
     const has = (k) => !!k && list.indexOf(k) >= 0 && !POST_ART_MISS.has(id + "-" + k);
     const chain = [o && v ? o + "-" + v : "", v, o];
@@ -4046,7 +3913,6 @@
     if (card.id === S.arcBias) S.arcBias = "";
     noteArcSeen(card.id);
     S.chanceCard = card; S.chanceOpt = null; S.chanceVar = "";
-    if (card.id === "chess") pickChessProblem();
     try { preloadChanceArt(); } catch (e) {}
     S.chanceNote = "";
     S.chanceReadyNote = "";
@@ -4059,11 +3925,6 @@
     const es0 = chanceLang();
     const warBody = applyWarCard(card);
     let body = warBody != null ? warBody : weaveCast(es0 ? (card.bodyEs || card.body) : card.body);
-    if (card.id === "chess") {
-      const cp = CHESS_POOL[pickChessProblem()];
-      body = weaveCast(es0 ? cp.bodyEs : cp.body);
-      S.chanceTitle = { en: cp.title, es: cp.titleEs };
-    }
     if (card.job) body = fillJob(body, card.jobTier);
     if (card.id === "anOffer" || card.id === "ambassador") body = bcAssetBody(card.id, body, es0);
     if (card.kind === "report") {
@@ -4245,11 +4106,6 @@
       const peeled = stripOutcomeMoney(raw);
       const cid = S.chanceCard ? S.chanceCard.id : "";
       let fixed = cid && S.chanceOpt ? OUTCOME_TLDR[cid + ":" + S.chanceOpt] : null;
-      if (cid === "chess") {
-        const cp = chessProblem();
-        const won = chessMoveOk(String(S.chanceOpt || "").replace(/^move:/, ""), cp);
-        fixed = won ? { en: cp.tWin, es: cp.tWinEs } : { en: cp.tMiss, es: cp.tMissEs };
-      }
       const punch = fixed ? (chanceLang() ? fixed.es : fixed.en) : (punchline(peeled) || peeled);
       const tldr = S.chanceCard ? cardTldr(S.chanceCard) : "";
       text = punch || tldr;
@@ -4434,6 +4290,7 @@
   }
 
   function perkOfferTitle() {
+    if ((S.perkChain | 0) > 0) return t("halvePerkTitle");
     if (S.ranked) {
       const n = S.perkFib || S.nextOffer || 1;
       const es = window.BZ && BZ.lang && BZ.lang() === "es";
@@ -4694,6 +4551,7 @@
     const m = metrics();
     let speed = m.speed * scrollMul();
     if (S.power === "BULL" || S.power === "BEAR" || S.laserOn) speed *= 1.28;
+    if (S.halveBull) speed *= HALVE_SPEED;
     for (const it of S.items) {
       if (kinds.indexOf(it.type) < 0) continue;
       const eta = (it.x - S.bird.x) / Math.max(40, speed);
@@ -7402,7 +7260,7 @@
   function parkMarketLoad(){
     halveReset();
     if(field){
-      field.classList.remove("is-play","bull","bear","swan-bear");
+      field.classList.remove("is-play","bull","bear","swan-bear","halve-shake");
       fieldFx = "";
       field.classList.add("defense-mode");
     }
@@ -7487,7 +7345,7 @@
     S.optPanel=null;S.arcHold=false;
     markBuildings(S.bcDefense);
     if(field){
-      field.classList.remove("is-play","bull","bear","swan-bear");
+      field.classList.remove("is-play","bull","bear","swan-bear","halve-shake");
       fieldFx = "";
       field.classList.add("defense-mode");
     }
@@ -10087,6 +9945,7 @@
       field.classList.toggle("bull", !fieldBattle && S.power === "BULL");
       field.classList.toggle("bear", !fieldBattle && S.power === "BEAR");
       field.classList.toggle("swan-bear", !fieldBattle && S.power === "BEAR" && S.swanBear);
+      field.classList.toggle("halve-shake", !fieldBattle && S.power === "BULL" && !!S.halveBull);
       field.classList.toggle("perk-ui", p === "perk" || p === "chance" || (p === "paused" && S.arcHold));
       field.classList.toggle("is-play", p === "play");
       field.classList.toggle("defense-mode", fieldBattle);
@@ -10245,6 +10104,7 @@
 
     let speed = m.speed * scrollMul();
     if (S.laserOn || streakLeft(S.lifeT) > 0) speed *= 1.28;
+    if (S.halveBull) speed *= HALVE_SPEED;
     for (const f of S.floats) f.x -= speed * dt;
     if ((S.waves || []).length) {
       S.cycleManip = Math.max(0.15, (S.cycleManip || 1) * (1 + trendBias() * dt));
@@ -10344,8 +10204,8 @@
         } else {
           S.candles++;
           if (!S.mpCatch) {
-            A.sfx.coin();
-            grantUsd(100, p.x + pw * 0.5, p.gapY - 50, "gain");
+            halveSfx("candle", "coin");
+            grantUsd(100 * halveEarn(), p.x + pw * 0.5, p.gapY - 50, "gain");
             tickJobChance();
             if (S.phase === "play" && !S.ranked && S.candles > 0 && S.candles % 10 === 0) openPerkOffer();
           }
@@ -10359,7 +10219,7 @@
             p.spark = S.lifeT;
             burst(p.x + pw * 0.5, S.bird.y, heroFill(), 2, true);
           }
-          if (S.power === "BULL") { A.sfx.wave(); grantUsd(200, p.x + pw * 0.5, S.bird.y - 66, "gain"); S.pipes.splice(i, 1); continue; }
+          if (S.power === "BULL") { halveSfx("smash", "wave"); grantUsd(200 * halveEarn(), p.x + pw * 0.5, S.bird.y - 66, "gain"); S.pipes.splice(i, 1); continue; }
           else if (S.invuln <= 0) hitFatal();
         }
       }
@@ -10392,10 +10252,11 @@
     halveAfter();
     const n = net();
     if (n > S.peakNet) S.peakNet = n;
-    const fx = S.power === "BULL" ? "b" : S.power === "BEAR" ? (S.swanBear ? "s" : "e") : "";
+    const fx = S.power === "BULL" ? (S.halveBull ? "h" : "b") : S.power === "BEAR" ? (S.swanBear ? "s" : "e") : "";
     if (fx !== fieldFx) {
       fieldFx = fx;
-      field.classList.toggle("bull", fx === "b");
+      field.classList.toggle("halve-shake", fx === "h");
+      field.classList.toggle("bull", fx === "b" || fx === "h");
       field.classList.toggle("bear", fx === "e" || fx === "s");
       field.classList.toggle("swan-bear", fx === "s");
     }
@@ -11793,7 +11654,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp206";
+      s.src = "halving.js?v=mp207";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -12694,9 +12555,9 @@
     { id: "fourth", cat: "country", secret: true, name: "The Fourth Color", nameEs: "El cuarto color", why: "Bitcoin Country survived the attack.", whyEs: "Bitcoin Country sobrevivió el ataque." },
     { id: "noAid", cat: "country", secret: true, name: "On Our Own", nameEs: "Por cuenta propia", why: "Won independence without paying for military aid.", whyEs: "Ganó la independencia sin pagar ayuda militar." },
     { id: "freeNation", cat: "country", secret: true, name: "Free Nation", nameEs: "Nación libre", why: "Kept trading after independence.", whyEs: "Siguió operando después de la independencia." },
-    { id: "chessWin", cat: "challenge", secret: true, name: "Over the Board", nameEs: "Sobre el tablero", why: "Found the winning move in a chess problem.", whyEs: "Encontró la jugada ganadora de un problema de ajedrez." },
-    { id: "chess3", cat: "challenge", secret: true, name: "Chess Scholar", nameEs: "Erudito del ajedrez", why: "Solved 3 different historical chess problems.", whyEs: "Resolvió 3 problemas de ajedrez históricos distintos." },
-    { id: "chess7", cat: "challenge", secret: true, name: "Hall of Fame", nameEs: "Salón de la fama", why: "Solved all 7 historical chess problems.", whyEs: "Resolvió los 7 problemas de ajedrez históricos." },
+    { id: "chessWin", cat: "challenge", secret: true, retired: true, name: "Over the Board", nameEs: "Sobre el tablero", why: "Found the winning move in a chess problem.", whyEs: "Encontró la jugada ganadora de un problema de ajedrez." },
+    { id: "chess3", cat: "challenge", secret: true, retired: true, name: "Chess Scholar", nameEs: "Erudito del ajedrez", why: "Solved 3 different historical chess problems.", whyEs: "Resolvió 3 problemas de ajedrez históricos distintos." },
+    { id: "chess7", cat: "challenge", secret: true, retired: true, name: "Hall of Fame", nameEs: "Salón de la fama", why: "Solved all 7 historical chess problems.", whyEs: "Resolvió los 7 problemas de ajedrez históricos." },
     { id: "scoop", cat: "challenge", secret: true, name: "Scoop", nameEs: "Toda la mesa", why: "Won the whole poker table.", whyEs: "Se llevó toda la mesa de póker." },
     { id: "unicorn", cat: "challenge", secret: true, name: "Unicorn", nameEs: "Unicornio", why: "Backed a startup that actually shipped.", whyEs: "Invirtió en una startup que de verdad lanzó." },
     { id: "highRoller", cat: "challenge", secret: true, name: "High Roller", nameEs: "Apostador fuerte", why: "Hit the number on the big casino bet.", whyEs: "Acertó el número con la apuesta fuerte del casino." },
@@ -12834,18 +12695,6 @@
       return bag && typeof bag === "object" ? bag : {};
     } catch (e) { return {}; }
   }
-  function noteChessSolved(idx) {
-    if (!awardsLive() || !(idx >= 0)) return;
-    const bag = awardCounter("choppy-chess-solved");
-    const mine = Array.isArray(bag[awardOwner()]) ? bag[awardOwner()] : [];
-    if (mine.indexOf(idx) < 0) mine.push(idx);
-    bag[awardOwner()] = mine;
-    try { localStorage.setItem("choppy-chess-solved", JSON.stringify(bag)); } catch (e) {}
-    const ids = ["chessWin"];
-    if (mine.length >= 3) ids.push("chess3");
-    if (CHESS_POOL.length && mine.length >= CHESS_POOL.length) ids.push("chess7");
-    addAwards(ids);
-  }
   // Story choices that earn an award (called once, right after the choice resolves).
   function cardAwards(card, opt) {
     if (!card || !awardsLive()) return;
@@ -12945,13 +12794,15 @@
     }
     const reg = isRegistered();
     const n = reg ? AWARD_CATALOG.filter((a) => owned[a.id]).length : 0;
+    // Retired awards (the removed chess cards) stay valid in saves but only show once earned.
+    const shown = AWARD_CATALOG.filter((a) => !a.retired || (reg && owned[a.id]));
     const groups = AWARD_CATS.map((c) => {
-      const list = AWARD_CATALOG.filter((a) => a.cat === c.id);
+      const list = shown.filter((a) => a.cat === c.id);
       if (!list.length) return "";
       return "<p class=\"k aw-cat\">" + (es ? c.es : c.en) + "</p>" + list.map((a) => awardRowHtml(a, reg && !!owned[a.id])).join("");
     }).join("");
     const note = reg ? "" : "<p class=\"k\">" + (es ? "Inicia sesión para ganar premios." : "Sign in to earn awards.") + "</p>";
-    return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + AWARD_CATALOG.length + ")</summary>" + note + groups + "</details></div>";
+    return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareRun(kind) {
     const btc = fmtBtc(netBtc());
@@ -14255,7 +14106,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp206";
+      s.src = "mp.js?v=mp207";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14807,7 +14658,7 @@
       if (S.battleTutOpen) title = t("tutBattle");
       if (card.job) title = fillJob(title, card.jobTier);
       title = stampNation(title);
-      const snapBody = card.job || card.input === "move" || card.id === "chess" || card.id === "anOffer" || card.id === "ambassador"
+      const snapBody = card.job || card.id === "anOffer" || card.id === "ambassador"
         || card.id === "firstBloc" || card.id === "rearmament" || card.id === "threeColors"
         || card.id === "blocReplies" || card.id === "blocAssault" || card.id === "battleWon" || card.id === "blocTriumph";
       const rawBody = S.battleTutOpen ? battleTutPlain()
@@ -14822,15 +14673,6 @@
           + arcOutcomeHtml()
           + "<div class=\"arc-actions\">" + btns + "</div>";
       } else {
-        if (card.input === "move") {
-          const esM = chanceLang();
-          const cpM = chessProblem(), wM = cpM.side === "w";
-          btns = "<form id=\"arc-move-form\" class=\"nation-ask arc-move\" autocomplete=\"off\">"
-            + "<label for=\"arc-move-in\" class=\"arc-move-label\">" + (esM ? "Tu jugada (" + (wM ? "blancas" : "negras") + ", jugada " + cpM.n + ")" : "Your move (" + (wM ? "White" : "Black") + ", move " + cpM.n + ")") + "</label>"
-            + "<input id=\"arc-move-in\" maxlength=\"16\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"none\" spellcheck=\"false\" enterkeyhint=\"done\" inputmode=\"text\" placeholder=\"" + (esM ? (wM ? "p. ej. Cf3" : "p. ej. Cf6") : (wM ? "e.g. Nf3" : "e.g. Nf6")) + "\">"
-            + "<button type=\"submit\" class=\"cta\">" + (esM ? "Jugar" : "Play") + "</button>"
-            + "</form>";
-        } else
         btns = (card.opts || []).map((o) => {
           const lab = stampNation(arcOptionLabel(card,o,es));
           return "<button class=\"cta\" data-ch=\"" + o.k + "\">" + lab + "</button>";
@@ -14843,7 +14685,6 @@
         overlay.innerHTML = "<div class=\"arc-head\"><h1>" + t("chanceHead") + "</h1>" + arcTldrBtn() + "</div>"
           + pic + "<p class=\"arc-title\" role=\"heading\" aria-level=\"2\">" + title + "</p>"
           + (S.battleTutOpen ? battleTutHtml() : arcStoryHtml(card, body))
-          + (card.input === "move" ? chessDiagramHtml(chessProblem(), es) : "")
           + settled
           + "<div class=\"arc-actions\">" + btns + "</div>";
       }
@@ -14862,18 +14703,6 @@
         renderOverlay();
       };
       bindArcChoices(card);
-      const mvForm = $("arc-move-form"), mvIn = $("arc-move-in");
-      if (mvForm && mvIn) {
-        // keys typed here never reach the game (the global keydown handler skips inputs); stop bubbling anyway
-        mvIn.addEventListener("keydown", (e) => e.stopPropagation());
-        mvIn.addEventListener("pointerdown", (e) => e.stopPropagation());
-        mvForm.onsubmit = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          try { mvIn.blur(); } catch (err) {}
-          pickChance("move:" + (mvIn.value || ""));
-        };
-      }
     } else if (p === "perk") {
       if (S.optPanel) {
         overlay.classList.add("chance-options");

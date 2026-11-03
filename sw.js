@@ -10,7 +10,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 (function () {
   "use strict";
 
-  var CACHE_VERSION = "mp206";
+  var CACHE_VERSION = "mp207";
   var SCOPE_PATH = "/choppy-bitcoin/";
   var ART_MAX_COUNT = 40;
   var ART_MAX_BYTES = 30 * 1024 * 1024;
@@ -36,7 +36,6 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "favicon-maskable-512.png",
     "apple-touch-icon.png",
     "i18n-extra.js",
-    "chess-data.js",
     "mp.js",
     "halving.js",
     "halving-surfer.png",

@@ -12,7 +12,7 @@
   var SCALE = 2;
   var FW = 61;
   var FH = 45;
-  var SPRITE_SRC = "halving-surfer.png?v=mp206";
+  var SPRITE_SRC = "halving-surfer.png?v=mp207";
 
   var BANDS = [
     { name: "deep red", hex: "#8E1A2F" },
@@ -269,7 +269,7 @@
     catch (e) { try { bus.gain.value = v; } catch (e2) {} }
   }
 
-  function tone(ac, t, f, dur, type, gain, f2) {
+  function tone(ac, t, f, dur, type, gain, f2, dest) {
     if (!(gain > 0) || !(f > 0)) return;
     try {
       var o = ac.createOscillator();
@@ -282,13 +282,13 @@
       g.gain.setValueAtTime(gain * 0.8, t + Math.max(0.01, dur * 0.6));
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g);
-      g.connect(bus);
+      g.connect(dest || bus);
       o.start(t);
       o.stop(t + dur + 0.03);
     } catch (e) {}
   }
 
-  function noise(ac, t, dur, gain, ftype, fhz) {
+  function noise(ac, t, dur, gain, ftype, fhz, dest) {
     if (!(gain > 0) || !ac.createBuffer || !(ac.sampleRate > 0)) return;
     try {
       if (!noiseBuf) {
@@ -307,10 +307,68 @@
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       s.connect(f);
       f.connect(g);
-      g.connect(bus);
+      g.connect(dest || bus);
       s.start(t);
       s.stop(t + dur + 0.02);
     } catch (e) {}
+  }
+
+  // ---- Halving bull sound effects: punchy, sparkly, over the top. Own bus (its own compressor), independent of the theme level.
+  var sbus = null, sbusAc = null, combo = 0, comboAt = -9;
+  var PENTA = [0, 2, 4, 7, 9, 12, 14];
+
+  function getSfxBus(ac) {
+    if (sbus && sbusAc === ac) return sbus;
+    try {
+      var g = ac.createGain();
+      g.gain.value = 0.6;
+      var comp = ac.createDynamicsCompressor ? ac.createDynamicsCompressor() : null;
+      if (comp) {
+        try { comp.threshold.value = -12; comp.knee.value = 10; comp.ratio.value = 6; comp.attack.value = 0.002; comp.release.value = 0.12; } catch (e0) {}
+        g.connect(comp);
+        comp.connect(ac.destination);
+      } else g.connect(ac.destination);
+      sbus = g;
+      sbusAc = ac;
+    } catch (e) { sbus = null; }
+    return sbus;
+  }
+
+  // kind: "candle" (eaten candle), "smash" (candle smashed by the bull), "power" (power-up eaten). Returns true when handled.
+  function sfx(A, kind) {
+    var ac = liveAc(A && A._halving);
+    if (!ac) return false;
+    if (A.muteSfx && A.muteSfx()) return true;
+    var sb = getSfxBus(ac);
+    if (!sb) return false;
+    var t = (isFinite(ac.currentTime) ? ac.currentTime : 0) + 0.005;
+    function T(dt, f, dur, type, gain, f2) { tone(ac, t + dt, f, dur, type, gain, f2, sb); }
+    function N(dt, dur, gain, ft, fhz) { noise(ac, t + dt, dur, gain, ft, fhz, sb); }
+    if (kind === "power") {
+      T(0, 190, 0.32, "sine", 0.5, 42);
+      N(0, 0.5, 0.24, "highpass", 2600);
+      var arp = [587, 740, 880, 1175, 1480, 1760, 2349];
+      for (var i = 0; i < arp.length; i++) T(0.03 + i * 0.045, arp[i], 0.14, "square", 0.13);
+      T(0.05, 587, 0.55, "sawtooth", 0.09);
+      T(0.05, 882, 0.55, "sawtooth", 0.07);
+      var sp = [2349, 3136, 3520, 4699, 3951];
+      for (var j = 0; j < sp.length; j++) T(0.3 + j * 0.055, sp[j], 0.12, "sine", 0.07);
+      T(0.32, 1175, 0.55, "triangle", 0.14);
+      return true;
+    }
+    var now = isFinite(ac.currentTime) ? ac.currentTime : 0;
+    combo = now - comboAt < 1.2 ? Math.min(combo + 1, PENTA.length - 1) : 0;
+    comboAt = now;
+    var f = 880 * Math.pow(2, PENTA[combo] / 12);
+    T(0, f, 0.1, "square", 0.16);
+    T(0.035, f * 2, 0.12, "triangle", 0.14);
+    T(0.07, f * 3, 0.14, "sine", 0.09);
+    N(0, 0.06, 0.16, "highpass", 7000);
+    if (kind === "smash") {
+      T(0, 220, 0.2, "sine", 0.42, 44);
+      N(0, 0.22, 0.22, "lowpass", 1800);
+    }
+    return true;
   }
 
   function schedule(ac, t, step, vol) {
@@ -509,6 +567,7 @@
     intensity: function () { return intensity; },
     draw: draw,
     pause: pause,
+    sfx: sfx,
     syncTheme: syncTheme
   };
 })();

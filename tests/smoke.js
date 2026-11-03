@@ -545,7 +545,6 @@ function checkImages() {
 
   for (const id of takeSet("const WIDE_ART_JPG")) refs.add("chance/" + id + "-wide.jpg");
   for (const id of takeSet("const WIDE_ART_PNG")) refs.add("chance/" + id + "-wide.png");
-  for (const slug of takeKeys("const CHESS_ART_VER")) refs.add("chance/chess-" + slug + "-wide.jpg");
   for (const key of takeKeys("const POST_ART_VER")) refs.add("chance/" + key + "-wide.jpg");
   // Post-decision (outcome) art: every key listed in POST_ART must exist on disk, and every POST_ART_VER key must be a listed one.
   {
