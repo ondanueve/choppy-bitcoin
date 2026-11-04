@@ -1689,3 +1689,5 @@ html[data-palette="simple"] .text-btn { color: #f2c14a; }
   .home { width: 44px; height: 44px; }
   .auth-card .text-btn { min-height: 44px; }
 }
+
+#overlay button:focus-visible, #overlay a[href]:focus-visible, #overlay summary:focus-visible, #overlay select:focus-visible, .bc-post button:focus-visible { outline: 3px solid #f2a900; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(242,169,0,.35); }
