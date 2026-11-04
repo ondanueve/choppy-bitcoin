@@ -2157,7 +2157,8 @@ E,2 [E,G,B,]2 E,2 [E,G,B,]2 | C,2 [C,E,G,]2 C,2 [E,G,C]2 | B,,2 [D,F,A,]2 B,,2 [
     "Bukele all-in ethereum",
     "Bitcoin Depravement Proposals",
     "Rat poison squared!",
-    "Block size wars!"
+    "Block size wars!",
+    "Binance megahack!"
   ];
   A.BUY = [
     "Long it!",

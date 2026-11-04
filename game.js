@@ -1274,6 +1274,7 @@
     "Bitcoin Depravement Proposals": "Propuestas de depravación de Bitcoin",
     "Rat poison squared!": "¡Veneno para ratas al cuadrado!",
     "Block size wars!": "¡Guerras del tamaño de bloque!",
+    "Binance megahack!": "¡Megahackeo a Binance!",
     "Long it!": "¡Ponte en largo!",
     "Bitcoin bought": "Bitcoin comprado",
     "All-in corn!": "¡Todo al maíz!",
@@ -11654,7 +11655,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp208";
+      s.src = "halving.js?v=mp209";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14106,7 +14107,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp208";
+      s.src = "mp.js?v=mp209";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
