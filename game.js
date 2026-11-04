@@ -8312,6 +8312,7 @@
     const el=$("bc-post");if(!el)return false;
     const d=S.bcDefense;
     e.preventDefault();e.stopPropagation();
+    if(kbNav(el,e))return true;
     if(e.repeat)return true;
     const m=/^Digit([1-3])$/.exec(e.code||"")||/^Numpad([1-3])$/.exec(e.code||"");
     if(m&&d&&d.perkOffer&&d.perkOffer[+m[1]-1])bcPostPick(+m[1]-1);
@@ -11655,7 +11656,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp209";
+      s.src = "halving.js?v=mp210";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14107,7 +14108,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp209";
+      s.src = "mp.js?v=mp210";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14994,7 +14995,7 @@
     });
     return "<div class=\"kb-list\">"+(kbMsg?"<p class=\"kb-msg\">"+kbMsg+"</p>":"")+h+"</div>"
       +"<button type=\"button\" class=\"cta opt-item\" id=\"kb-reset\">"+(es?"Restablecer teclas":"Reset to defaults")+"</button>"
-      +"<p class=\"kb-note\">"+(es?"Flechas también mueven en batalla; ↑ también salta. Esc cancela la reasignación.":"Arrow keys also move in battle; ↑ also jumps. Esc cancels rebinding.")+"</p>";
+      +"<p class=\"kb-note\">"+(es?"Flechas también mueven en batalla; ↑ también salta; ← compra y → vende durante las velas. En menús, las flechas cambian de opción y Enter confirma. Esc cancela la reasignación.":"Arrow keys also move in battle; ↑ also jumps; ← buys and → sells during candles. In menus, arrows move between options and Enter confirms. Esc cancels rebinding.")+"</p>";
   }
   function kbHelpHtml() {
     const es = chanceLang();
@@ -15040,6 +15041,17 @@
     if(xBtn){xBtn.onclick=(ev)=>{ev.stopPropagation();kbSheetToggle(false);};setTimeout(()=>{try{xBtn.focus();}catch(err){}},0);}
     if(S.phase==="play"&&!S.mp)togglePause();
   }
+  function kbNav(box,e){
+    const k=e.key,dir=k==="ArrowDown"||k==="ArrowRight"?1:k==="ArrowUp"||k==="ArrowLeft"?-1:0;
+    if(!dir||!box)return false;
+    const list=Array.prototype.filter.call(box.querySelectorAll("button,a[href],summary,[role='button'],select"),(b)=>!b.disabled&&b.offsetParent!==null&&b.getAttribute("aria-hidden")!=="true");
+    if(!list.length)return false;
+    e.preventDefault();e.stopPropagation();
+    const i=list.indexOf(document.activeElement);
+    const n=i<0?(dir>0?0:list.length-1):(i+dir+list.length)%list.length;
+    try{list[n].focus({preventScroll:false});list[n].scrollIntoView({block:"nearest"});}catch(err){}
+    return true;
+  }
   function kbClickFirst(sel){const el=overlay.querySelector(sel);if(el&&!el.disabled&&el.offsetParent!==null){el.click();return true;}return false;}
   window.addEventListener("keyup", (e) => {
     if(S.phase!=="defense")return;
@@ -15065,7 +15077,8 @@
     }
     const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || (e.target && e.target.isContentEditable);
-    if (typing && e.key !== "Escape") return;
+    const toggleIn = tag === "input" && /^(range|checkbox|radio|button)$/i.test(e.target.type || "");
+    if (typing && e.key !== "Escape" && !(toggleIn && kbIs(e, "pause"))) return;
     const ae = document.activeElement;
     if (ae && ae.closest && ae.closest("button, a[href], summary, [role='button']") && (e.key === " " || e.key === "Enter" || e.code === "Space")) return;
     if (S.mp && (S.phase === "play" || S.phase === "count") && /^Digit[1-8]$/.test(e.code || "") && !e.repeat && window.ChoppyMP && window.ChoppyMP.REACTS) {
@@ -15100,6 +15113,7 @@
       return;
     }
     const ovOpen = overlay && !overlay.classList.contains("hide") && overlay.offsetParent !== null && overlay.innerHTML.trim() !== "";
+    if (ovOpen && /^Arrow/.test(e.key) && kbNav(overlay, e)) return;
     if (ovOpen && !e.repeat) {
       if (kbIs(e, "close")) {
         e.preventDefault();
@@ -15119,12 +15133,14 @@
       }
     }
     if (S.arcHold || S.phase === "chance") {
+      if (kbIs(e, "pause") && S.phase === "paused" && !S.mp) { e.preventDefault(); togglePause(); return; }
       if (kbIs(e, "flap") || e.code === "ArrowUp" || kbIs(e, "pause")) { e.preventDefault(); return; }
     }
     if (!ovOpen && kbIs(e, "close") && S.phase === "play" && !S.mp) { e.preventDefault(); togglePause(); return; }
     if (kbIs(e, "flap") || e.code === "ArrowUp") { e.preventDefault(); if (!e.repeat) flap(); return; }
     if (e.repeat) return;
     const fire = (id) => { const el = $(id); if (el && el.onpointerdown) el.onpointerdown({ stopPropagation(){}, preventDefault(){}, target: el }); };
+    if (S.phase === "play" && !ovOpen && (e.code === "ArrowLeft" || e.code === "ArrowRight")) { e.preventDefault(); if (!aiLocks().trade) { if (e.code === "ArrowLeft") buyBtc(); else sellBtc(); unstickTrades(); renderHud(); } return; }
     if (kbIs(e, "buy")) { e.preventDefault(); if (!aiLocks().trade) { buyBtc(); unstickTrades(); renderHud(); } }
     else if (kbIs(e, "sell")) { e.preventDefault(); if (!aiLocks().trade) { sellBtc(); unstickTrades(); renderHud(); } }
     else if (kbIs(e, "pause")) { e.preventDefault(); if (!S.mp) togglePause(); }
