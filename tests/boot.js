@@ -393,12 +393,21 @@ async function runChrome(url) {
         await new Promise((r) => setTimeout(r, 150));
       }
     }
-    if (!version) throw new Error("Chrome did not open a debugging port");
+    // Optional boot: binary present but CDP never comes up is infrastructure,
+    // not a game regression. Match the Playwright launch-failure path and
+    // let main() omit instead of failing CI.
+    if (!version) {
+      console.error("boot: Chrome found but did not open a debugging port");
+      return false;
+    }
     let target = null;
     const newUrl = "http://127.0.0.1:" + port + "/json/new?" + encodeURIComponent(url);
     try { target = await httpJson("PUT", newUrl); }
     catch (e) { target = await httpJson("GET", newUrl); }
-    if (!target || !target.webSocketDebuggerUrl) throw new Error("Chrome did not return a page target");
+    if (!target || !target.webSocketDebuggerUrl) {
+      console.error("boot: Chrome found but did not return a page target");
+      return false;
+    }
     cdp = await connectCdp(target.webSocketDebuggerUrl);
     cdp.on((msg) => {
       if (msg.method === "Runtime.consoleAPICalled" && msg.params && msg.params.type === "error") {
@@ -453,7 +462,7 @@ async function main() {
     if (usedPw) return;
     const usedChrome = await runChrome(url);
     if (usedChrome) return;
-    omit("Playwright no está instalado y no hay Chromium en el PATH");
+    omit("no usable headless browser (Playwright missing or Chrome failed to start)");
   } finally {
     server.close();
   }
