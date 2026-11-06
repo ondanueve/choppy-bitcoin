@@ -214,7 +214,7 @@ H.tick(H.FADE_OUT, false);
 H.syncTheme(cued);
 check("resumes after cue", resumes(cued.ev), 1);
 
-check("relative loader", /s\.src = "halving\.js\?v=mp211"/.test(game), true);
+check("relative loader", /s\.src = "halving\.js\?v=mp213"/.test(game), true);
 check("not absolute", game.indexOf("/choppy-bitcoin/halving.js") < 0, true);
 check("not in index", html.indexOf("halving.js") < 0, true);
 check("draw hook", /drawWorldBg\(ctx, wash\);\s*halveFrame\(ctx\);\s*drawTape\(/.test(game), true);

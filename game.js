@@ -3307,7 +3307,7 @@
   };
   // Cache tags per post image: bump only the files that change (default post3).
   const POST_ART_VER = {
-    "honeymoon-a":"post5", "citadelQuestion-a":"post4", "islandInspection-a":"post4", "phish-a":"post4", "phish-b":"post4",
+    "honeymoon-a":"post5", "citadelQuestion-a":"post4", "islandInspection-a":"post5", "phish-a":"post4", "phish-b":"post4",
     "anOffer-b":"post5", "anOffer-a":"post5", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
     "wedding-a":"post4", "wedding-b":"post5", "wedding-c":"post4",
     "unclemike-a":"post6", "unclemike-b":"post6", "unclemike-c":"post6", "casino-win":"post6",
@@ -11656,7 +11656,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp211";
+      s.src = "halving.js?v=mp213";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14108,7 +14108,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp211";
+      s.src = "mp.js?v=mp213";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
