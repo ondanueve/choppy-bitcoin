@@ -3157,7 +3157,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3384,7 +3384,7 @@
     const va = battleArtPick(card);
     if (va && base.indexOf("<img") === 0) {
       const m0 = base.match(/ src="([^"]*)"/);
-      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat6\" data-base=\"" + m0[1] + "\"")
+      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat7\" data-base=\"" + m0[1] + "\"")
         .replace("<img ", "<img onerror=\"window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
     }
     const aid = blocArtId(card);
@@ -11656,7 +11656,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp214";
+      s.src = "halving.js?v=mp215";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14108,7 +14108,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp214";
+      s.src = "mp.js?v=mp215";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
