@@ -3384,7 +3384,7 @@
     const va = battleArtPick(card);
     if (va && base.indexOf("<img") === 0) {
       const m0 = base.match(/ src="([^"]*)"/);
-      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat7\" data-base=\"" + m0[1] + "\"")
+      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat8\" data-base=\"" + m0[1] + "\"")
         .replace("<img ", "<img onerror=\"window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
     }
     const aid = blocArtId(card);
@@ -11656,7 +11656,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp215";
+      s.src = "halving.js?v=mp216";
       s.onload = function () { hvLoad = 0; };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
@@ -14108,7 +14108,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp215";
+      s.src = "mp.js?v=mp216";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
