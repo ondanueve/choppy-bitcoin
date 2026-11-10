@@ -11656,7 +11656,15 @@
     try {
       const s = document.createElement("script");
       s.src = "halving.js?v=mp218";
-      s.onload = function () { hvLoad = 0; };
+      s.onload = function () {
+        hvLoad = 0;
+        try {
+          const H = window.ChoppyHalving;
+          if (!H) return;
+          if (S.halveBull && S.phase === "play" && !S.dead && !S.spectate && H.tick) H.tick(0.05, true);
+          if (H.syncTheme) H.syncTheme(A);
+        } catch (e) {}
+      };
       s.onerror = function () { hvLoad = null; };
       (document.body || document.documentElement).appendChild(s);
     } catch (e) { hvLoad = null; }
@@ -14495,8 +14503,13 @@
       if (again && overlay.contains(again)) { try { again.focus(); } catch (e) {} return; }
     }
     a11yDlgKey = key;
-    const prefer = overlay.querySelector("#bc-name-in, #arc-move-in, .arc-actions button, .perk-list button, .opt-menu button, #mp-host, #mp-code, button.cta, input:not([type='hidden'])");
+    const prefer = overlay.querySelector("#bc-name-in, #arc-move-in, #mp-host, #mp-code");
     if (prefer) { try { prefer.focus(); } catch (e) {} }
+    else {
+      const h = overlay.querySelector("h1, h2, .arc-title") || overlay;
+      if (h && h.tabIndex < 0) h.tabIndex = -1;
+      try { h.focus({ preventScroll: true }); } catch (e) { try { h.focus(); } catch (e2) {} }
+    }
   }
   function queueA11ySync() {
     const ae = document.activeElement;
@@ -15048,7 +15061,12 @@
     if(!list.length)return false;
     e.preventDefault();e.stopPropagation();
     const i=list.indexOf(document.activeElement);
-    const n=i<0?(dir>0?0:list.length-1):(i+dir+list.length)%list.length;
+    let n;
+    if(i<0){
+      const choices=list.filter((b)=>b.id!=="opt-x"&&!(b.classList&&b.classList.contains("opt-x")));
+      const pool=choices.length?choices:list;
+      n=list.indexOf(dir>0?pool[0]:pool[pool.length-1]);
+    }else n=(i+dir+list.length)%list.length;
     try{list[n].focus({preventScroll:false});list[n].scrollIntoView({block:"nearest"});}catch(err){}
     return true;
   }
@@ -15123,7 +15141,7 @@
       }
       if (kbIs(e, "confirm")) {
         e.preventDefault();
-        if (kbClickFirst("#arc-move-form button[type=submit]") || kbClickFirst("[data-ch=\"ok\"]") || kbClickFirst("#go") || kbClickFirst("[data-ch]")) return;
+        if (kbClickFirst("#arc-move-form button[type=submit]") || kbClickFirst("[data-ch=\"ok\"]") || kbClickFirst("#go")) return;
         return;
       }
       const oi = ["opt1","opt2","opt3"].findIndex((id) => kbIs(e, id));

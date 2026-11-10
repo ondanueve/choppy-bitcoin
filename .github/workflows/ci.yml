@@ -60,6 +60,12 @@ jobs:
       - name: Halving v4 (x3 earnings, sfx, speed, shake, no chess)
         run: node tests/halving-v4.js
 
+      - name: Keyboard nav, trades and pause
+        run: node tests/keyboard.js
+
+      - name: Halving theme, bull speed and duration
+        run: node tests/halving-theme.js
+
       - name: i18n audit
         run: node tools/i18n-audit.js
 

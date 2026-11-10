@@ -1,0 +1,122 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>halving rms</title>
+<pre id="out">pending</pre>
+<script>
+function report(obj) {
+  var text = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+  var el = document.getElementById("out");
+  if (el) el.textContent = text;
+  document.documentElement.setAttribute("data-done", obj && obj.ok ? "1" : "0");
+  try { fetch("/result", { method: "POST", headers: { "content-type": "application/json" }, body: typeof obj === "string" ? obj : JSON.stringify(obj) }); } catch (e) {}
+}
+window.onerror = function (msg, src, line, col, err) {
+  report({ ok: false, error: String(msg) + " at " + src + ":" + line + ":" + col + (err && err.stack ? "\n" + err.stack : "") });
+};
+window.localStorage = {
+  getItem: function () { return null; },
+  setItem: function () {},
+  removeItem: function () {}
+};
+</script>
+<script src="/audio.js"></script>
+<script src="/halving.js"></script>
+<script>
+(function () {
+  var RATE = 44100;
+  var BULL = [329, 392, 523, 659, 523, 659, 783, 1046];
+  var IDLE = [146, 220, 293, 220, 164, 246, 329, 246];
+  // One offline context: idle 0-4, bull 4-8, cap 8-10, fanfare 10-14.
+  var TOTAL = 14;
+
+  function wrapOffline(seconds) {
+    var off = new OfflineAudioContext(1, Math.ceil(RATE * seconds), RATE);
+    var t = 0;
+    return new Proxy(off, {
+      get: function (target, prop) {
+        if (prop === "currentTime") return t;
+        if (prop === "__advance") return function (dt) { t += dt; };
+        if (prop === "__raw") return target;
+        var v = target[prop];
+        if (typeof v === "function") return v.bind(target);
+        return v;
+      }
+    });
+  }
+
+  function rms(buf, from, to) {
+    var d = buf.getChannelData(0);
+    var a = Math.max(0, Math.floor((from || 0) * buf.sampleRate));
+    var b = Math.min(d.length, Math.floor((to != null ? to : buf.duration) * buf.sampleRate));
+    var s = 0, n = Math.max(1, b - a), p = 0, clipped = 0;
+    for (var i = a; i < b; i++) {
+      var x = d[i];
+      s += x * x;
+      var ax = Math.abs(x);
+      if (ax > p) p = ax;
+      if (ax >= 0.99) clipped++;
+    }
+    return { rms: Math.sqrt(s / n), peak: p, clipped: clipped, samples: n, from: from, to: to };
+  }
+
+  (async function () {
+    var out = { ok: false };
+    try {
+      if (!window.ArcadeAudio) throw new Error("ArcadeAudio missing");
+      if (!window.ChoppyHalving) throw new Error("ChoppyHalving missing");
+      var ctx = wrapOffline(TOTAL);
+      window.AudioContext = function () { return ctx; };
+      window.webkitAudioContext = window.AudioContext;
+      var A = window.ArcadeAudio;
+      A.unlock();
+      A.setMuteTheme(false);
+      A.setMuteSfx(false);
+      var beep = A._halving.beep;
+      var i;
+      for (i = 0; i < 20; i++) {
+        beep(IDLE[i % 8], 0.18, "sine", 0.05, null, 0, "theme");
+        ctx.__advance(0.2);
+      }
+      for (i = 0; i < 20; i++) {
+        beep(BULL[i % 8], 0.11, "square", 0.05, null, 0, "theme");
+        ctx.__advance(0.2);
+      }
+      A.sfx.cap();
+      ctx.__advance(2);
+      var H = window.ChoppyHalving;
+      H.reset();
+      H.tick(0.6, true);
+      H.syncTheme(A);
+      for (i = 0; i < 80; i++) {
+        ctx.__advance(0.05);
+        H.syncTheme(A);
+      }
+      var buf = await ctx.__raw.startRendering();
+      var idle = rms(buf, 0.2, 3.8);
+      idle.name = "main-idle";
+      var bull = rms(buf, 4.2, 7.8);
+      bull.name = "main-bull";
+      var cap = rms(buf, 8.0, 9.6);
+      cap.name = "cap-sting";
+      var fan = rms(buf, 10.3, 13.8);
+      fan.name = "halving-fanfare";
+      fan.intensity = H.intensity();
+      out = {
+        ok: true,
+        sampleRate: RATE,
+        seconds: TOTAL,
+        idle: idle,
+        bull: bull,
+        cap: cap,
+        fanfare: fan,
+        ratioVsBull: fan.rms / Math.max(1e-9, bull.rms),
+        ratioVsIdle: fan.rms / Math.max(1e-9, idle.rms)
+      };
+    } catch (e) {
+      out = { ok: false, error: String(e && e.stack || e) };
+    }
+    report(out);
+    document.title = "rms-done";
+  })();
+})();
+</script>
