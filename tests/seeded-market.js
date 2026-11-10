@@ -24,13 +24,14 @@ const amp = body(gameSrc, "function pickCycleAmp(");
 const resid = body(gameSrc, "function pickCycleResid(");
 const trend = body(gameSrc, "function trendBias(");
 assert.ok(amp && resid && trend, "market helpers found");
-assert.ok(!/Math\.random/.test(amp + resid + trend), "cycle amplitude, residual, and trend use wrng, not Math.random");
-assert.ok(/wrng\(\)/.test(amp) && /wrng\(\)/.test(resid) && /wrng\(\)/.test(trend));
-assert.ok(/px \+ \(wrng\(\) - mid\)/.test(gameSrc), "idle price drift uses wrng");
-assert.ok(/S\.vtPrice \+ \(wrng\(\) - 0\.45\)/.test(gameSrc), "level-2 price drift uses wrng");
-assert.ok(/S\.vtPrice = 100 \+ wrng\(\)/.test(gameSrc), "continue-bonus price uses wrng");
+assert.ok(!/Math\.random/.test(amp + resid + trend), "cycle amplitude, residual, and trend do not use Math.random");
+assert.ok(/waveRand\(\)/.test(amp) && /waveRand\(\)/.test(resid) && /srand\(/.test(trend));
+assert.ok(/srand\(2, n\)/.test(gameSrc), "idle price shock uses indexed srand");
+assert.ok(/srand\(3, n\)/.test(gameSrc), "level-2 price uses indexed srand");
+assert.ok(/S\.vtPrice = 100 \+ srand\(11, 0\)/.test(gameSrc), "continue-bonus price uses srand");
+assert.ok(/function applyMarketTick/.test(gameSrc), "market ticks are applied on a fixed clock");
 assert.ok(/function rollWorldSeed\(seed\)/.test(gameSrc));
-assert.ok(/function startGame\(ranked, seed\)/.test(gameSrc));
+assert.ok(/function startGame\(ranked, seed, mode\)/.test(gameSrc));
 assert.ok(/window\.choppySimulateMarket/.test(gameSrc));
 
 function el(id) {
@@ -118,6 +119,7 @@ const ctx = {
     documentElement: el("html"),
     body: el("body"),
     readyState: "complete",
+    head: null,
     getElementById: byId,
     querySelector() { return el("q"); },
     querySelectorAll() { return []; },
@@ -145,6 +147,7 @@ const ctx = {
   getComputedStyle() { return { getPropertyValue() { return ""; } }; },
   navigator: { onLine: true, language: "en", userAgent: "node" }
 };
+ctx.document.head = ctx.document.createElement("head");
 ctx.window = ctx;
 ctx.globalThis = ctx;
 ctx.self = ctx;
@@ -187,4 +190,12 @@ const c = sim(SEED ^ 0x5a5a5a5a, N);
 assert.ok(c.candles >= N, "other seed also reached " + N + " candles");
 assert.notDeepStrictEqual(c.tape, a.tape, "a different seed produces a different chart");
 
-console.log("seeded-market tests ok (" + a.candles + " candles, tape " + a.tape.length + ")");
+const N2 = 32;
+const fps30 = sim(SEED, N2, 30);
+const fps144 = sim(SEED, N2, 144);
+assert.ok(fps30.candles >= N2 && fps144.candles >= N2, "fps runs reached " + N2 + " candles");
+assert.ok(fps30.ohlc.length >= N2 && fps144.ohlc.length >= N2, "fps runs recorded OHLC bars");
+assert.deepStrictEqual(fps30.ohlc.slice(0, N2), fps144.ohlc.slice(0, N2), "30 fps and 144 fps produce identical OHLC for the same seed");
+assert.deepStrictEqual(fps30.tape.slice(0, fps144.tape.length), fps144.tape.slice(0, fps30.tape.length), "30 fps and 144 fps produce the same price tape");
+
+console.log("seeded-market tests ok (" + a.candles + " candles, tape " + a.tape.length + "; 30 vs 144 fps ohlc " + N2 + ")");

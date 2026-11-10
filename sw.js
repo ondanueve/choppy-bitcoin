@@ -10,7 +10,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 (function () {
   "use strict";
 
-  var CACHE_VERSION = "mp221";
+  var CACHE_VERSION = "mp222";
   var SCOPE_PATH = "/choppy-bitcoin/";
   var ART_MAX_COUNT = 40;
   var ART_MAX_BYTES = 30 * 1024 * 1024;
@@ -24,6 +24,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "run-stats.js",
     "audio.js",
     "nozoom.js",
+    "donate-config.js",
     "style.css",
     "site.webmanifest",
     "favicon.svg",
@@ -39,7 +40,9 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "mp.js",
     "halving.js",
     "halving-surfer.png",
-    "nft-preview.js"
+    "nft-preview.js",
+    "share-card.js",
+    "daily.js"
   ];
   // Code files the pages request with ?v=CACHE_VERSION. The cache key keeps that tag,
   // so a cached copy can only answer a request for the exact same version.

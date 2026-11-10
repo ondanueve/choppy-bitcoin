@@ -20,7 +20,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Bitcoinizate">
   <meta property="og:title" content="Choppy Bitcoin | Bitcoinizate">
-  <meta property="og:description" content="Free bitcoin-themed games. 70% of donations is paid out as leaderboard prizes.">
+  <meta property="og:description" content="Free bitcoin-themed games. Play Choppy Bitcoin in the browser. Scores are play money.">
   <meta property="og:url" content="https://bitcoinizate.com/choppy-bitcoin/about/">
   <meta property="og:image" content="https://bitcoinizate.com/choppy-bitcoin/og-icon.png">
   <meta property="og:image:width" content="1200">
@@ -179,7 +179,7 @@
     }
     @media (min-width: 640px) { .chips { grid-template-columns: repeat(4, 1fr); } }
   </style>
-  <script src="/choppy-bitcoin/nozoom.js?v=mp221"></script>
+  <script src="/choppy-bitcoin/nozoom.js?v=mp222"></script>
 </head>
 <body>
   <main class="wrap">
@@ -229,7 +229,7 @@
       <h3 data-i18n="boardInd">Fastest independence</h3>
       <div id="site-indep" class="board">—</div>
     </section>
-    <button type="button" class="play play-alt" id="cta-signup"><span data-i18n="ctaAccount">Create a free account</span><small data-i18n="ctaSub">Save your score · be on the board for prizes</small></button>
+    <button type="button" class="play play-alt" id="cta-signup"><span data-i18n="ctaAccount">Create a free account</span><small data-i18n="ctaSub">Save your score and, if you want, a Bitcoin or Lightning address.</small></button>
     <section class="how discord" id="discord">
       <h3 data-i18n="discordTitle">Discord</h3>
       <p data-i18n="discordBody">The game chat is here. Questions, bugs, and the people who already play.</p>
@@ -248,8 +248,8 @@
     </section>
     <section class="faq" id="donate">
       <h3 data-i18n="donateTitle">Donations</h3>
-      <p data-i18n="donateBody">Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.</p>
-      <p class="donate-links"><a href="lightning:lnbc1p4tdeq9pp5v39yyvsws5swurns2gpmj64m469548f64t2cqjsfyka574fj0dasdqqcqzzgxqyz5vqrzjqf0wu22xsefd8gzu0m9n93g2khea86l6yy26en9v46g9e6hk7v9z8lytgux50yx2zuqqqqryqqqqthqqpyrzjqfwdd2w9y5ra5z3m4qetfa5ccu6432xfuvk6zrvg9vxwltvukd48dlytgux50yx2zuqqqqryqqqqthqqpysp5zc5j4qd90hqxklpcy4skg9rfl5aypv9rsmrypjdt62td8869kx0s9qrsgq43tqd4ujehpvccxw5rzkk8z74mk7sdhgga3tqtk3uwvtlj3tl3s3yhrv5vy5x8t6x2zfursvw7z82rqu4fmuttaj57ukyspx35np6zgq6tutga">Lightning</a><a href="bitcoin:bc1q5yrmsvdh3m7ad03txs2h5ktw5zzdxwxrgeujsj0e25s83cffzauq4vgjez">Bitcoin</a></p>
+      <p data-i18n="donateBody">Donations keep the game going.</p>
+      <p class="donate-links" id="donate-links"></p>
     </section>
     <footer>© Bitcoinizate · <a href="/privacy.html" data-i18n="privacy">Privacy</a> · <a href="https://discord.gg/HkS8epr8mE" target="_blank" rel="noopener noreferrer">Discord</a> · <a href="mailto:hello@bitcoinizate.com">hello@bitcoinizate.com</a> · <a href="https://bitcoinizate.com/choppy-bitcoin/" data-i18n="playLink">play Choppy Bitcoin</a></footer>
   </main>
@@ -283,10 +283,12 @@
       <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp221"></script>
-  <script src="/choppy-bitcoin/i18n-extra.js?v=mp221"></script>
-  <script src="/choppy-bitcoin/supabase-lib.js?v=mp221"></script>
-  <script src="/choppy-bitcoin/auth.js?v=mp221"></script>
+  <script src="/choppy-bitcoin/i18n.js?v=mp222"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp222"></script>
+  <script src="/choppy-bitcoin/supabase-lib.js?v=mp222"></script>
+  <script src="/choppy-bitcoin/auth.js?v=mp222"></script>
+  <script src="/choppy-bitcoin/donate-config.js?v=mp222"></script>
+  <script>if (window.choppyFillDonateLinks) choppyFillDonateLinks(document.getElementById("donate-links"));</script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
     (function () {

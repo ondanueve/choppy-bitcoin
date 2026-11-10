@@ -33,8 +33,20 @@ jobs:
       - name: Smoke test
         run: node tests/smoke.js
 
+      - name: Donation links
+        run: node tests/donate.js
+
+      - name: Anonymous usage counters
+        run: node tests/usage.js
+
+      - name: Share card
+        run: node tests/share-card.js
+
       - name: Seeded market
         run: node tests/seeded-market.js
+
+      - name: Daily candle and challenge links
+        run: node tests/daily.js
 
       - name: Versus simulation
         run: node tests/mp-sim.js

@@ -21,7 +21,8 @@ const PUBLISHED_JS = [
   "supabase-lib.js",
   "run-stats.js",
   "i18n.js",
-  "nozoom.js"
+  "nozoom.js",
+  "donate-config.js"
 ];
 const HTML_WITH_INLINE = [
   "index.html",
