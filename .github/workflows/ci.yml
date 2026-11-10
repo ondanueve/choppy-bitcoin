@@ -33,6 +33,9 @@ jobs:
       - name: Smoke test
         run: node tests/smoke.js
 
+      - name: Anonymous usage counters
+        run: node tests/usage.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 
