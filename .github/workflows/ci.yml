@@ -39,6 +39,9 @@ jobs:
       - name: Anonymous usage counters
         run: node tests/usage.js
 
+      - name: Share card
+        run: node tests/share-card.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 

@@ -244,6 +244,10 @@
       trendDown: "TREND ↓",
       trendOff: "TREND OFF",
       share: "Share",
+      shareCopied: "Copied",
+      shareSaved: "Image saved",
+      shareChart: "Price path",
+      shareEmpty: "No chart for this run",
       saveAlias: "Save alias",
       awards: "Awards",
       howPlay: "How to play",
@@ -533,6 +537,10 @@
       trendDown: "TENDENCIA ↓",
       trendOff: "TENDENCIA APAGADA",
       share: "Compartir",
+      shareCopied: "Copiado",
+      shareSaved: "Imagen guardada",
+      shareChart: "Recorrido del precio",
+      shareEmpty: "No hay gráfico de esta partida",
       saveAlias: "Guardar alias",
       awards: "Premios",
       howPlay: "Cómo se juega",
@@ -615,7 +623,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp220";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp221";
     document.head.appendChild(s);
   }
 
