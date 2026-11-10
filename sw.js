@@ -10,7 +10,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
 (function () {
   "use strict";
 
-  var CACHE_VERSION = "mp219";
+  var CACHE_VERSION = "mp221";
   var SCOPE_PATH = "/choppy-bitcoin/";
   var ART_MAX_COUNT = 40;
   var ART_MAX_BYTES = 30 * 1024 * 1024;
@@ -24,6 +24,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "run-stats.js",
     "audio.js",
     "nozoom.js",
+    "donate-config.js",
     "style.css",
     "site.webmanifest",
     "favicon.svg",

@@ -33,6 +33,12 @@ jobs:
       - name: Smoke test
         run: node tests/smoke.js
 
+      - name: Donation links
+        run: node tests/donate.js
+
+      - name: Anonymous usage counters
+        run: node tests/usage.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 
