@@ -33,6 +33,9 @@ jobs:
       - name: Smoke test
         run: node tests/smoke.js
 
+      - name: Donation links
+        run: node tests/donate.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 
