@@ -885,6 +885,17 @@
   }
   function wrng() { return S.worldRand ? S.worldRand() : Math.random(); }
 
+  function bumpUsage(kind) {
+    try {
+      if (kind !== "start" && kind !== "finish" && kind !== "share") return;
+      const sb = window.supabase && window.supabase.createClient && window.supabase.createClient();
+      if (!sb || typeof sb.rpc !== "function") return;
+      const res = sb.rpc("bump_usage", { p_kind: kind });
+      if (res && typeof res.catch === "function") res.catch(function () {});
+    } catch (e) {}
+  }
+
+
   function gauss(mean, lo, hi) {
     let u = 0, v = 0;
     while (!u) u = wrng();
@@ -1938,6 +1949,7 @@
       renderOverlay();
       return;
     }
+    try { bumpUsage("finish"); } catch (e) {}
     try { setPhase("over"); } catch (e) { try { renderOverlay(); } catch (err) {} }
   }
 
@@ -9961,6 +9973,7 @@
   function startGame(ranked) {
     if (!S.mp) { S.worldSeed = 0; S.worldRand = null; S.mpOver = false; S.mpPlayAt = 0; }
     S.ranked = ranked !== false;
+    try { bumpUsage("start"); } catch (e) {}
     wipeShotKeep();
     if (A && A.unlock) try { A.unlock(); } catch (e) {}
     if (A && A.sfx && A.sfx.start) try { A.sfx.start(); } catch (e) {}
@@ -10006,6 +10019,7 @@
     S.optPanel = null;
     snapshotRun();
     try { S.best = saveBest(scoreSats()); } catch (e) {}
+    try { bumpUsage("finish"); } catch (e) {}
     setPhase("win");
   }
 
@@ -10062,6 +10076,7 @@
   function replay() {
     A.cancelSpeech();
     S.trainBattleLose = false;
+    try { bumpUsage("start"); } catch (e) {}
     wipeShotKeep();
     resetWorld(false);
     applyTestLoadout();
@@ -10145,6 +10160,7 @@
       A.speak(t("floatYours"), true);
       snapshotRun();
       try { S.best = saveBest(scoreSats()); } catch (e) {}
+      try { bumpUsage("finish"); } catch (e) {}
       setPhase("win");
       return;
     }
@@ -11655,7 +11671,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp219";
+      s.src = "halving.js?v=mp220";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12814,6 +12830,7 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareRun(kind) {
+    try { bumpUsage("share"); } catch (e) {}
     const btc = fmtBtc(netBtc());
     const names = runAwards(S.stats || collectRunStats()).map((a) => awardName(a)).join(", ");
     let who = (window.choppyUsername || "").trim();
@@ -14115,7 +14132,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp219";
+      s.src = "mp.js?v=mp220";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
