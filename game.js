@@ -521,7 +521,7 @@
     mpAlpha: "ALPHA",
     mpAlphaNote: "Alpha. Testers welcome. Send feedback to",
     donateTitle: "Donations",
-    donateBody: "Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.",
+    donateBody: "Donations keep the game going.",
     boardBtc: "Most BTC",
     boardInd: "Fastest independence",
     mpHost: "HOST ROOM", mpJoin: "JOIN", mpStart: "START MATCH", mpBack: "BACK",
