@@ -127,6 +127,14 @@
       play: "Play Choppy Bitcoin",
       ranked: "Ranked",
       training: "Training",
+      daily: "Candle of the day",
+      dailyNote: "The same chart for everyone today.",
+      dailyBoard: "Today's bags",
+      beatBag: "Beat {n}",
+      beatBagNote: "Same chart as the challenger.",
+      beatPlay: "Play this chart",
+      beatYes: "You beat the bag.",
+      beatNo: "The bag still stands.",
       trainCamp: "Training",
       trainNote: "9 cold and 999 multisig. Does not count for the board or awards.",
       versus: "VERSUS",
@@ -420,6 +428,14 @@
       play: "Jugar Choppy Bitcoin",
       ranked: "Ranked",
       training: "Entrenamiento",
+      daily: "Vela del día",
+      dailyNote: "El mismo gráfico para todos hoy.",
+      dailyBoard: "Bolsas de hoy",
+      beatBag: "Supera {n}",
+      beatBagNote: "El mismo gráfico que quien te desafía.",
+      beatPlay: "Jugar este gráfico",
+      beatYes: "Superaste la bolsa.",
+      beatNo: "La bolsa sigue en pie.",
       trainCamp: "Entrenamiento",
       trainNote: "9 cold y 999 multisig. No cuenta para el ranking ni para los logros.",
       versus: "VERSUS",
@@ -623,7 +639,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp221";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp222";
     document.head.appendChild(s);
   }
 

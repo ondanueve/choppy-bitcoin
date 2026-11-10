@@ -42,6 +42,12 @@ jobs:
       - name: Share card
         run: node tests/share-card.js
 
+      - name: Seeded market
+        run: node tests/seeded-market.js
+
+      - name: Daily candle and challenge links
+        run: node tests/daily.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 

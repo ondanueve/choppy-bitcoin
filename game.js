@@ -517,6 +517,10 @@
     sound: "SOUND", jukebox: "JUKEBOX", tutorial: "TUTORIAL", feedback: "FEEDBACK",
     language: "LANGUAGE", aiLog: "A.I. BUD LOG", signIn: "SIGN IN",
     ranked: "RANKED", training: "TRAINING", versus: "VERSUS",
+    daily: "CANDLE OF THE DAY", dailyNote: "The same chart for everyone today.",
+    dailyBoard: "Today's bags", beatBag: "Beat {n}",
+    beatBagNote: "Same chart as the challenger.", beatPlay: "Play this chart",
+    beatYes: "You beat the bag.", beatNo: "The bag still stands.",
     comingSoon: "COMING SOON",
     mpAlpha: "ALPHA",
     mpAlphaNote: "Alpha. Testers welcome. Send feedback to",
@@ -844,7 +848,11 @@
   }
   function saveBest(n) {
     if (!S.ranked || S.testCheat) return S.best || 0;
-    if (!S.ranked) return S.best || 0;
+    if (S.daily) {
+      try { queueDailySubmit(n); } catch (e) {}
+      return n;
+    }
+    if (S.challengeSeed) return n;
     let s = { scores: { choppy: 0 } };
     try { s = Object.assign({ scores: { choppy: 0 } }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
     s.scores = s.scores || {};
@@ -883,7 +891,80 @@
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-  function wrng() { return S.worldRand ? S.worldRand() : Math.random(); }
+  function rollWorldSeed(seed) {
+    if (seed != null && seed !== 0 && seed !== "0") {
+      const n = Number(seed);
+      S.worldSeed = (Number.isFinite(n) ? n : 0) >>> 0 || 1;
+    } else if (S.mp && S.worldSeed) {
+      S.worldSeed = S.worldSeed >>> 0 || 1;
+    } else {
+      S.worldSeed = ((Math.random() * 0xffffffff) >>> 0) || 1;
+    }
+    S.worldRand = mulberry32(S.worldSeed);
+  }
+  function wrng() {
+    if (!S.worldRand) rollWorldSeed(S.worldSeed);
+    return S.worldRand();
+  }
+  // Indexed market RNG: a function of worldSeed + kind + index, not of how
+  // many times step() ran. Kind 1=bias 2=shock 3=vt 4=drift0 5=wave 6=unused
+  // 7=pipe 8=item 9=startCash 10=startPx 11=vt0 12=halveSide.
+  function srand(kind, i) {
+    let h = (S.worldSeed >>> 0) ^ ((kind + 1) * 0x9e3779b9) ^ ((i + 1) * 0x85ebca6b);
+    h = Math.imul(h ^ (h >>> 16), 0x7feb352d);
+    h = Math.imul(h ^ (h >>> 15), 0x846ca68b);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  function waveRand() {
+    const i = (S.waveSeq = (S.waveSeq || 0) + 1);
+    return srand(5, i);
+  }
+  function gaussFrom(kind, mean, lo, hi) {
+    let u = srand(kind, 0), v = srand(kind, 1);
+    if (!u) u = 1e-12;
+    if (!v) v = 1e-12;
+    const z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    return Math.max(lo, Math.min(hi, mean + z * ((hi - lo) / 5)));
+  }
+  function utcDayKey(d) {
+    const x = d || new Date();
+    const y = x.getUTCFullYear();
+    const m = String(x.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(x.getUTCDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+  function seedFromDay(key) {
+    let h = 2166136261;
+    const s = "choppy-daily-" + String(key || "");
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) || 1;
+  }
+  function dailySeed(d) { return seedFromDay(utcDayKey(d)); }
+  function parseChallenge(search) {
+    try {
+      const q = new URLSearchParams(search || (typeof location !== "undefined" ? location.search : "") || "");
+      const raw = q.get("seed");
+      if (raw == null || raw === "") return null;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return null;
+      const seed = (n >>> 0) || 1;
+      const bag = Number(q.get("bag"));
+      return { seed: seed, bag: (Number.isFinite(bag) && bag > 0) ? bag : 0 };
+    } catch (e) { return null; }
+  }
+  function challengeUrl(seed, bag) {
+    let url = "https://bitcoinizate.com/choppy-bitcoin/?seed=" + ((seed >>> 0) || 1);
+    const n = Number(bag);
+    if (Number.isFinite(n) && n > 0) {
+      let s = n.toFixed(6);
+      s = s.replace(/\.0+$/, "").replace(/(\.[0-9]*?)0+$/, "$1").replace(/\.$/, "");
+      url += "&bag=" + s;
+    }
+    return url;
+  }
 
   function bumpUsage(kind) {
     try {
@@ -954,32 +1035,32 @@
     const t = S.have.adopt || 0;
     const soft = adoptSoft(t);
     let amp;
-    if (kind === "HALVE") amp = 1 + (Math.random() * 0.2 - 0.1);
-    else if (kind === "SWAN") amp = (0.75 + (Math.random() * 0.2 - 0.1)) * (1 - soft * 0.4) * 0.75;
-    else if (kind === "BEAR") amp = (0.17 + Math.random() * 0.05) * (1 - soft * 0.45) * 0.9;
+    if (kind === "HALVE") amp = 1 + (waveRand() * 0.2 - 0.1);
+    else if (kind === "SWAN") amp = (0.75 + (waveRand() * 0.2 - 0.1)) * (1 - soft * 0.4) * 0.75;
+    else if (kind === "BEAR") amp = (0.17 + waveRand() * 0.05) * (1 - soft * 0.45) * 0.9;
     else if (clampPx(S.price) < 10000) {
-      const add = 2500 + Math.random() * 7500;
+      const add = 2500 + waveRand() * 7500;
       amp = add / Math.max(PX_MIN, clampPx(S.price));
     }
-    else amp = (0.17 + Math.random() * 0.05) * (1 - soft * 0.45);
+    else amp = (0.17 + waveRand() * 0.05) * (1 - soft * 0.45);
     return amp;
   }
 
   function pickCycleResid(kind, amp) {
     let mag;
-    if (kind === "HALVE") mag = 0.50 + Math.random() * 0.25;
+    if (kind === "HALVE") mag = 0.50 + waveRand() * 0.25;
     else if (kind === "SWAN") {
       const r = adoptSwanRange(S.have.adopt || 0);
-      mag = Math.abs(r.lo + Math.random() * (r.hi - r.lo));
+      mag = Math.abs(r.lo + waveRand() * (r.hi - r.lo));
     } else if (kind === "BULL") {
-      if (clampPx(S.price) < 10000) mag = amp * (1 - Math.random() * 0.15);
+      if (clampPx(S.price) < 10000) mag = amp * (1 - waveRand() * 0.15);
       else {
         const r = adoptBullRange(S.have.adopt || 0);
-        mag = r.lo + Math.random() * (r.hi - r.lo);
+        mag = r.lo + waveRand() * (r.hi - r.lo);
       }
     } else {
       const r = adoptBearRange(S.have.adopt || 0);
-      mag = Math.abs(r.lo + Math.random() * (r.hi - r.lo));
+      mag = Math.abs(r.lo + waveRand() * (r.hi - r.lo));
     }
     mag = Math.max(0.004, mag);
     if (kind === "BULL" && clampPx(S.price) < 10000) return mag;
@@ -1000,7 +1081,7 @@
       let tot = 0;
       w.forEach((x) => { tot += x[1]; });
       if (tot <= 0) return "BULL";
-      let x = wrng() * tot;
+      let x = srand(8, (S.spawnedPipes || 0) * 2) * tot;
       for (let i = 0; i < w.length; i++) {
         x -= w[i][1];
         if (x <= 0) {
@@ -1012,10 +1093,11 @@
       return "BULL";
     }
     const bag = ["BULL","BULL","BULL","BULL","BULL","BULL","BULL","BULL","BEAR","BEAR","BEAR","BEAR","BEAR","LASER","LASER","COLD","COLD","COLD","SWAN","SWAN","SWAN","SWAN"];
-    let type = bag[(wrng() * bag.length) | 0];
-    if (type === "SWAN" && S.spawnedPipes < 7) {
+    const n = S.spawnedPipes || 0;
+    let type = bag[(srand(8, n * 2) * bag.length) | 0];
+    if (type === "SWAN" && n < 7) {
       const safe = bag.filter((t) => t !== "SWAN");
-      type = safe[(wrng() * safe.length) | 0];
+      type = safe[(srand(8, n * 2 + 1) * safe.length) | 0];
     }
     return type;
   }
@@ -1496,11 +1578,12 @@
     const gapH = m.gapH;
     const minY = m.margin + gapH / 2;
     const maxY = S.H - m.margin - gapH / 2;
+    const n = S.spawnedPipes || 0;
     let gapY;
-    if (!S.pipes.length) gapY = S.bird.y + (wrng() > 0.5 ? 1 : -1) * gapH * 0.28;
+    if (!S.pipes.length) gapY = S.bird.y + (srand(7, n * 8) > 0.5 ? 1 : -1) * gapH * 0.28;
     else {
-      const sign = wrng() > 0.5 ? 1 : -1;
-      gapY = S.lastGapY + sign * (0.42 + wrng() * 0.42) * gapH;
+      const sign = srand(7, n * 8) > 0.5 ? 1 : -1;
+      gapY = S.lastGapY + sign * (0.42 + srand(7, n * 8 + 1) * 0.42) * gapH;
     }
     gapY = Math.max(minY, Math.min(maxY, gapY));
     if (S.pipes.length && Math.abs(gapY - S.lastGapY) < gapH * 0.32) {
@@ -1511,9 +1594,9 @@
     S.spawnedPipes += 1;
     const raceN = S.mp ? ((S.mpRules && S.mpRules.mode === "race") ? (S.mpRules.raceN | 0) : 0) : 0;
     const isFinish = !!(raceN && S.spawnedPipes === raceN);
-    const pipe = { x, gapY, gapH, green: wrng() > 0.45, scored: false, seen: false, finish: isFinish };
+    const pipe = { x, gapY, gapH, green: srand(7, n * 8 + 2) > 0.45, scored: false, seen: false, finish: isFinish };
     S.pipes.push(pipe);
-    const roll = !isFinish && wrng() < 0.52;
+    const roll = !isFinish && srand(7, n * 8 + 3) < 0.52;
     if (S.halvePend && !isFinish) {
       S.halvePend = false;
       const up = S.halveSide !== "down";
@@ -1530,8 +1613,8 @@
       const r = type === "SWAN" ? 17 : 14;
       const box = wickAxis(pipe, r);
       const span = Math.max(8, box.hi - box.lo);
-      const y = box.lo + wrng() * span;
-      const vy = (wrng() < 0.5 ? -1 : 1) * (22 + wrng() * 16);
+      const y = box.lo + srand(7, n * 8 + 4) * span;
+      const vy = (srand(7, n * 8 + 5) < 0.5 ? -1 : 1) * (22 + srand(7, n * 8 + 6) * 16);
       if (!(halveLock() && (type === "BULL" || type === "BEAR" || type === "SWAN"))) {
         S.items.push({ pipe, x: box.x, y, lo: box.lo, hi: box.hi, vy, type, r, freeX: false });
       }
@@ -1547,7 +1630,7 @@
       say(pool[(Math.random() * pool.length) | 0], true, "halve");
     }
     if (S.halveLeft === 3) {
-      S.halveSide = wrng() < 0.5 ? "up" : "down";
+      S.halveSide = srand(12, S.shownCandles || 0) < 0.5 ? "up" : "down";
       if (S.aibudOn && (S.have.aibud || 0) >= 1) {
         sayEn(
           S.halveSide === "up" ? "Halving. Look up!" : "Halving. Look down!",
@@ -1566,17 +1649,19 @@
 
   function resetWorld(keepWallet) {
     const m = metrics();
-    if (S.mp && S.worldSeed) S.worldRand = mulberry32(S.worldSeed);
-    else S.worldRand = null;
+    if (S.worldSeed) S.worldRand = mulberry32(S.worldSeed);
+    else rollWorldSeed();
+    S.marketAcc = 0; S.marketN = 0; S.waveSeq = 0;
+    S.ohlcBars = []; S.ohlcOpen = null; S.ohlcHigh = null; S.ohlcLow = null;
     S.bird.x = Math.max(64, S.W * 0.18);
     S.bird.y = S.H * 0.42;
     S.bird.v = 0;
     S.bird.r = m.birdR;
     S.pipes = []; S.items = []; S.particles = []; S.floats = [];
     if (!keepWallet) {
-      S.cash = gauss(2000, 0, 4000);
+      S.cash = gaussFrom(9, 2000, 0, 4000);
       S.btc = 0; S.vt = 0; S.vtPrice = 0; S.level = 1; S.hitCap = false;
-      S.price = gauss(20000, 0, 40000);
+      S.price = gaussFrom(10, 20000, 0, 40000);
       S.startCash = S.cash; S.startPrice = S.price;
       S.peakNet = netBtc(); S.candles = 0; S.shownCandles = 0; S.buys = 0; S.sells = 0; S.swans = 0; S.lasers = 0;
       S.halvings = 0; S.halveMiss = 0; S.halveSpawned = 0; S.lasers = 0; S.perkPick = ""; S.perkHint = ""; S.perkChain = 0; S.dcaOn = false; S.trend = "off"; S.perkOffers = []; S.speedMul = 1;
@@ -1619,7 +1704,7 @@
     S.markAt = -99;
     S.cycleEnv = 0; S.cycleManip = 1; S.cycleStacks = 0;
     S.waves = []; S.priceBase = clampPx(S.price);
-    S.drift = DRIFT0 * (1 + (wrng() * 2 - 1));
+    S.drift = DRIFT0 * (1 + (srand(4, keepWallet ? 1 : 0) * 2 - 1));
     S.runTab = null; S.runTape = []; S.runMarks = []; S.runTrades = []; S.runCash = []; S.runBtcBag = []; S.runNet = []; S.chartFlags = { trades: false, btc: false, usd: false, net: false };
     S.speechUntil = 0;
     S.speechRank = 0;
@@ -1787,7 +1872,7 @@
 
   function trendBias() {
     const base = (S.drift != null ? S.drift : DRIFT0);
-    let bias = base * (1 + (Math.random() * 2 - 1) * 0.05);
+    let bias = base * (1 + (srand(1, S.marketN || 0) * 2 - 1) * 0.05);
     if ((S.have.manip || 0) > 0) {
       const k = (S.have.manip || 0) * (12 / 7);
       if (S.trend === "up") bias += 0.004 * k;
@@ -4652,7 +4737,7 @@
 
   function continueBonus() {
     S.level = 2;
-    S.vtPrice = 100 + Math.random() * 200;
+    S.vtPrice = 100 + srand(11, 0) * 200;
     S.vt = 0; S.vtCycle = S.vtPrice;
     resetWorld(true);
     startCount();
@@ -9970,8 +10055,25 @@
     try { syncMpChrome(); } catch (e) {}
   }
 
-  function startGame(ranked) {
-    if (!S.mp) { S.worldSeed = 0; S.worldRand = null; S.mpOver = false; S.mpPlayAt = 0; }
+  function startGame(ranked, seed, mode) {
+    if (!S.mp) {
+      S.mpOver = false; S.mpPlayAt = 0;
+      if (mode === "daily") {
+        S.daily = true; S.dailyDay = utcDayKey();
+        S.challengeSeed = 0; S.challengeBag = 0;
+        seed = seed != null ? seed : dailySeed();
+      } else if (mode === "challenge") {
+        S.daily = false; S.dailyDay = "";
+        const ch = S.pendingChallenge || {};
+        seed = seed != null ? seed : ch.seed;
+        S.challengeSeed = (Number(seed) >>> 0) || 1;
+        if (!(S.challengeBag > 0)) S.challengeBag = Number(ch.bag) || 0;
+      } else {
+        S.daily = false; S.dailyDay = "";
+        S.challengeSeed = 0; S.challengeBag = 0;
+      }
+      rollWorldSeed(seed);
+    }
     S.ranked = ranked !== false;
     try { bumpUsage("start"); } catch (e) {}
     wipeShotKeep();
@@ -10076,6 +10178,11 @@
   function replay() {
     A.cancelSpeech();
     S.trainBattleLose = false;
+    if (!S.mp) {
+      if (S.daily) rollWorldSeed(S.worldSeed);
+      else if (S.challengeSeed) rollWorldSeed(S.challengeSeed);
+      else rollWorldSeed();
+    }
     try { bumpUsage("start"); } catch (e) {}
     wipeShotKeep();
     resetWorld(false);
@@ -10087,6 +10194,43 @@
     let w = 0;
     for (let i = 0; i < arr.length; i++) if (arr[i].life > 0) arr[w++] = arr[i];
     if (w !== arr.length) arr.length = w;
+  }
+  const MARKET_DT = 1 / 60;
+  function notePriceOHLC() {
+    const px = clampPx(S.price);
+    if (S.ohlcOpen == null) { S.ohlcOpen = px; S.ohlcHigh = px; S.ohlcLow = px; return; }
+    if (px > S.ohlcHigh) S.ohlcHigh = px;
+    if (px < S.ohlcLow) S.ohlcLow = px;
+  }
+  function closeCandleOHLC() {
+    if (!S.ohlcBars) S.ohlcBars = [];
+    const px = clampPx(S.price);
+    const o = S.ohlcOpen != null ? S.ohlcOpen : px;
+    S.ohlcBars.push({ o: o, h: S.ohlcHigh != null ? S.ohlcHigh : px, l: S.ohlcLow != null ? S.ohlcLow : px, c: px });
+    S.ohlcOpen = px; S.ohlcHigh = px; S.ohlcLow = px;
+  }
+  function applyMarketTick(tickDt) {
+    const n = S.marketN || 0;
+    if ((S.waves || []).length) {
+      S.cycleManip = Math.max(0.15, (S.cycleManip || 1) * (1 + trendBias() * tickDt));
+      const now = S.lifeT;
+      let sum = 0;
+      for (const w of S.waves) sum += waveK(w, now);
+      S.price = clampPx((S.priceBase || S.cycleStart || S.price) * waveMul(sum) * S.cycleManip);
+      if (S.level >= 2 && S.vtCycle > 0) S.vtPrice = Math.max(1, S.vtCycle * (1 + sum * 0.45) * S.cycleManip);
+      noteCyclePrice();
+      updateTapeLive(now);
+      syncWaveFlags();
+      if (streakLeft(now) <= 0) endCycle();
+    } else {
+      const bias = trendBias();
+      const mid = bias > 0.001 ? 0.42 : bias < -0.001 ? 0.58 : 0.48;
+      const px = clampPx(S.price);
+      S.price = clampPx(px + (srand(2, n) - mid) * px * 0.012 * tickDt + px * bias * tickDt);
+      if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (srand(3, n) - 0.45) * S.vtPrice * 0.01 * tickDt + S.vtPrice * 0.0012 * tickDt);
+    }
+    notePriceOHLC();
+    S.marketN = n + 1;
   }
   let fieldFx = "";
   function step(dt) {
@@ -10122,23 +10266,10 @@
     if (S.laserOn || streakLeft(S.lifeT) > 0) speed *= 1.28;
     if (S.halveBull) speed *= HALVE_SPEED;
     for (const f of S.floats) f.x -= speed * dt;
-    if ((S.waves || []).length) {
-      S.cycleManip = Math.max(0.15, (S.cycleManip || 1) * (1 + trendBias() * dt));
-      const now = S.lifeT;
-      let sum = 0;
-      for (const w of S.waves) sum += waveK(w, now);
-      S.price = clampPx((S.priceBase || S.cycleStart || S.price) * waveMul(sum) * S.cycleManip);
-      if (S.level >= 2 && S.vtCycle > 0) S.vtPrice = Math.max(1, S.vtCycle * (1 + sum * 0.45) * S.cycleManip);
-      noteCyclePrice();
-      updateTapeLive(now);
-      syncWaveFlags();
-      if (streakLeft(now) <= 0) endCycle();
-    } else {
-      const bias = trendBias();
-      const mid = bias > 0.001 ? 0.42 : bias < -0.001 ? 0.58 : 0.48;
-      const px = clampPx(S.price);
-      S.price = clampPx(px + (Math.random() - mid) * px * 0.012 * dt + px * bias * dt);
-      if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (Math.random() - 0.45) * S.vtPrice * 0.01 * dt + S.vtPrice * 0.0012 * dt);
+    S.marketAcc = (S.marketAcc || 0) + dt;
+    while (S.marketAcc >= MARKET_DT - 1e-12) {
+      applyMarketTick(MARKET_DT);
+      S.marketAcc -= MARKET_DT;
     }
     S.lifeT += dt; S.sampleAcc += dt;
     if (!S.mpCatch) {
@@ -10220,6 +10351,7 @@
           if (!watching) mpFinishRace();
         } else {
           S.candles++;
+          closeCandleOHLC();
           if (!S.mpCatch) {
             halveSfx("candle", "coin");
             grantUsd(100 * halveEarn(), p.x + pw * 0.5, p.gapY - 50, "gain");
@@ -11671,7 +11803,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp221";
+      s.src = "halving.js?v=mp222";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12830,7 +12962,52 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp221";
+    return "share-card.js?v=mp222";
+  }
+  function dailyScriptSrc() { return "daily.js?v=mp222"; }
+  function loadDaily(cb) {
+    if (typeof choppyDailyReady === "function") { cb(); return; }
+    if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
+    window.__choppyDailyLoad.push(cb);
+    if (window.__choppyDailyLoading) return;
+    if (!document || !document.head || !document.createElement) { try { cb(); } catch (e) {} return; }
+    window.__choppyDailyLoading = true;
+    const s = document.createElement("script");
+    s.src = dailyScriptSrc();
+    s.onload = function () {
+      window.__choppyDailyLoading = false;
+      const q = window.__choppyDailyLoad || [];
+      window.__choppyDailyLoad = [];
+      q.forEach(function (fn) { try { fn(); } catch (e) {} });
+    };
+    s.onerror = function () {
+      window.__choppyDailyLoading = false;
+      const q = window.__choppyDailyLoad || [];
+      window.__choppyDailyLoad = [];
+      q.forEach(function (fn) { try { fn(); } catch (e) {} });
+    };
+    document.head.appendChild(s);
+  }
+  function fillDailyBoard() {
+    const wrap = $("daily-board-wrap");
+    const box = $("ready-daily");
+    if (!wrap || !box) return;
+    loadDaily(function () {
+      if (typeof choppyFillDailyBoard === "function") choppyFillDailyBoard(wrap, box, utcDayKey());
+      else wrap.hidden = true;
+    });
+  }
+  function queueDailySubmit(n) {
+    const payload = {
+      score: n,
+      life: S.lifeT,
+      candles: S.candles,
+      day: S.dailyDay || utcDayKey(),
+      bag: netBtc()
+    };
+    loadDaily(function () {
+      if (typeof choppySubmitDaily === "function") choppySubmitDaily(payload);
+    });
   }
   function loadShareCard(cb) {
     if (typeof choppyRenderShareCard === "function") { cb(choppyRenderShareCard); return; }
@@ -12894,7 +13071,7 @@
       : (es
         ? tag + "quedó rekt en Choppy Bitcoin. Bag " + btc + ". Juega gratis en Bitcoinizate."
         : tag + "got rekt on Choppy Bitcoin. Bag " + btc + ". Play free on Bitcoinizate.");
-    const url = "https://bitcoinizate.com/choppy-bitcoin/";
+    const url = challengeUrl(S.worldSeed, netBtc());
     const headline = kind === "indep"
       ? (es ? "Independencia" : "Independence")
       : kind === "win"
@@ -14195,7 +14372,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp221";
+      s.src = "mp.js?v=mp222";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14664,6 +14841,10 @@
           + "<p class=\"k\">" + t("playSub") + "</p>"
           + "<button type=\"button\" class=\"cta play-alt\" id=\"go-train\">" + t("training") + "</button>"
           + "<p class=\"k\">" + t("trainNote") + "</p>"
+          + "<button type=\"button\" class=\"cta play-alt\" id=\"go-daily\">" + t("daily") + "</button>"
+          + "<p class=\"k\">" + t("dailyNote") + "</p>"
+          + "<div id=\"daily-board-wrap\" hidden><h3 class=\"k\">" + t("dailyBoard") + "</h3><pre id=\"ready-daily\" class=\"board\">—</pre></div>"
+          + (S.pendingChallenge ? ("<p class=\"k\">" + t("beatBag").replace("{n}", fmtBtc(S.pendingChallenge.bag || 0)) + "</p><p class=\"k\">" + t("beatBagNote") + "</p><button type=\"button\" class=\"cta play-alt\" id=\"go-challenge\">" + t("beatPlay") + "</button>") : "")
           + "<button type=\"button\" class=\"cta play-alt\" id=\"go-mp\">" + t("versus") + "<small class=\"alpha-tag\">" + t("mpAlpha") + "</small></button>"
           + "<p class=\"k\">" + t("mpAlphaNote") + " <a href=\"mailto:versus@bitcoinizate.com\">versus@bitcoinizate.com</a></p>"
           + (window.choppySignedIn ? "" : "<button type=\"button\" class=\"cta play-alt\" id=\"overlay-auth\">" + t("signIn") + "</button>")
@@ -14677,6 +14858,15 @@
           $("go-train").onclick = () => startGame(false);
           $("go-train").onpointerdown = (e) => { e.stopPropagation(); startGame(false); };
         }
+        if ($("go-daily")) {
+          $("go-daily").onclick = () => startGame(true, null, "daily");
+          $("go-daily").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "daily"); };
+        }
+        if ($("go-challenge")) {
+          $("go-challenge").onclick = () => startGame(true, S.pendingChallenge && S.pendingChallenge.seed, "challenge");
+          $("go-challenge").onpointerdown = (e) => { e.stopPropagation(); startGame(true, S.pendingChallenge && S.pendingChallenge.seed, "challenge"); };
+        }
+        fillDailyBoard();
         const mpGo = $("go-mp");
         if (mpGo) {
           mpGo.onclick = () => openMpLobby();
@@ -14854,7 +15044,7 @@
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
       } else {
-        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? "" : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1><p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
+        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? "" : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
           + donateBlock();
         if ($("go")) {
           $("go").onclick = replay;
@@ -15221,7 +15411,7 @@
       }
       if (kbIs(e, "confirm")) {
         e.preventDefault();
-        if (kbClickFirst("#arc-move-form button[type=submit]") || kbClickFirst("[data-ch=\"ok\"]") || kbClickFirst("#go")) return;
+        if (kbClickFirst("#arc-move-form button[type=submit]") || kbClickFirst("[data-ch=\"ok\"]") || kbClickFirst("#go-challenge") || kbClickFirst("#go")) return;
         return;
       }
       const oi = ["opt1","opt2","opt3"].findIndex((id) => kbIs(e, id));
@@ -15680,6 +15870,69 @@
   })();
   window.startChoppy = startGame;
   window.replayChoppy = replay;
+  window.choppyWorldSeed = function () { return S.worldSeed >>> 0; };
+  window.choppyDailySeed = function (d) { return dailySeed(d); };
+  window.choppyUtcDayKey = function (d) { return utcDayKey(d); };
+  window.choppyParseChallenge = function (search) { return parseChallenge(search); };
+  window.choppyChallengeUrl = function (seed, bag) { return challengeUrl(seed, bag); };
+  window.choppySimulateMarket = function (seed, nCandles, frameHz) {
+    const n = Math.max(1, nCandles || 40);
+    const hz = (frameHz > 0) ? frameHz : 60;
+    const frameDt = 1 / hz;
+    S.mp = false;
+    S.ranked = true;
+    S.optPanel = null;
+    S.testPerkSeed = {};
+    S.testArcEvery = 0;
+    S.testCashOnce = 0;
+    S.testBtcOnce = 0;
+    S.testIndepQueued = false;
+    S.testCheat = false;
+    S.humanInput = true;
+    rollWorldSeed(seed);
+    resetWorld(false);
+    S.dead = false;
+    S.finished = false;
+    S.spectate = false;
+    S.invuln = 1e9;
+    S.phase = "play";
+    let steps = 0, acc = 0;
+    const cap = 60 * 60 * 20;
+    function pinSim() {
+      if (S.pipes && S.pipes.length) S.bird.y = S.pipes[0].gapY;
+      S.bird.v = 0;
+      S.invuln = 1e9;
+      if (S.phase !== "play") {
+        S.phase = "play";
+        S.arcHold = false;
+        S.optPanel = null;
+        S.perkOffers = [];
+        S.chanceCard = null;
+      }
+    }
+    while ((S.candles || 0) < n && !S.dead && steps < cap) {
+      acc += frameDt;
+      while (acc >= 1 / 60 && (S.candles || 0) < n && !S.dead && steps++ < cap) {
+        pinSim();
+        step(1 / 60);
+        acc -= 1 / 60;
+      }
+    }
+    return {
+      seed: S.worldSeed >>> 0,
+      candles: S.candles | 0,
+      steps: steps,
+      hz: hz,
+      ohlc: (S.ohlcBars || []).slice(),
+      startPrice: S.startPrice,
+      startCash: S.startCash,
+      drift: S.drift,
+      tape: (S.tape || []).slice(),
+      pipes: (S.pipes || []).map(function (p) {
+        return { x: p.x, gapY: p.gapY, gapH: p.gapH, green: !!p.green };
+      })
+    };
+  };
   window.dealChoppyArc = function (id) {
     window.__arcForce = id || "";
     if ((S.have.chance || 0) < 1) S.have.chance = 1;
@@ -15717,6 +15970,8 @@
     wireMp();
     try {
       const q = new URLSearchParams(location.search || "");
+      const ch = parseChallenge(location.search || "");
+      if (ch) S.pendingChallenge = ch;
       const room = (q.get("room") || q.get("mp") || "").toUpperCase();
       if (room.length >= 4) { S.mpJoinCode = room; openMpLobby(); }
       else if (q.get("versus") === "1") openMpLobby();
