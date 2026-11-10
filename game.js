@@ -11656,7 +11656,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp217";
+      s.src = "halving.js?v=mp220";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12814,7 +12814,49 @@
     const note = reg ? "" : "<p class=\"k\">" + (es ? "Inicia sesión para ganar premios." : "Sign in to earn awards.") + "</p>";
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
+  function shareCardSrc() {
+    return "share-card.js?v=mp220";
+  }
+  function loadShareCard(cb) {
+    if (typeof choppyRenderShareCard === "function") { cb(choppyRenderShareCard); return; }
+    const s = document.createElement("script");
+    s.src = shareCardSrc();
+    s.onload = function () { cb(typeof choppyRenderShareCard === "function" ? choppyRenderShareCard : null); };
+    s.onerror = function () { cb(null); };
+    document.head.appendChild(s);
+  }
+  function markShareBtn(key) {
+    const btn = $("share-run");
+    if (!btn) return;
+    btn.textContent = t(key);
+    setTimeout(function () { if (btn) btn.textContent = t("share"); }, 1600);
+  }
+  function downloadShareBlob(blob) {
+    if (!blob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "choppy-bitcoin.png";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      try { URL.revokeObjectURL(a.href); a.remove(); } catch (e) {}
+    }, 2000);
+  }
+  function fallbackShare(blob, text, url) {
+    try { downloadShareBlob(blob); } catch (e) {}
+    const line = text + " " + url;
+    const copied = function () { markShareBtn(blob ? "shareSaved" : "shareCopied"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(line).then(copied).catch(function () {
+        window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(line), "_blank", "noopener");
+      });
+      return;
+    }
+    window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(line), "_blank", "noopener");
+  }
   function shareRun(kind) {
+    if (typeof bumpUsage === "function") try { bumpUsage("share"); } catch (e) {}
     const btc = fmtBtc(netBtc());
     const names = runAwards(S.stats || collectRunStats()).map((a) => awardName(a)).join(", ");
     let who = (window.choppyUsername || "").trim();
@@ -12838,25 +12880,47 @@
         ? tag + "quedó rekt en Choppy Bitcoin. Bag " + btc + ". Juega gratis en Bitcoinizate."
         : tag + "got rekt on Choppy Bitcoin. Bag " + btc + ". Play free on Bitcoinizate.");
     const url = "https://bitcoinizate.com/choppy-bitcoin/";
-    const imgUrl = "https://bitcoinizate.com/choppy-bitcoin/share-icon.png";
+    const headline = kind === "indep"
+      ? (es ? "Independencia" : "Independence")
+      : kind === "win"
+      ? (es ? "21 millones" : "Twenty one million")
+      : (es ? "Liquidado" : "Rekt");
+    const kicker = kind === "indep" || kind === "win"
+      ? (es ? "Victoria" : "Victory")
+      : (es ? "Fin de la partida" : "Run over");
+    const payload = { title: "Choppy Bitcoin", text: text, url: url };
     const goTweet = () => {
       window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text + " " + url), "_blank", "noopener");
     };
-    const payload = { title: "Choppy Bitcoin", text: text, url: url };
-    const send = (data) => {
-      if (!navigator.share) { goTweet(); return; }
-      navigator.share(data).catch(goTweet);
+    const send = (data, blob) => {
+      const fail = () => fallbackShare(blob || null, text, url);
+      if (!navigator.share) { fail(); return; }
+      navigator.share(data).catch(fail);
     };
-    if (navigator.canShare) {
-      fetch("share-icon.png").then((r) => r.blob()).then((blob) => {
+    const withImage = (blob) => {
+      if (!blob) { send(payload, null); return; }
+      try {
         const file = new File([blob], "choppy-bitcoin.png", { type: blob.type || "image/png" });
         const withFile = { title: payload.title, text: payload.text, url: payload.url, files: [file] };
-        if (navigator.canShare(withFile)) send(withFile);
-        else send(payload);
-      }).catch(() => send(payload));
-      return;
-    }
-    send(payload);
+        if (navigator.canShare && navigator.canShare(withFile)) { send(withFile, blob); return; }
+      } catch (e) {}
+      send(payload, blob);
+    };
+    const tape = (S.runTape && S.runTape.length) ? S.runTape
+      : (S.stats && S.stats.tape && S.stats.tape.length) ? S.stats.tape
+      : (S.tape || []);
+    loadShareCard(function (render) {
+      if (!render) { withImage(null); return; }
+      Promise.resolve(render({
+        bag: btc,
+        headline: headline,
+        kicker: kicker,
+        tone: (kind === "win" || kind === "indep") ? "win" : "rekt",
+        tape: tape,
+        url: "bitcoinizate.com/choppy-bitcoin/",
+        emptyChart: t("shareEmpty")
+      })).then(withImage).catch(function () { withImage(null); });
+    });
   }
   window.CHOPPY_AWARDS = AWARD_CATALOG;
   window.choppyAwardHtml = () => awardListHtml(loadAwards(), "owned");
@@ -14116,7 +14180,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp217";
+      s.src = "mp.js?v=mp220";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
