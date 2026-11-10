@@ -7,6 +7,7 @@
   var FADE_IN = 0.6;
   var FADE_OUT = 0.8;
   var BPM = 156;
+  var FANFARE_VOL = 0.9;
   var STEP = 60 / BPM / 4;
   var LOOK = 0.6;
   var SCALE = 2;
@@ -449,7 +450,7 @@
     if (!(intensity > 0)) return;
     var ac = liveAc(h);
     if (!ac || !getBus(ac)) return;
-    var vol = h.vol ? h.vol() : 0.8;
+    var vol = FANFARE_VOL;
     if (!(vol > 0)) return;
     setBusLevel(ac, vol * (0.35 + 0.65 * Math.min(1, intensity * 1.5)));
     var now = isFinite(ac.currentTime) ? ac.currentTime : 0;
@@ -549,7 +550,7 @@
       if (!muted && !cue && intensity > 0 && h) {
         var ac = liveAc(h);
         if (ac && getBus(ac)) {
-          setBusLevel(ac, (h.vol ? h.vol() : 0.8));
+          setBusLevel(ac, (FANFARE_VOL));
           finale(ac, (isFinite(ac.currentTime) ? ac.currentTime : 0) + 0.02);
         }
       }
