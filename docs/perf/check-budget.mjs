@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const STARTUP = ["nozoom.js", "i18n.js", "supabase-lib.js", "auth.js", "run-stats.js", "audio.js", "game.js"];
+const STARTUP = ["nozoom.js", "i18n.js", "supabase-lib.js", "auth.js", "run-stats.js", "audio.js", "donate-config.js", "game.js"];
 const LIMIT = 290000;
 
 let total = 0;
