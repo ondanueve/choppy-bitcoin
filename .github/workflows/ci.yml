@@ -33,6 +33,9 @@ jobs:
       - name: Smoke test
         run: node tests/smoke.js
 
+      - name: Seeded market
+        run: node tests/seeded-market.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 

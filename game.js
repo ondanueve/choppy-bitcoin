@@ -884,7 +884,22 @@
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-  function wrng() { return S.worldRand ? S.worldRand() : Math.random(); }
+  function rollWorldSeed(seed) {
+    if (seed != null && seed !== 0 && seed !== "0") {
+      const n = Number(seed);
+      S.worldSeed = (Number.isFinite(n) ? n : 0) >>> 0 || 1;
+    } else if (S.mp && S.worldSeed) {
+      S.worldSeed = S.worldSeed >>> 0 || 1;
+    } else {
+      S.worldSeed = ((Math.random() * 0xffffffff) >>> 0) || 1;
+    }
+    S.worldRand = mulberry32(S.worldSeed);
+  }
+  function wrng() {
+    if (!S.worldRand) rollWorldSeed(S.worldSeed);
+    return S.worldRand();
+  }
+
 
   function gauss(mean, lo, hi) {
     let u = 0, v = 0;
@@ -944,32 +959,32 @@
     const t = S.have.adopt || 0;
     const soft = adoptSoft(t);
     let amp;
-    if (kind === "HALVE") amp = 1 + (Math.random() * 0.2 - 0.1);
-    else if (kind === "SWAN") amp = (0.75 + (Math.random() * 0.2 - 0.1)) * (1 - soft * 0.4) * 0.75;
-    else if (kind === "BEAR") amp = (0.17 + Math.random() * 0.05) * (1 - soft * 0.45) * 0.9;
+    if (kind === "HALVE") amp = 1 + (wrng() * 0.2 - 0.1);
+    else if (kind === "SWAN") amp = (0.75 + (wrng() * 0.2 - 0.1)) * (1 - soft * 0.4) * 0.75;
+    else if (kind === "BEAR") amp = (0.17 + wrng() * 0.05) * (1 - soft * 0.45) * 0.9;
     else if (clampPx(S.price) < 10000) {
-      const add = 2500 + Math.random() * 7500;
+      const add = 2500 + wrng() * 7500;
       amp = add / Math.max(PX_MIN, clampPx(S.price));
     }
-    else amp = (0.17 + Math.random() * 0.05) * (1 - soft * 0.45);
+    else amp = (0.17 + wrng() * 0.05) * (1 - soft * 0.45);
     return amp;
   }
 
   function pickCycleResid(kind, amp) {
     let mag;
-    if (kind === "HALVE") mag = 0.50 + Math.random() * 0.25;
+    if (kind === "HALVE") mag = 0.50 + wrng() * 0.25;
     else if (kind === "SWAN") {
       const r = adoptSwanRange(S.have.adopt || 0);
-      mag = Math.abs(r.lo + Math.random() * (r.hi - r.lo));
+      mag = Math.abs(r.lo + wrng() * (r.hi - r.lo));
     } else if (kind === "BULL") {
-      if (clampPx(S.price) < 10000) mag = amp * (1 - Math.random() * 0.15);
+      if (clampPx(S.price) < 10000) mag = amp * (1 - wrng() * 0.15);
       else {
         const r = adoptBullRange(S.have.adopt || 0);
-        mag = r.lo + Math.random() * (r.hi - r.lo);
+        mag = r.lo + wrng() * (r.hi - r.lo);
       }
     } else {
       const r = adoptBearRange(S.have.adopt || 0);
-      mag = Math.abs(r.lo + Math.random() * (r.hi - r.lo));
+      mag = Math.abs(r.lo + wrng() * (r.hi - r.lo));
     }
     mag = Math.max(0.004, mag);
     if (kind === "BULL" && clampPx(S.price) < 10000) return mag;
@@ -1556,8 +1571,8 @@
 
   function resetWorld(keepWallet) {
     const m = metrics();
-    if (S.mp && S.worldSeed) S.worldRand = mulberry32(S.worldSeed);
-    else S.worldRand = null;
+    if (S.worldSeed) S.worldRand = mulberry32(S.worldSeed);
+    else rollWorldSeed();
     S.bird.x = Math.max(64, S.W * 0.18);
     S.bird.y = S.H * 0.42;
     S.bird.v = 0;
@@ -1777,7 +1792,7 @@
 
   function trendBias() {
     const base = (S.drift != null ? S.drift : DRIFT0);
-    let bias = base * (1 + (Math.random() * 2 - 1) * 0.05);
+    let bias = base * (1 + (wrng() * 2 - 1) * 0.05);
     if ((S.have.manip || 0) > 0) {
       const k = (S.have.manip || 0) * (12 / 7);
       if (S.trend === "up") bias += 0.004 * k;
@@ -4641,7 +4656,7 @@
 
   function continueBonus() {
     S.level = 2;
-    S.vtPrice = 100 + Math.random() * 200;
+    S.vtPrice = 100 + wrng() * 200;
     S.vt = 0; S.vtCycle = S.vtPrice;
     resetWorld(true);
     startCount();
@@ -9959,8 +9974,8 @@
     try { syncMpChrome(); } catch (e) {}
   }
 
-  function startGame(ranked) {
-    if (!S.mp) { S.worldSeed = 0; S.worldRand = null; S.mpOver = false; S.mpPlayAt = 0; }
+  function startGame(ranked, seed) {
+    if (!S.mp) { S.mpOver = false; S.mpPlayAt = 0; rollWorldSeed(seed); }
     S.ranked = ranked !== false;
     wipeShotKeep();
     if (A && A.unlock) try { A.unlock(); } catch (e) {}
@@ -10063,6 +10078,7 @@
   function replay() {
     A.cancelSpeech();
     S.trainBattleLose = false;
+    if (!S.mp) rollWorldSeed();
     wipeShotKeep();
     resetWorld(false);
     applyTestLoadout();
@@ -10123,8 +10139,8 @@
       const bias = trendBias();
       const mid = bias > 0.001 ? 0.42 : bias < -0.001 ? 0.58 : 0.48;
       const px = clampPx(S.price);
-      S.price = clampPx(px + (Math.random() - mid) * px * 0.012 * dt + px * bias * dt);
-      if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (Math.random() - 0.45) * S.vtPrice * 0.01 * dt + S.vtPrice * 0.0012 * dt);
+      S.price = clampPx(px + (wrng() - mid) * px * 0.012 * dt + px * bias * dt);
+      if (S.level >= 2) S.vtPrice = Math.max(1, S.vtPrice + (wrng() - 0.45) * S.vtPrice * 0.01 * dt + S.vtPrice * 0.0012 * dt);
     }
     S.lifeT += dt; S.sampleAcc += dt;
     if (!S.mpCatch) {
@@ -11656,7 +11672,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp218";
+      s.src = "halving.js?v=mp221";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -14116,7 +14132,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp218";
+      s.src = "mp.js?v=mp221";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -15600,6 +15616,55 @@
   })();
   window.startChoppy = startGame;
   window.replayChoppy = replay;
+  window.choppyWorldSeed = function () { return S.worldSeed >>> 0; };
+  window.choppySimulateMarket = function (seed, nCandles) {
+    const n = Math.max(1, nCandles || 40);
+    S.mp = false;
+    S.ranked = true;
+    S.optPanel = null;
+    S.testPerkSeed = {};
+    S.testArcEvery = 0;
+    S.testCashOnce = 0;
+    S.testBtcOnce = 0;
+    S.testIndepQueued = false;
+    S.testCheat = false;
+    S.humanInput = true;
+    rollWorldSeed(seed);
+    resetWorld(false);
+    S.dead = false;
+    S.finished = false;
+    S.spectate = false;
+    S.invuln = 1e9;
+    S.phase = "play";
+    const dt = 1 / 60;
+    let steps = 0;
+    const cap = 60 * 60 * 10;
+    while ((S.candles || 0) < n && !S.dead && steps++ < cap) {
+      if (S.pipes && S.pipes.length) S.bird.y = S.pipes[0].gapY;
+      S.bird.v = 0;
+      S.invuln = 1e9;
+      if (S.phase !== "play") {
+        S.phase = "play";
+        S.arcHold = false;
+        S.optPanel = null;
+        S.perkOffers = [];
+        S.chanceCard = null;
+      }
+      step(dt);
+    }
+    return {
+      seed: S.worldSeed >>> 0,
+      candles: S.candles | 0,
+      steps: steps,
+      startPrice: S.startPrice,
+      startCash: S.startCash,
+      drift: S.drift,
+      tape: (S.tape || []).slice(),
+      pipes: (S.pipes || []).map(function (p) {
+        return { x: p.x, gapY: p.gapY, gapH: p.gapH, green: !!p.green };
+      })
+    };
+  };
   window.dealChoppyArc = function (id) {
     window.__arcForce = id || "";
     if ((S.have.chance || 0) < 1) S.have.chance = 1;
