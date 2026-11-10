@@ -21,9 +21,9 @@
       highScore: "High score",
       playSub: "Play is ranked (0 cold, 0 multisig).",
       donateTitle: "Donations",
-      donateBody: "Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.",
+      donateBody: "Donations keep the game going.",
       how: "How to play",
-      prizes: "Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.",
+      prizes: "Donations keep the game going.",
       feedback: "Feedback",
       send: "Send",
       thanks: "Thanks.",
@@ -310,9 +310,9 @@
       highScore: "Mejor puntaje",
       playSub: "Jugar es ranked (0 cold, 0 multisig).",
       donateTitle: "Donaciones",
-      donateBody: "Las donaciones mantienen el juego. El 70% de cada donación se reparte en premios del ranking.",
+      donateBody: "Las donaciones mantienen el juego.",
       how: "Cómo se juega",
-      prizes: "Las donaciones mantienen el juego. El 70% de cada donación se reparte en premios del ranking.",
+      prizes: "Las donaciones mantienen el juego.",
       feedback: "Feedback",
       send: "Enviar",
       thanks: "Gracias.",
@@ -417,7 +417,7 @@
       ranked: "Ranked",
       training: "Entrenamiento",
       trainCamp: "Entrenamiento",
-      trainNote: "9 cold y 999 multisig. No cuenta para el ranking ni los premios.",
+      trainNote: "9 cold y 999 multisig. No cuenta para el ranking ni para los logros.",
       versus: "VERSUS",
       comingSoon: "PRÓXIMAMENTE",
       mpAlpha: "ALPHA",
@@ -615,7 +615,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp218";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp219";
     document.head.appendChild(s);
   }
 

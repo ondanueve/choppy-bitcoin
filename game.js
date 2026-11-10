@@ -521,7 +521,7 @@
     mpAlpha: "ALPHA",
     mpAlphaNote: "Alpha. Testers welcome. Send feedback to",
     donateTitle: "Donations",
-    donateBody: "Donations keep the game going. 70% of every donation is distributed as leaderboard prizes.",
+    donateBody: "Donations keep the game going.",
     boardBtc: "Most BTC",
     boardInd: "Fastest independence",
     mpHost: "HOST ROOM", mpJoin: "JOIN", mpStart: "START MATCH", mpBack: "BACK",
@@ -640,12 +640,11 @@
   }
 
   function donateBlock() {
-    const ln = "lnbc1p4tdeq9pp5v39yyvsws5swurns2gpmj64m469548f64t2cqjsfyka574fj0dasdqqcqzzgxqyz5vqrzjqf0wu22xsefd8gzu0m9n93g2khea86l6yy26en9v46g9e6hk7v9z8lytgux50yx2zuqqqqryqqqqthqqpyrzjqfwdd2w9y5ra5z3m4qetfa5ccu6432xfuvk6zrvg9vxwltvukd48dlytgux50yx2zuqqqqryqqqqthqqpysp5zc5j4qd90hqxklpcy4skg9rfl5aypv9rsmrypjdt62td8869kx0s9qrsgq43tqd4ujehpvccxw5rzkk8z74mk7sdhgga3tqtk3uwvtlj3tl3s3yhrv5vy5x8t6x2zfursvw7z82rqu4fmuttaj57ukyspx35np6zgq6tutga";
-    const btc = "bc1q5yrmsvdh3m7ad03txs2h5ktw5zzdxwxrgeujsj0e25s83cffzauq4vgjez";
+    const links = (typeof choppyDonateLinksHtml === "function" && choppyDonateLinksHtml()) || "";
     return "<section class=\"donate-note\">"
       + "<h3 class=\"k\">" + t("donateTitle") + "</h3>"
       + "<p>" + t("donateBody") + "</p>"
-      + "<p class=\"donate-links\"><a href=\"lightning:" + ln + "\">Lightning</a> · <a href=\"bitcoin:" + btc + "\">Bitcoin</a></p>"
+      + (links ? "<p class=\"donate-links\">" + links + "</p>" : "")
       + "</section>";
   }
   function battleIcos(kinds){
@@ -11656,7 +11655,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp218";
+      s.src = "halving.js?v=mp219";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -14116,7 +14115,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp218";
+      s.src = "mp.js?v=mp219";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14591,8 +14590,7 @@
           + tutorialBody()
           + awardListHtml(loadAwards(), "full")
           + "<h3 class=\"k\">" + t("boardBtc") + "</h3><pre id=\"ready-board\" class=\"board\">—</pre>"
-          + "<h3 class=\"k\">" + t("boardInd") + "</h3><pre id=\"ready-indep\" class=\"board\">—</pre>"
-          + donateBlock();
+          + "<h3 class=\"k\">" + t("boardInd") + "</h3><pre id=\"ready-indep\" class=\"board\">—</pre>";
         $("go").onclick = () => startGame(true);
         $("go").onpointerdown = (e) => { e.stopPropagation(); startGame(true); };
         if ($("go-train")) {
@@ -14776,7 +14774,8 @@
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
       } else {
-        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? "" : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1><p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>";
+        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? "" : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1><p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
+          + donateBlock();
         if ($("go")) {
           $("go").onclick = replay;
           $("go").onpointerdown = (e) => { e.stopPropagation(); replay(); };
@@ -14797,7 +14796,8 @@
             + "<p>" + (esW ? "Tu partida queda registrada como una victoria. Puedes seguir operando como nación libre o empezar de nuevo." : "Your run is recorded as a victory. Keep trading as a free nation, or start over.") + "</p>"
           : "<p class=\"k\">TWENTY ONE MILLION</p><h1>" + t("congrats") + "</h1>"
             + "<p>" + t("stacked") + "</p>")
-          + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("keepPlaying") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"go-again\">" + t("playAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>";
+          + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("keepPlaying") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"go-again\">" + t("playAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
+          + donateBlock();
         if ($("go")) $("go").onclick = keepPlaying;
         if ($("run-stats")) $("run-stats").onclick = (e) => { e.stopPropagation(); S.runTab = "stats"; renderOverlay(); };
         if ($("go-again")) $("go-again").onclick = replay;
