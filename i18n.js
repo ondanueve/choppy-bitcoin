@@ -19,7 +19,7 @@
       btcAddr: "BTC address",
       lightning: "Lightning",
       highScore: "High score",
-      playSub: "Play is ranked (0 cold, 0 multisig).",
+      playSub: "Ranked is the candle of the day: the same chart for everyone. Best bag of the day, unlimited attempts. The board resets at 00:00 UTC.",
       donateTitle: "Donations",
       donateBody: "Donations keep the game going.",
       how: "How to play",
@@ -130,6 +130,13 @@
       daily: "Candle of the day",
       dailyNote: "The same chart for everyone today.",
       dailyBoard: "Today's bags",
+      dailyYesterday: "Yesterday",
+      dailyReset: "Resets in {n}",
+      boardLegacy: "All-time (legacy)",
+      practice: "Practice",
+      practiceNote: "Same rules as ranked, a random chart, no score on the board.",
+      shareDaily: "Candle of the day · {n}",
+      shareRank: "Rank #{n}",
       beatBag: "Beat {n}",
       beatBagNote: "Same chart as the challenger.",
       beatPlay: "Play this chart",
@@ -320,7 +327,7 @@
       btcAddr: "Dirección BTC",
       lightning: "Lightning",
       highScore: "Mejor puntaje",
-      playSub: "Jugar es ranked (0 cold, 0 multisig).",
+      playSub: "El ranked es la vela del día: el mismo gráfico para todos. Gana la mejor bolsa del día, con intentos ilimitados. El ranking se reinicia a las 00:00 UTC.",
       donateTitle: "Donaciones",
       donateBody: "Las donaciones mantienen el juego.",
       how: "Cómo se juega",
@@ -431,6 +438,13 @@
       daily: "Vela del día",
       dailyNote: "El mismo gráfico para todos hoy.",
       dailyBoard: "Bolsas de hoy",
+      dailyYesterday: "Ayer",
+      dailyReset: "Se reinicia en {n}",
+      boardLegacy: "Histórico (legado)",
+      practice: "Práctica",
+      practiceNote: "Las mismas reglas que el ranked, un gráfico al azar, sin puntaje en el ranking.",
+      shareDaily: "Vela del día · {n}",
+      shareRank: "Puesto #{n}",
       beatBag: "Supera {n}",
       beatBagNote: "El mismo gráfico que quien te desafía.",
       beatPlay: "Jugar este gráfico",
@@ -639,7 +653,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp223";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp224";
     document.head.appendChild(s);
   }
 
