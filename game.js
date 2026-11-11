@@ -519,9 +519,9 @@
     ranked: "RANKED", training: "TRAINING", versus: "VERSUS",
     daily: "CANDLE OF THE DAY", dailyNote: "The same chart for everyone today.",
     dailyBoard: "Today's bags", dailyYesterday: "Yesterday",
-    dailyReset: "Resets in {t}", boardLegacy: "All-time (legacy)",
+    dailyReset: "Resets in {n}", boardLegacy: "All-time (legacy)",
     practice: "PRACTICE", practiceNote: "Same rules as ranked, a random chart, no score on the board.",
-    shareDaily: "Candle of the day · {d}", shareRank: "Rank #{n}",
+    shareDaily: "Candle of the day · {n}", shareRank: "Rank #{n}",
     beatBag: "Beat {n}",
     beatBagNote: "Same chart as the challenger.", beatPlay: "Play this chart",
     beatYes: "You beat the bag.", beatNo: "The bag still stands.",
@@ -949,7 +949,7 @@
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const left = h > 0 ? (h + "h " + String(m).padStart(2, "0") + "m") : (m + "m");
-    return t("dailyReset").replace("{t}", left);
+    return t("dailyReset").replace("{n}", left);
   }
   function parseChallenge(search) {
     try {
@@ -13128,7 +13128,7 @@
     const shareDay = S.dailyDay || (S.daily ? utcDayKey() : "");
     let shareSub = "";
     if (S.daily && shareDay) {
-      shareSub = t("shareDaily").replace("{d}", shareDay);
+      shareSub = t("shareDaily").replace("{n}", shareDay);
       if (S.dailyRank) shareSub += " · " + t("shareRank").replace("{n}", String(S.dailyRank));
     }
     const payload = { title: "Choppy Bitcoin", text: text, url: url };

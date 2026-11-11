@@ -320,8 +320,8 @@
         var h = Math.floor(s / 3600);
         var m = Math.floor((s % 3600) / 60);
         var left = h > 0 ? (h + "h " + String(m).padStart(2, "0") + "m") : (m + "m");
-        var tmpl = (window.BZ && BZ.t && BZ.t("dailyReset")) || "Resets in {t}";
-        return tmpl.replace("{t}", left);
+        var tmpl = (window.BZ && BZ.t && BZ.t("dailyReset")) || "Resets in {n}";
+        return tmpl.replace("{n}", left);
       }
       var el = document.getElementById("about-daily-reset");
       if (el) el.textContent = resetText();
