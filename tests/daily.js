@@ -17,7 +17,7 @@ assert.ok(/id=\\"go-daily\\"/.test(game), "title screen has a daily button");
 assert.ok(/id=\\"go-challenge\\"/.test(game), "title screen can show a challenge button");
 assert.ok(/kbClickFirst\("#go-challenge"\)/.test(game), "Enter can confirm a challenge");
 assert.ok(/startGame\(true, null, "daily"\)/.test(game));
-assert.ok(/daily\.js\?v=mp222/.test(game), "daily.js is lazy-loaded");
+assert.ok(/daily\.js\?v=mp223/.test(game), "daily.js is lazy-loaded");
 assert.ok(!/daily\.js/.test(index), "daily.js is not on the startup path");
 
 const keys = ["daily", "dailyNote", "dailyBoard", "beatBag", "beatBagNote", "beatPlay", "beatYes", "beatNo"];
