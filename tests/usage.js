@@ -20,7 +20,7 @@ assert.ok(/revoke all on public\.usage_counts from public, anon, authenticated/.
 
 assert.ok(/function bumpUsage\(kind\)/.test(game));
 assert.ok(/sb\.rpc\("bump_usage", \{ p_kind: kind \}\)/.test(game));
-const startFn = game.match(/function startGame\(ranked, seed, mode\) \{[\s\S]{0,900}/)[0];
+const startFn = game.match(/function startGame\(ranked, seed, mode\) \{[\s\S]{0,1800}/)[0];
 assert.ok(startFn.indexOf('bumpUsage("start")') !== -1, "startGame counts a start");
 const replayFn = game.match(/function replay\(\) \{[\s\S]{0,500}/)[0];
 assert.ok(replayFn.indexOf('bumpUsage("start")') !== -1, "replay counts a start");

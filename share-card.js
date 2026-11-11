@@ -97,6 +97,12 @@
     ctx.font = "700 32px 'Segoe UI', Helvetica, sans-serif";
     ctx.fillText(d.headline || "", 72, 286);
 
+    if (d.subline) {
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.font = "600 22px 'Segoe UI', Helvetica, sans-serif";
+      ctx.fillText(d.subline, 72, 322);
+    }
+
     ctx.fillStyle = "rgba(255,255,255,0.06)";
     fillRound(ctx, 72, 330, W - 144, 200, 18);
     var vals = tapeValues(d.tape);

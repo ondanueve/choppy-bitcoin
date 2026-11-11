@@ -179,7 +179,7 @@
     }
     @media (min-width: 640px) { .chips { grid-template-columns: repeat(4, 1fr); } }
   </style>
-  <script src="/choppy-bitcoin/nozoom.js?v=mp223"></script>
+  <script src="/choppy-bitcoin/nozoom.js?v=mp224"></script>
 </head>
 <body>
   <main class="wrap">
@@ -208,6 +208,7 @@
         <h3>Choppy Bitcoin</h3>
         <p data-i18n="lead2">Fly through Japanese candles. The price moves while you fly. Score is total net worth in BTC at the in-game price.</p>
         <p data-i18n="mpAbout">Versus is a room for up to 8 players. Last one standing, most BTC, or a race to a candle. It does not count for ranked or for awards.</p>
+        <p data-i18n="aboutDaily">Ranked play is the candle of the day: everyone gets the same chart until 00:00 UTC. Your best bag of the day counts, with unlimited attempts. Practice uses the same rules on a random chart and does not submit a score. Training stays a sandbox with extra lives.</p>
         <a class="play" href="/choppy-bitcoin/"><span data-i18n="play">Play Choppy Bitcoin</span></a>
       </article>
     </div>
@@ -224,8 +225,17 @@
       </div>
     </section>
     <section class="how">
-      <h3 data-i18n="boardBtc">Most BTC</h3>
-      <div id="site-board" class="board">—</div>
+      <h3 data-i18n="dailyBoard">Today's bags</h3>
+      <p class="k" id="about-daily-reset"></p>
+      <div id="daily-board-wrap" hidden>
+        <div id="daily-today-wrap"><pre id="site-daily" class="board">—</pre></div>
+        <h3 data-i18n="dailyYesterday">Yesterday</h3>
+        <div id="daily-y-wrap"><pre id="site-daily-y" class="board">—</pre></div>
+      </div>
+      <details>
+        <summary data-i18n="boardLegacy">All-time (legacy)</summary>
+        <div id="site-board" class="board">—</div>
+      </details>
       <h3 data-i18n="boardInd">Fastest independence</h3>
       <div id="site-indep" class="board">—</div>
     </section>
@@ -283,12 +293,44 @@
       <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp223"></script>
-  <script src="/choppy-bitcoin/i18n-extra.js?v=mp223"></script>
-  <script src="/choppy-bitcoin/supabase-lib.js?v=mp223"></script>
-  <script src="/choppy-bitcoin/auth.js?v=mp223"></script>
-  <script src="/choppy-bitcoin/donate-config.js?v=mp223"></script>
+  <script src="/choppy-bitcoin/i18n.js?v=mp224"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp224"></script>
+  <script src="/choppy-bitcoin/supabase-lib.js?v=mp224"></script>
+  <script src="/choppy-bitcoin/auth.js?v=mp224"></script>
+  <script src="/choppy-bitcoin/donate-config.js?v=mp224"></script>
+  <script src="/choppy-bitcoin/daily.js?v=mp224"></script>
   <script>if (window.choppyFillDonateLinks) choppyFillDonateLinks(document.getElementById("donate-links"));</script>
+  <script>
+    (function () {
+      function dayKey(d) {
+        var x = d || new Date();
+        var m = String(x.getUTCMonth() + 1).padStart(2, "0");
+        var day = String(x.getUTCDate()).padStart(2, "0");
+        return x.getUTCFullYear() + "-" + m + "-" + day;
+      }
+      function yKey() {
+        var x = new Date();
+        x.setUTCDate(x.getUTCDate() - 1);
+        return dayKey(x);
+      }
+      function resetText() {
+        var x = new Date();
+        var end = Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate() + 1);
+        var s = Math.max(0, Math.floor((end - x.getTime()) / 1000));
+        var h = Math.floor(s / 3600);
+        var m = Math.floor((s % 3600) / 60);
+        var left = h > 0 ? (h + "h " + String(m).padStart(2, "0") + "m") : (m + "m");
+        var tmpl = (window.BZ && BZ.t && BZ.t("dailyReset")) || "Resets in {t}";
+        return tmpl.replace("{t}", left);
+      }
+      var el = document.getElementById("about-daily-reset");
+      if (el) el.textContent = resetText();
+      if (window.choppyFillRankedBoards) window.choppyFillRankedBoards(dayKey(), yKey());
+      else if (window.choppyFillDailyBoard) {
+        window.choppyFillDailyBoard(document.getElementById("daily-board-wrap"), document.getElementById("site-daily"), dayKey());
+      }
+    })();
+  </script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
   <script>
     (function () {

@@ -968,11 +968,11 @@
     }
   };
   window.refreshLeaderboard = (id) => {
-    fetchGlobalLeaderboard(id);
-    fetchIndepBoard(id === "ready-board" ? "ready-indep" : "site-indep");
-    if (id === "ready-board") fetchIndepBoard("site-indep");
-    fetchEloBoard(id === "ready-board" ? "ready-elo" : (id || "site-elo"));
-    if (id === "ready-board") fetchEloBoard("site-elo");
+    if (id !== "ready-indep") fetchGlobalLeaderboard(id);
+    fetchIndepBoard(id === "ready-board" || id === "ready-indep" ? "ready-indep" : "site-indep");
+    if (id === "ready-board" || id === "ready-indep") fetchIndepBoard("site-indep");
+    fetchEloBoard(id === "ready-board" || id === "ready-indep" ? "ready-elo" : (id || "site-elo"));
+    if (id === "ready-board" || id === "ready-indep") fetchEloBoard("site-elo");
   };
   window.submitIndependence = submitIndependence;
   window.submitVersusResult = submitVersusResult;

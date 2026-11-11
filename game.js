@@ -518,7 +518,11 @@
     language: "LANGUAGE", aiLog: "A.I. BUD LOG", signIn: "SIGN IN",
     ranked: "RANKED", training: "TRAINING", versus: "VERSUS",
     daily: "CANDLE OF THE DAY", dailyNote: "The same chart for everyone today.",
-    dailyBoard: "Today's bags", beatBag: "Beat {n}",
+    dailyBoard: "Today's bags", dailyYesterday: "Yesterday",
+    dailyReset: "Resets in {t}", boardLegacy: "All-time (legacy)",
+    practice: "PRACTICE", practiceNote: "Same rules as ranked, a random chart, no score on the board.",
+    shareDaily: "Candle of the day · {d}", shareRank: "Rank #{n}",
+    beatBag: "Beat {n}",
     beatBagNote: "Same chart as the challenger.", beatPlay: "Play this chart",
     beatYes: "You beat the bag.", beatNo: "The bag still stands.",
     comingSoon: "COMING SOON",
@@ -846,33 +850,20 @@
       return (s.scores && s.scores.choppy3) || 0;
     } catch (e) { return 0; }
   }
+  // Flip to true together with daily_one_attempt() in supabase/supabase-daily.sql
+  // to allow only one ranked submit per signed-in user per UTC day.
+  const DAILY_ONE_ATTEMPT = false;
   function saveBest(n) {
-    if (!S.ranked || S.testCheat) return S.best || 0;
+    if (!S.ranked || S.testCheat || S.practice) return S.best || 0;
     if (S.daily) {
       try { queueDailySubmit(n); } catch (e) {}
-      return n;
+      return Math.max(S.best || 0, n);
     }
-    if (S.challengeSeed) return n;
-    let s = { scores: { choppy: 0 } };
-    try { s = Object.assign({ scores: { choppy: 0 } }, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
-    s.scores = s.scores || {};
-    const stats = packRunStats();
-    const old = s.scores.choppy3 || 0;
-    const oldT = s.choppyTime != null ? s.choppyTime : 1e18;
-    const better = n > old || (n === old && (stats.time || 0) < oldT);
-    if (better) {
-      s.scores.choppy3 = n;
-      s.choppyTime = stats.time || 0;
-      s.choppyStats = stats;
-    }
-    try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
-    if (typeof window.submitNewHighScore === "function") {
-      window.submitNewHighScore(n, { lifeT: S.lifeT, candles: S.candles, human: !!S.humanInput, stats: stats });
-    }
-    return s.scores.choppy3;
+    if (S.challengeSeed) return Math.max(S.best || 0, n);
+    return Math.max(S.best || 0, n);
   }
   function noteIndependence() {
-    if (S.indepNoted || S.mp || !S.ranked || S.testCheat || S.humanInput === false) return;
+    if (S.indepNoted || S.mp || !S.ranked || S.practice || !S.daily || S.testCheat || S.humanInput === false) return;
     const life = Number(S.lifeT) || 0;
     const candles = S.candles || 0;
     if (life < 12 || candles < 3) return;
@@ -943,6 +934,23 @@
     return (h >>> 0) || 1;
   }
   function dailySeed(d) { return seedFromDay(utcDayKey(d)); }
+  function utcYesterdayKey(d) {
+    const x = new Date((d || new Date()).getTime());
+    x.setUTCDate(x.getUTCDate() - 1);
+    return utcDayKey(x);
+  }
+  function msUntilUtcReset(now) {
+    const x = now || new Date();
+    const end = Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate() + 1);
+    return Math.max(0, end - x.getTime());
+  }
+  function fmtResetLeft(now) {
+    const s = Math.floor(msUntilUtcReset(now) / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const left = h > 0 ? (h + "h " + String(m).padStart(2, "0") + "m") : (m + "m");
+    return t("dailyReset").replace("{t}", left);
+  }
   function parseChallenge(search) {
     try {
       const q = new URLSearchParams(search || (typeof location !== "undefined" ? location.search : "") || "");
@@ -1121,7 +1129,7 @@
     startCash: 0, startPrice: 0, peakNet: 0, candles: 0, shownCandles: 0, buys: 0, sells: 0, swans: 0, lasers: 0,
     halvings: 0, halveLeft: HALVE_GAP, halveBull: false, halveFloor: 0, spawnedPipes: 0, halveSide: "up",
     swanBear: false, halveSpeechUntil: 0,
-    stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true,
+    stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true, practice: false, daily: false,
     mp: false, worldSeed: 0, worldRand: null, mpOver: false, mpErr: "", mpJoinCode: "",
     mpRules: null, mpPlayAt: 0, mpSlot: 0, btcColdAt: 0, spectate: false, finished: false,
     mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false, mpSeriesT0: 0, mpEloTry: 0, mpLog: [], mpCatch: false,
@@ -10058,16 +10066,23 @@
   function startGame(ranked, seed, mode) {
     if (!S.mp) {
       S.mpOver = false; S.mpPlayAt = 0;
+      if (ranked !== false && (mode == null || mode === "" || mode === "ranked")) mode = "daily";
+      S.practice = mode === "practice";
       if (mode === "daily") {
         S.daily = true; S.dailyDay = utcDayKey();
+        if (S.dailySubmittedDay !== S.dailyDay) { S.dailySubmitted = false; S.dailyRank = 0; }
         S.challengeSeed = 0; S.challengeBag = 0;
         seed = seed != null ? seed : dailySeed();
       } else if (mode === "challenge") {
-        S.daily = false; S.dailyDay = "";
         const ch = S.pendingChallenge || {};
         seed = seed != null ? seed : ch.seed;
         S.challengeSeed = (Number(seed) >>> 0) || 1;
         if (!(S.challengeBag > 0)) S.challengeBag = Number(ch.bag) || 0;
+        if (S.challengeSeed === dailySeed()) {
+          S.daily = true; S.dailyDay = utcDayKey();
+        } else {
+          S.daily = false; S.dailyDay = "";
+        }
       } else {
         S.daily = false; S.dailyDay = "";
         S.challengeSeed = 0; S.challengeBag = 0;
@@ -10181,6 +10196,7 @@
     if (!S.mp) {
       if (S.daily) rollWorldSeed(S.worldSeed);
       else if (S.challengeSeed) rollWorldSeed(S.challengeSeed);
+      else if (S.practice) rollWorldSeed();
       else rollWorldSeed();
     }
     try { bumpUsage("start"); } catch (e) {}
@@ -11803,7 +11819,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp223";
+      s.src = "halving.js?v=mp224";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12731,7 +12747,7 @@
     return !!(window.choppySignedIn === true && window.choppyUid && window.choppyUserId && window.choppyUid === window.choppyUserId);
   }
   function awardsLive() {
-    return isRegistered() && !!S.ranked && !S.testCheat && !S.mp;
+    return isRegistered() && !!S.ranked && !!S.daily && !S.practice && !S.testCheat && !S.mp;
   }
   const AWARD_TOAST_MS = 3000;
   const awardToastQ = [];
@@ -12962,9 +12978,9 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp223";
+    return "share-card.js?v=mp224";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp223"; }
+  function dailyScriptSrc() { return "daily.js?v=mp224"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -12990,23 +13006,50 @@
   }
   function fillDailyBoard() {
     const wrap = $("daily-board-wrap");
-    const box = $("ready-daily");
-    if (!wrap || !box) return;
+    if (!wrap) return;
+    const resetEl = $("daily-reset");
+    if (resetEl) resetEl.textContent = fmtResetLeft();
     loadDaily(function () {
-      if (typeof choppyFillDailyBoard === "function") choppyFillDailyBoard(wrap, box, utcDayKey());
+      if (typeof choppyFillRankedBoards === "function") choppyFillRankedBoards(utcDayKey(), utcYesterdayKey());
+      else if (typeof choppyFillDailyBoard === "function") choppyFillDailyBoard(wrap, $("ready-daily"), utcDayKey());
       else wrap.hidden = true;
     });
   }
+  let dailyResetTick = 0;
+  function startDailyResetClock() {
+    if (dailyResetTick) clearInterval(dailyResetTick);
+    const tick = function () {
+      const el = $("daily-reset");
+      if (!el || S.phase !== "ready") {
+        if (S.phase !== "ready" && dailyResetTick) {
+          clearInterval(dailyResetTick);
+          dailyResetTick = 0;
+        }
+        return;
+      }
+      el.textContent = fmtResetLeft();
+    };
+    tick();
+    dailyResetTick = setInterval(tick, 30000);
+  }
   function queueDailySubmit(n) {
+    const day = S.dailyDay || utcDayKey();
+    if (DAILY_ONE_ATTEMPT && S.dailySubmitted && S.dailyDay === day) return;
     const payload = {
       score: n,
       life: S.lifeT,
       candles: S.candles,
-      day: S.dailyDay || utcDayKey(),
+      day: day,
       bag: netBtc()
     };
     loadDaily(function () {
-      if (typeof choppySubmitDaily === "function") choppySubmitDaily(payload);
+      if (typeof choppySubmitDaily === "function") {
+        choppySubmitDaily(payload, function (rank) {
+          S.dailySubmitted = true;
+          S.dailySubmittedDay = day;
+          if (rank) S.dailyRank = rank;
+        });
+      }
     });
   }
   function loadShareCard(cb) {
@@ -13069,17 +13112,25 @@
         ? tag + "juntó 21M en Choppy Bitcoin. Bag " + btc + (names ? " Premios: " + names : "")
         : tag + "stacked 21M on Choppy Bitcoin. Bag " + btc + (names ? " Awards: " + names : ""))
       : (es
-        ? tag + "quedó rekt en Choppy Bitcoin. Bag " + btc + ". Juega gratis en Bitcoinizate."
-        : tag + "got rekt on Choppy Bitcoin. Bag " + btc + ". Play free on Bitcoinizate.");
+        ? tag + "quedó rekt en Choppy Bitcoin" + (S.daily ? " (vela del día " + (S.dailyDay || utcDayKey()) + ")" : "") + ". Bag " + btc + ". Juega gratis en Bitcoinizate."
+        : tag + "got rekt on Choppy Bitcoin" + (S.daily ? " (candle of the day " + (S.dailyDay || utcDayKey()) + ")" : "") + ". Bag " + btc + ". Play free on Bitcoinizate.");
     const url = challengeUrl(S.worldSeed, netBtc());
     const headline = kind === "indep"
       ? (es ? "Independencia" : "Independence")
       : kind === "win"
       ? (es ? "21 millones" : "Twenty one million")
       : (es ? "Liquidado" : "Rekt");
-    const kicker = kind === "indep" || kind === "win"
+    const kicker = S.daily
+      ? t("daily")
+      : kind === "indep" || kind === "win"
       ? (es ? "Victoria" : "Victory")
       : (es ? "Fin de la partida" : "Run over");
+    const shareDay = S.dailyDay || (S.daily ? utcDayKey() : "");
+    let shareSub = "";
+    if (S.daily && shareDay) {
+      shareSub = t("shareDaily").replace("{d}", shareDay);
+      if (S.dailyRank) shareSub += " · " + t("shareRank").replace("{n}", String(S.dailyRank));
+    }
     const payload = { title: "Choppy Bitcoin", text: text, url: url };
     const goTweet = () => {
       window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text + " " + url), "_blank", "noopener");
@@ -13107,6 +13158,7 @@
         bag: btc,
         headline: headline,
         kicker: kicker,
+        subline: shareSub,
         tone: (kind === "win" || kind === "indep") ? "win" : "rekt",
         tape: tape,
         url: "bitcoinizate.com/choppy-bitcoin/",
@@ -14372,7 +14424,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp223";
+      s.src = "mp.js?v=mp224";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14837,36 +14889,46 @@
         bindPauseUi();
       } else {
         overlay.innerHTML = "<h1>Choppy Bitcoin</h1>"
-          + "<button class=\"cta\" id=\"go\">" + t("ranked") + "</button>"
+          + "<button class=\"cta\" id=\"go\">" + t("daily") + "</button>"
           + "<p class=\"k\">" + t("playSub") + "</p>"
+          + "<p class=\"k\" id=\"daily-reset\">" + fmtResetLeft() + "</p>"
+          + "<button type=\"button\" class=\"cta play-alt\" id=\"go-practice\">" + t("practice") + "</button>"
+          + "<p class=\"k\">" + t("practiceNote") + "</p>"
           + "<button type=\"button\" class=\"cta play-alt\" id=\"go-train\">" + t("training") + "</button>"
           + "<p class=\"k\">" + t("trainNote") + "</p>"
-          + "<button type=\"button\" class=\"cta play-alt\" id=\"go-daily\">" + t("daily") + "</button>"
-          + "<p class=\"k\">" + t("dailyNote") + "</p>"
-          + "<div id=\"daily-board-wrap\" hidden><h3 class=\"k\">" + t("dailyBoard") + "</h3><pre id=\"ready-daily\" class=\"board\">—</pre></div>"
           + (S.pendingChallenge ? ("<p class=\"k\">" + t("beatBag").replace("{n}", fmtBtc(S.pendingChallenge.bag || 0)) + "</p><p class=\"k\">" + t("beatBagNote") + "</p><button type=\"button\" class=\"cta play-alt\" id=\"go-challenge\">" + t("beatPlay") + "</button>") : "")
           + "<button type=\"button\" class=\"cta play-alt\" id=\"go-mp\">" + t("versus") + "<small class=\"alpha-tag\">" + t("mpAlpha") + "</small></button>"
           + "<p class=\"k\">" + t("mpAlphaNote") + " <a href=\"mailto:versus@bitcoinizate.com\">versus@bitcoinizate.com</a></p>"
           + (window.choppySignedIn ? "" : "<button type=\"button\" class=\"cta play-alt\" id=\"overlay-auth\">" + t("signIn") + "</button>")
           + tutorialBody()
           + awardListHtml(loadAwards(), "full")
-          + "<h3 class=\"k\">" + t("boardBtc") + "</h3><pre id=\"ready-board\" class=\"board\">—</pre>"
+          + "<div id=\"daily-board-wrap\" hidden>"
+          + "<div class=\"overlay-actions\" id=\"daily-tabs\">"
+          + "<button type=\"button\" class=\"cta play-alt on\" data-daily-tab=\"today\">" + t("dailyBoard") + "</button>"
+          + "<button type=\"button\" class=\"cta play-alt\" data-daily-tab=\"yesterday\">" + t("dailyYesterday") + "</button>"
+          + "<button type=\"button\" class=\"cta play-alt\" data-daily-tab=\"legacy\">" + t("boardLegacy") + "</button>"
+          + "</div>"
+          + "<div id=\"daily-today-wrap\"><pre id=\"ready-daily\" class=\"board\">—</pre></div>"
+          + "<div id=\"daily-y-wrap\" hidden><pre id=\"ready-daily-y\" class=\"board\">—</pre></div>"
+          + "<div id=\"daily-legacy-wrap\" hidden><pre id=\"ready-board\" class=\"board\">—</pre></div>"
+          + "</div>"
           + "<h3 class=\"k\">" + t("boardInd") + "</h3><pre id=\"ready-indep\" class=\"board\">—</pre>";
-        $("go").onclick = () => startGame(true);
-        $("go").onpointerdown = (e) => { e.stopPropagation(); startGame(true); };
+        $("go").onclick = () => startGame(true, null, "daily");
+        $("go").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "daily"); };
+        if ($("go-practice")) {
+          $("go-practice").onclick = () => startGame(true, null, "practice");
+          $("go-practice").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "practice"); };
+        }
         if ($("go-train")) {
           $("go-train").onclick = () => startGame(false);
           $("go-train").onpointerdown = (e) => { e.stopPropagation(); startGame(false); };
-        }
-        if ($("go-daily")) {
-          $("go-daily").onclick = () => startGame(true, null, "daily");
-          $("go-daily").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "daily"); };
         }
         if ($("go-challenge")) {
           $("go-challenge").onclick = () => startGame(true, S.pendingChallenge && S.pendingChallenge.seed, "challenge");
           $("go-challenge").onpointerdown = (e) => { e.stopPropagation(); startGame(true, S.pendingChallenge && S.pendingChallenge.seed, "challenge"); };
         }
         fillDailyBoard();
+        startDailyResetClock();
         const mpGo = $("go-mp");
         if (mpGo) {
           mpGo.onclick = () => openMpLobby();
@@ -14874,7 +14936,7 @@
         }
         const oa = $("overlay-auth");
         if (oa) oa.onclick = (e) => { e.stopPropagation(); if (window.openAuth) window.openAuth(); };
-        if (window.refreshLeaderboard) window.refreshLeaderboard("ready-board");
+        if (window.refreshLeaderboard) window.refreshLeaderboard("ready-indep");
       }
     } else if (p === "mplobby") {
       overlay.innerHTML = mpLobbyHtml();
@@ -15044,7 +15106,7 @@
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
       } else {
-        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? "" : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
+        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.practice ? " · " + t("practice") : (S.ranked ? (S.daily ? " · " + t("daily") : "") : " · " + t("trainCamp"))) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.practice ? t("practiceNote") : (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote"))) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
           + donateBlock();
         if ($("go")) {
           $("go").onclick = replay;
@@ -15872,6 +15934,9 @@
   window.replayChoppy = replay;
   window.choppyWorldSeed = function () { return S.worldSeed >>> 0; };
   window.choppyDailySeed = function (d) { return dailySeed(d); };
+  window.choppyUtcYesterdayKey = function (d) { return utcYesterdayKey(d); };
+  window.choppyMsUntilUtcReset = function (d) { return msUntilUtcReset(d); };
+  window.choppyDailyOneAttempt = function () { return DAILY_ONE_ATTEMPT; };
   window.choppyUtcDayKey = function (d) { return utcDayKey(d); };
   window.choppyParseChallenge = function (search) { return parseChallenge(search); };
   window.choppyChallengeUrl = function (seed, bag) { return challengeUrl(seed, bag); };
