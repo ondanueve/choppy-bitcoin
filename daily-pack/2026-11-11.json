@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-11",
+  "seed": 2295988385,
+  "url": "https://bitcoinizate.com/choppy-bitcoin/?seed=2295988385",
+  "candles": 48,
+  "chart": {
+    "start": 31598.81972913945,
+    "end": 19847.501743440538,
+    "changePct": -37.1891,
+    "high": 40445.16894020293,
+    "low": 10152.640272491713,
+    "volatility": 12.0375,
+    "up": 32,
+    "down": 16,
+    "flat": 0,
+    "description": "Today's candle 2026-11-11 (48 candles) closed lower at -37.2%. Range 10152.6–40445.2, candle volatility 12.04%, 32 up / 16 down / 0 flat."
+  },
+  "posts": [
+    {
+      "id": "short",
+      "text": "Today's candle on Choppy Bitcoin (2026-11-11): -37.2% over 48 candles, range 10152.6–40445.2. Same chart for everyone until 00:00 UTC. Play: https://bitcoinizate.com/choppy-bitcoin/?seed=2295988385"
+    },
+    {
+      "id": "chart",
+      "text": "Candle of the day 2026-11-11 fell -37.2% (high 40445.2, low 10152.6). One seed for the whole board. https://bitcoinizate.com/choppy-bitcoin/?seed=2295988385"
+    },
+    {
+      "id": "challenge",
+      "text": "Choppy Bitcoin daily ranked 2026-11-11: seed 2295988385, 48 candles, 32 green / 16 red. Beat today's bag: https://bitcoinizate.com/choppy-bitcoin/?seed=2295988385"
+    }
+  ],
+  "og": "daily-pack/2026-11-11.svg",
+  "generatedAt": "2026-11-12T00:04:17.203Z"
+}
