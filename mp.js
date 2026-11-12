@@ -422,6 +422,50 @@
     if (MP.ws && MP.ws.readyState === 1) joinBoard();
     else joinSocket();
   }
+  function bindGame(api) { MP.game = api || null; if (MP.game) attachUi(MP.game); }
+  function takeSid(S, sid) {
+    S.mpTaken = S.mpTaken || Object.create(null);
+    return !sid || (!S.mpTaken[sid] && (S.mpTaken[sid] = 1));
+  }
+  function lastWaveBag() {
+    const S = MP.game && MP.game.S;
+    const w = S && S.waves && S.waves[S.waves.length - 1];
+    return w && { type: w.type, kind: w.kind, dir: w.dir, amp: w.amp, resid: w.resid, t0: w.t0 };
+  }
+  function youWinText() {
+    const S = MP.game && MP.game.S;
+    const tt = (MP.game && MP.game.t) || (function (k) { return k; });
+    const m = (S && S.mpRules && S.mpRules.mode) || "last";
+    return tt(m === "whale" ? "mpYouWinWhale" : m === "race" ? "mpYouWinRace" : "mpYouWin");
+  }
+  function joinUrl(c) { return "https://bitcoinizate.com/choppy-bitcoin/?room=" + c; }
+  function shareTake(it, waveOn) {
+    const S = MP.game && MP.game.S;
+    if (!S || !S.mp || S.mpCatch || !it || !takeSid(S, it.sid)) return;
+    const wave = waveOn && waveOn !== true ? waveOn : (waveOn ? lastWaveBag() : null);
+    take({ sid: it.sid | 0, typ: it.type || "", wave: wave || null });
+  }
+  function applyTake(data) {
+    const g = MP.game, S = g && g.S;
+    if (!S || !S.mp || !data || data.id === MP.id || !takeSid(S, data.sid)) return;
+    if (S.items) for (let i = S.items.length - 1; i >= 0; i--) if (S.items[i].sid === data.sid) S.items.splice(i, 1);
+    const w = data.wave;
+    if (!w || !w.type) return;
+    if ((w.kind || w.type) === "HALVE") {
+      if (S.waves && S.waves.length) g.endCycle();
+      for (const o of S.items) if (o.type === "BULL" || o.type === "BEAR" || o.type === "SWAN") { o.pipe = null; o.freeX = true; o.x = -100; }
+    }
+    g.beginCycle(w.type, w.kind, w);
+  }
+  function take(info) {
+    if (!MP.started || !info) return;
+    const w = info.wave;
+    send("take", ident({
+      sid: info.sid | 0,
+      typ: String(info.typ || "").slice(0, 8),
+      wave: w && w.type ? { type: w.type, kind: w.kind || w.type, dir: w.dir, amp: Number(w.amp), resid: Number(w.resid), t0: Number(w.t0) } : null
+    }));
+  }
   function react(id) {
     if (!MP.code || !MP.started) return false;
     const now = Date.now();
@@ -585,6 +629,11 @@
     if (ev === "react") {
       if (!pl || !pl.id || pl.id === MP.id) return;
       showReact(pl.id, pl.g, 0);
+      return;
+    }
+    if (ev === "take") {
+      if (!pl || !pl.id || pl.id === MP.id) return;
+      emit("take", pl);
       return;
     }
     if (ev === "sync") {
@@ -1060,9 +1109,390 @@
     emit("left");
   }
 
+
+  function attachUi(g) {
+    if (!g) return;
+    const S = g.S, t = g.t, $ = g.$, overlay = g.overlay;
+    const mpRulesNow = g.rulesNow, mpMixTotal = g.mixTotal, mpFocusPlayer = g.focusPlayer;
+    const applyMpSound = g.applySound, ensureMp = g.ensureMp, leaveMp = g.leave;
+    const heroOf = g.heroOf, renderOverlay = g.renderOverlay, snapshotRun = g.snapshotRun;
+  function mpRosterHtml() {
+    const list = (window.ChoppyMP && window.ChoppyMP.players()) || [];
+    if (!list.length) return "<p class=\"k\">—</p>";
+    return "<ul class=\"mp-list\">" + list.map((p) => {
+      const you = window.ChoppyMP && p.id === window.ChoppyMP.id();
+      const dead = p.alive === false;
+      const h = heroOf(p.slot || 0);
+      const ready = p.ready ? " · " + t("mpReady") : "";
+      const glyphs = { btc: "₿", usdt: "₮", eth: "Ξ", bch: "₿", xrp: "X", bnb: "B", sol: "S", trx: "T" };
+      const glyph = glyphs[h.mark] || "₿";
+      return "<li class=\"" + (dead ? "out" : "") + "\"><span class=\"hero-dot\" style=\"background:" + h.fill + ";color:" + h.ink + "\">" + glyph + "</span>"
+        + (p.name || "?") + (you ? " · " + t("mpYou") : "") + (p.host ? " · " + t("mpHostRole") : "")
+        + (dead ? " · " + t("mpDead") : ready) + eloBit(p) + "</li>";
+    }).join("") + "</ul>";
+  }
+  function eloBit(p) {
+    const bag = S.mpElo;
+    if (Array.isArray(bag) && p.uid) {
+      const row = bag.find((r) => r.id === p.uid);
+      if (row && row.elo != null) return " · " + Math.round(row.elo);
+    }
+    return p.uid ? "" : " · " + t("mpGuest");
+  }
+  function mpRulesHtml() {
+    const r = mpRulesNow();
+    const host = !!(window.ChoppyMP && window.ChoppyMP.get && window.ChoppyMP.get().host);
+    const dis = host ? "" : " disabled";
+    const sum = mpMixTotal(r);
+    const open = S.mpRulesOpen === false ? "" : " open";
+    const mode = r.mode || "last";
+    const raceHide = mode === "race" ? "" : " hide";
+    const radio = (val, lab) =>
+      "<label class=\"mp-mode" + (mode === val ? " on" : "") + "\"><input type=\"radio\" name=\"mp-mode\" value=\"" + val + "\""
+      + (mode === val ? " checked" : "") + dis + "> " + lab + "</label>";
+    return "<details class=\"mp-rules\"" + open + "><summary>" + t("mpRules") + (host ? "" : " · " + t("mpView")) + "</summary>"
+      + "<div class=\"mp-modes\">"
+      + radio("last", t("mpLast"))
+      + radio("whale", t("mpWhale"))
+      + radio("race", t("mpRace"))
+      + "</div>"
+      + "<div class=\"mp-rule" + raceHide + "\" id=\"mp-race-row\"><span>" + t("mpRaceN") + "</span><input type=\"number\" id=\"mp-race-n\" min=\"5\" max=\"210\" value=\"" + (r.raceN | 0 || 21) + "\"" + dis + "></div>"
+      + "<div class=\"mp-rule\"><span>" + t("mpBestOf") + "</span><select id=\"mp-bestof\"" + dis + ">"
+      + [1, 3, 5, 7].map((n) => "<option value=\"" + n + "\"" + ((r.bestOf | 0) === n ? " selected" : "") + ">" + n + "</option>").join("")
+      + "</select></div>"
+      + "<div class=\"mp-rule\"><span>" + t("mpCold0") + "</span><input type=\"number\" id=\"mp-cold\" min=\"0\" max=\"99\" value=\"" + (r.startCold | 0) + "\"" + dis + "></div>"
+      + "<p class=\"k mp-mix-sum" + (sum !== 100 ? " bad" : "") + "\" id=\"mp-mix-sum\">" + t("mpMix") + " · " + Math.round(sum) + (sum !== 100 ? " · " + t("mpMixNeed") : "") + "</p>"
+      + "<div class=\"mp-w\">"
+      + "<label>" + t("mpBull") + "</label><input type=\"number\" id=\"mp-w-bull\" min=\"0\" max=\"100\" value=\"" + (r.bull | 0) + "\"" + dis + ">"
+      + "<label>" + t("mpBear") + "</label><input type=\"number\" id=\"mp-w-bear\" min=\"0\" max=\"100\" value=\"" + (r.bear | 0) + "\"" + dis + ">"
+      + "<label>" + t("mpLaserW") + "</label><input type=\"number\" id=\"mp-w-laser\" min=\"0\" max=\"100\" value=\"" + (r.laser | 0) + "\"" + dis + ">"
+      + "<label>" + t("mpSwanW") + "</label><input type=\"number\" id=\"mp-w-swan\" min=\"0\" max=\"100\" value=\"" + (r.swan | 0) + "\"" + dis + ">"
+      + "<label>" + t("mpColdW") + "</label><input type=\"number\" id=\"mp-w-cold\" min=\"0\" max=\"100\" value=\"" + (r.cold | 0) + "\"" + dis + ">"
+      + "</div>"
+      + "<label class=\"mp-open\"><input type=\"checkbox\" id=\"mp-open\"" + (r.open ? " checked" : "") + dis + "> " + t("mpOpen") + "</label>"
+      + "<div class=\"mute-row\" style=\"margin-top:8px\">"
+      + "<button type=\"button\" class=\"mute-tog" + (r.muteTheme ? " on" : "") + "\" id=\"mp-mute-theme\"" + (host ? "" : " disabled") + ">" + t("bullSongs") + " " + (r.muteTheme ? t("soundOff") : t("soundOn")) + "</button>"
+      + "<button type=\"button\" class=\"mute-tog" + (r.muteSfx ? " on" : "") + "\" id=\"mp-mute-sfx\"" + (host ? "" : " disabled") + ">" + t("gameFx") + " " + (r.muteSfx ? t("soundOff") : t("soundOn")) + "</button>"
+      + "<button type=\"button\" class=\"mute-tog" + (r.muteVoice ? " on" : "") + "\" id=\"mp-mute-voice\"" + (host ? "" : " disabled") + ">" + t("voices") + " " + (r.muteVoice ? t("soundOff") : t("soundOn")) + "</button>"
+      + "</div></details>";
+  }
+  function readMpRulesForm() {
+    const num = (id, d) => {
+      const el = $(id);
+      const v = el ? Number(el.value) : d;
+      return isFinite(v) ? v : d;
+    };
+    const r = mpRulesNow();
+    let mode = r.mode || "last";
+    const picked = overlay && overlay.querySelector && overlay.querySelector("input[name=\"mp-mode\"]:checked");
+    if (picked) mode = picked.value;
+    const boEl = $("mp-bestof");
+    const bestOf = boEl ? (Number(boEl.value) || 1) : (r.bestOf || 1);
+    return {
+      startCold: Math.max(0, Math.min(99, num("mp-cold", r.startCold) | 0)),
+      msig: 0,
+      bull: Math.max(0, Math.min(100, num("mp-w-bull", r.bull) | 0)),
+      bear: Math.max(0, Math.min(100, num("mp-w-bear", r.bear) | 0)),
+      laser: Math.max(0, Math.min(100, num("mp-w-laser", r.laser) | 0)),
+      swan: Math.max(0, Math.min(100, num("mp-w-swan", r.swan) | 0)),
+      cold: Math.max(0, Math.min(100, num("mp-w-cold", r.cold) | 0)),
+      mode: mode === "whale" || mode === "race" ? mode : "last",
+      raceN: Math.max(5, Math.min(210, num("mp-race-n", r.raceN) | 0)),
+      bestOf: bestOf === 3 || bestOf === 5 || bestOf === 7 ? bestOf : 1,
+      muteTheme: !!(r.muteTheme),
+      muteSfx: !!(r.muteSfx),
+      muteVoice: !!(r.muteVoice),
+      open: $("mp-open") ? !!$("mp-open").checked : !!r.open
+    };
+  }
+  function pushHostRules(extra) {
+    if (!window.ChoppyMP || !window.ChoppyMP.get().host) return;
+    const r = Object.assign(readMpRulesForm(), extra || {});
+    S.mpRules = r;
+    window.ChoppyMP.setRules(r);
+  }
+  function mpLobbyHtml() {
+    const mp = window.ChoppyMP && window.ChoppyMP.get();
+    const code = (mp && mp.code) || "----";
+    const n = ((mp && mp.players) || []).length;
+    const host = !!(mp && mp.host);
+    const ready = !!(mp && mp.ready);
+    const all = !!(window.ChoppyMP && window.ChoppyMP.allReady && window.ChoppyMP.allReady());
+    const mix = mpRulesNow();
+    const mixSum = mpMixTotal(mix);
+    const canStart = host && n >= 2 && all && mixSum === 100;
+    const err = S.mpErr ? "<p class=\"k\">" + S.mpErr + "</p>" : "";
+    if (!mp || !mp.code) {
+      return "<h1>" + t("versus") + " · " + t("mpAlpha") + "</h1><p class=\"k\">" + t("mpAlphaNote") + " <a href=\"mailto:versus@bitcoinizate.com\">versus@bitcoinizate.com</a></p><p class=\"k\">" + t("mpNote") + "</p>"
+        + "<button class=\"cta mp-cta\" id=\"mp-host\">" + t("mpHost") + "</button>"
+        + "<div class=\"mp-join\"><input id=\"mp-code\" maxlength=\"6\" placeholder=\"CODE\" value=\"" + (S.mpJoinCode || "") + "\" autocomplete=\"off\">"
+        + "<button class=\"cta play-alt\" id=\"mp-join\">" + t("mpJoin") + "</button></div>"
+        + err
+        + "<button class=\"cta play-alt mp-cta\" id=\"mp-back\">" + t("mpBack") + "</button>";
+    }
+    return "<h1>" + t("versus") + "</h1><p class=\"k\">" + t("mpCode") + " <b id=\"mp-code-lab\">" + code + "</b></p>"
+      + "<button class=\"cta play-alt mp-cta\" id=\"mp-copy\">" + t("mpCopy") + "</button>"
+      + "<p class=\"k\">" + n + "/8 · " + (mix.mode === "whale" ? t("mpWhale") : mix.mode === "race" ? t("mpRace") : t("mpLast"))
+      + (mix.bestOf > 1 ? " · " + t("mpBestOf") + " " + mix.bestOf : "") + "</p>"
+      + mpRosterHtml()
+      + (n < 2 ? "<p class=\"k\">" + t("mpNeed") + "</p>" : (all ? (mixSum === 100 ? "" : "<p class=\"k\">" + t("mpMixNeed") + "</p>") : "<p class=\"k\">" + t("mpNeedReady") + "</p>"))
+      + err
+      + (host
+        ? "<button class=\"cta mp-cta\" id=\"mp-start\"" + (canStart ? "" : " disabled") + ">" + t("mpStart") + "</button>"
+        : "<button class=\"cta mp-cta\" id=\"mp-ready\">" + (ready ? t("mpUnready") : t("mpReady")) + "</button>")
+      + mpRulesHtml()
+      + "<button class=\"cta play-alt mp-cta\" id=\"mp-back\">" + t("mpBack") + "</button>";
+  }
+  function bindMpLobby() {
+    if ($("mp-host")) $("mp-host").onclick = (e) => {
+      e.stopPropagation();
+      S.mpErr = "";
+      ensureMp().then((mp) => { if (mp) mp.host(); });
+    };
+    if ($("mp-join")) $("mp-join").onclick = (e) => {
+      e.stopPropagation();
+      const inp = $("mp-code");
+      S.mpJoinCode = inp ? inp.value : "";
+      S.mpErr = "";
+      ensureMp().then((mp) => { if (mp) mp.join(S.mpJoinCode); });
+    };
+    if ($("mp-ready")) $("mp-ready").onclick = (e) => {
+      e.stopPropagation();
+      const mp = window.ChoppyMP && window.ChoppyMP.get();
+      if (window.ChoppyMP && window.ChoppyMP.setReady) window.ChoppyMP.setReady(!(mp && mp.ready));
+    };
+    if ($("mp-start")) $("mp-start").onclick = (e) => {
+      e.stopPropagation();
+      const r = readMpRulesForm();
+      const sum = mpMixTotal(r);
+      if (sum !== 100) { S.mpErr = t("mpMixNeed"); renderOverlay(); return; }
+      pushHostRules();
+      if (window.ChoppyMP) {
+        if (window.ChoppyMP.setReady) window.ChoppyMP.setReady(true);
+        window.ChoppyMP.start({ rules: r });
+      }
+    };
+    const rulesEl = overlay && overlay.querySelector && overlay.querySelector("details.mp-rules");
+    if (rulesEl) rulesEl.ontoggle = () => { S.mpRulesOpen = !!rulesEl.open; };
+    const paintMix = () => {
+      const r = readMpRulesForm();
+      const sum = mpMixTotal(r);
+      const el = $("mp-mix-sum");
+      if (el) {
+        el.textContent = t("mpMix") + " · " + sum + (sum !== 100 ? " · " + t("mpMixNeed") : "");
+        el.classList.toggle("bad", sum !== 100);
+      }
+      const start = $("mp-start");
+      if (start) {
+        const all = window.ChoppyMP && window.ChoppyMP.allReady && window.ChoppyMP.allReady();
+        const n = ((window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || []).length;
+        start.disabled = !all || sum !== 100 || n < 2;
+      }
+      const row = $("mp-race-row");
+      if (row) row.classList.toggle("hide", r.mode !== "race");
+      overlay.querySelectorAll(".mp-mode").forEach((lab) => {
+        const inp = lab.querySelector("input");
+        lab.classList.toggle("on", !!(inp && inp.checked));
+      });
+    };
+    if ($("mp-copy")) $("mp-copy").onclick = (e) => {
+      e.stopPropagation();
+      const c = window.ChoppyMP && window.ChoppyMP.code();
+      const btn = $("mp-copy");
+      const done = () => {
+        if (!btn) return;
+        btn.textContent = t("mpCopied");
+        setTimeout(() => { if ($("mp-copy")) $("mp-copy").textContent = t("mpCopy"); }, 1400);
+      };
+      if (c && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(window.ChoppyMP.joinUrl(c)).then(done).catch(() => { try { done(); } catch (err) {} });
+      }
+    };
+    if ($("mp-back")) $("mp-back").onclick = (e) => { e.stopPropagation(); leaveMp(); };
+    const mpBack = $("mp-back");
+    if (mpBack && window.ChoppyMP && window.ChoppyMP.get && !window.ChoppyMP.get().code) {
+      const rooms = document.createElement("div");
+      rooms.innerHTML = mpPublicHtml();
+      mpBack.parentNode.insertBefore(rooms, mpBack);
+    }
+    const inp = $("mp-code");
+    if (inp) {
+      inp.oninput = () => {
+        inp.value = String(inp.value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+        S.mpJoinCode = inp.value;
+      };
+      inp.onkeydown = (e) => { if (e.key === "Enter" && $("mp-join")) $("mp-join").click(); };
+    }
+    ["mp-cold", "mp-w-bull", "mp-w-bear", "mp-w-laser", "mp-w-swan", "mp-w-cold", "mp-race-n", "mp-bestof"].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.oninput = () => { pushHostRules(); paintMix(); };
+      el.onchange = () => { pushHostRules(); paintMix(); };
+    });
+    overlay.querySelectorAll("input[name=\"mp-mode\"]").forEach((inp) => {
+      inp.onchange = () => { pushHostRules(); paintMix(); };
+    });
+    const bindMute = (id, key) => {
+      const el = $(id);
+      if (!el) return;
+      el.onclick = (e) => {
+        e.stopPropagation();
+        const r = mpRulesNow();
+        r[key] = !r[key];
+        pushHostRules(r);
+        if (window.ChoppyMP && window.ChoppyMP.get().host) applyMpSound(r);
+      };
+    };
+    bindMute("mp-mute-theme", "muteTheme");
+    bindMute("mp-mute-sfx", "muteSfx");
+    bindMute("mp-mute-voice", "muteVoice");
+    if ($("mp-open")) $("mp-open").onchange = () => { pushHostRules(); };
+    if (overlay && overlay.querySelectorAll) overlay.querySelectorAll("[data-room]").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const code = btn.getAttribute("data-room") || "";
+        S.mpJoinCode = code;
+        S.mpErr = "";
+        if (window.ChoppyMP) window.ChoppyMP.join(code);
+      };
+    });
+  }
+  function mpPublicHtml() {
+    const rows = (window.ChoppyMP && window.ChoppyMP.rooms && window.ChoppyMP.rooms()) || [];
+    let html = "<p class=\"k\">" + t("mpPublic") + "</p>";
+    if (!rows.length) return html + "<p class=\"k\">" + t("mpNoRooms") + "</p>";
+    html += "<div class=\"mp-rooms\">";
+    rows.forEach((r) => {
+      const mode = r.mode === "whale" ? t("mpWhale") : r.mode === "race" ? t("mpRace") : t("mpLast");
+      html += "<button type=\"button\" class=\"mp-room\" data-room=\"" + r.code + "\">" + r.code + " · " + mode + " · " + (r.n | 0) + "/8</button>";
+    });
+    return html + "</div>";
+  }
+  function mpRoundLines() {
+    const rows = S.mpLog || [];
+    if (!rows.length) return "";
+    let html = "<div class=\"mp-rounds\">";
+    rows.forEach((r) => { html += "<div>" + t("mpRound") + " " + r.n + " · " + (r.name || "?") + "</div>"; });
+    return html + "</div>";
+  }
+  function mpEloLines() {
+    if (!Array.isArray(S.mpElo) || !S.mpElo.length) return "";
+    const list = (window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || [];
+    let html = "<div class=\"mp-rounds\">";
+    S.mpElo.forEach((row) => {
+      let name = "";
+      for (let i = 0; i < list.length; i++) if (list[i].uid === row.id) name = list[i].name || "";
+      if (!name) name = String(row.id || "").slice(0, 8);
+      const after = row.elo | 0;
+      const before = after - (row.delta | 0);
+      const delta = row.delta | 0;
+      html += "<div>" + name + " " + before + " → " + after + " (" + (delta > 0 ? "+" : "") + delta + ")</div>";
+    });
+    return html + "</div>";
+  }
+  function mpShareText() {
+    const w = S.mpWinner || {};
+    const lines = [t("versus"), (w.name || "?") + " " + t("mpSeriesWin")];
+    (S.mpLog || []).forEach((r) => { lines.push(t("mpRound") + " " + r.n + ": " + (r.name || "?")); });
+    if (Array.isArray(S.mpElo)) {
+      const list = (window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || [];
+      S.mpElo.forEach((row) => {
+        let name = "?";
+        for (let i = 0; i < list.length; i++) if (list[i].uid === row.id && list[i].name) name = list[i].name;
+        lines.push(name + " " + ((row.elo | 0) - (row.delta | 0)) + " → " + (row.elo | 0));
+      });
+    } else if (S.mpEloNote) lines.push(S.mpEloNote);
+    return lines.join("\n");
+  }
+
+  function copyMpResult(btn) {
+    const text = mpShareText();
+    const done = () => {
+      if (!btn) return;
+      btn.textContent = t("mpShared");
+      setTimeout(() => { if (btn) btn.textContent = t("mpShare"); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(done);
+    } else done();
+  }
+
+  function mpWaitHtml() {
+    return mpSpecHtml();
+  }
+  function mpYouWinText() { const m = window.ChoppyMP; return m && m.youWinText ? m.youWinText() : t("mpYouWin"); }
+  function mpSpecHtml() {
+    const foc = mpFocusPlayer() || S.mpWinner || {};
+    const mine = window.ChoppyMP && window.ChoppyMP.id();
+    const win = S.mpWinner || {};
+    const last = !!S.mpSeriesOver;
+    const left = S.mpNextAt ? Math.max(0, Math.ceil((S.mpNextAt - Date.now()) / 1000)) : 0;
+    const title = S.mpRoundOver
+      ? (last ? ((win.name || "?") + " " + t("mpSeriesWin")) : (win.id === mine ? mpYouWinText() : ((win.name || foc.name || "?") + " " + t("mpWins"))))
+      : (t("mpSpec") + " · " + (foc.name || ""));
+    const bo = (S.mpRules && S.mpRules.bestOf) || 1;
+    const series = bo > 1
+      ? "<p class=\"k\">" + t("mpSeries") + " " + (S.mpGameN || 1) + "/" + bo + (S.mpEloNote ? " · " + S.mpEloNote : "") + "</p>"
+      : (S.mpEloNote ? "<p class=\"k\">" + S.mpEloNote + "</p>" : "");
+    const pool = last ? ((window.ChoppyMP && window.ChoppyMP.players && window.ChoppyMP.players()) || []).filter((p) => !p.gone) : [];
+    const votes = pool.filter((p) => p.rematch).length;
+    const voteN = pool.length;
+    const timer = S.mpRoundOver && left
+      ? "<p class=\"k\">" + (last ? t("mpRematch") + (voteN ? " " + votes + "/" + voteN : "") : t("mpNext")) + " · " + left + "s</p>"
+      : "";
+    const recap = last ? (mpRoundLines() + mpEloLines() + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>") : "";
+    return "<p class=\"k\">" + title + "</p>" + (last && win.id === mine ? "<p class=\"k\">" + mpYouWinText() + "</p>" : "") + series + timer + recap
+      + "<div class=\"overlay-actions\">"
+      + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-quit\">" + t("mpQuit") + "</button>"
+      + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-stats\">" + t("runStats") + "</button>"
+      + (last ? "<button type=\"button\" class=\"cta" + (S.mpRematchOn ? " on" : "") + "\" id=\"mp-rematch\">" + t("mpRematch") + "</button>" : "")
+      + "</div>";
+  }
+  function bindMpSpec() {
+    if ($("mp-quit")) $("mp-quit").onclick = (e) => { e.stopPropagation(); leaveMp(); };
+    if ($("mp-stats")) $("mp-stats").onclick = (e) => {
+      e.stopPropagation();
+      if (!S.stats) try { snapshotRun(); } catch (err) {}
+      S.runTab = "stats";
+      renderOverlay();
+    };
+    if ($("mp-rematch")) $("mp-rematch").onclick = (e) => {
+      e.stopPropagation();
+      S.mpRematchOn = !S.mpRematchOn;
+      if (window.ChoppyMP && window.ChoppyMP.setRematch) window.ChoppyMP.setRematch(S.mpRematchOn);
+      renderOverlay();
+    };
+    if ($("mp-share")) $("mp-share").onclick = (e) => { e.stopPropagation(); copyMpResult($("mp-share")); };
+  }
+  function mpWinHtml() {
+    const w = S.mpWinner || {};
+    const mine = window.ChoppyMP && w.id === window.ChoppyMP.id();
+    const host = window.ChoppyMP && window.ChoppyMP.get().host;
+    return "<p class=\"k\">" + t("versus") + "</p><h1>" + ((w.name || "?") + " " + t("mpSeriesWin")) + "</h1>"
+      + (mine ? "<p class=\"k\">" + mpYouWinText() + "</p>" : "")
+      + (S.mpEloNote ? "<p class=\"k\">" + S.mpEloNote + "</p>" : "")
+      + mpRoundLines()
+      + mpEloLines()
+      + mpRosterHtml()
+      + "<div class=\"overlay-actions\">"
+      + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>"
+      + (host ? "<button class=\"cta\" id=\"mp-again\">" + t("mpRematch") + "</button>" : "<button class=\"cta\" id=\"mp-rematch\">" + t("mpRematch") + "</button>")
+      + "<button class=\"cta play-alt\" id=\"go\">" + t("mpBack") + "</button></div>";
+  }
+
+    const api = window.ChoppyMP;
+    if (!api) return;
+    api.lobbyHtml = mpLobbyHtml;
+    api.bindLobby = bindMpLobby;
+    api.specHtml = mpSpecHtml;
+    api.bindSpec = bindMpSpec;
+    api.winHtml = mpWinHtml;
+    api.copyResult = copyMpResult;
+  }
+
   window.ChoppyMP = {
     host, join, start, pulse, dead, finish, leave, setReady, setRematch, setRules,
-    resetLobby, nextRound, react, browse, resumeRoom,
+    resetLobby, nextRound, react, take, shareTake, applyTake, bindGame, lastWaveBag, youWinText, joinUrl, browse, resumeRoom,
     rooms: roomList,
     link: () => MP.link,
     REACTS,

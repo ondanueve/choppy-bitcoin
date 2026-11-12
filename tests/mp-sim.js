@@ -675,6 +675,41 @@ scenario("reaction-is-rate-limited", () => {
   return { rid: row.react.rid };
 });
 
+scenario("take-broadcasts-shared-wave", () => {
+  const env = fresh({ seedBase: 19000 });
+  const clients = boot(env, 2, { mode: "last", bestOf: 1 });
+  let got = null;
+  clients[1].setHandler((ev, data) => { if (ev === "take") got = data; });
+  clients[0].take({
+    sid: 3,
+    typ: "BULL",
+    wave: { type: "BULL", kind: "BULL", dir: 1, amp: 0.2, resid: 0.1, t0: 4.5 }
+  });
+  env.clock.advance(200 + lagOf(env));
+  if (!got || got.sid !== 3 || !got.wave || got.wave.amp !== 0.2 || got.wave.t0 !== 4.5) {
+    throw new Error("peer missed the shared wave " + JSON.stringify(got));
+  }
+  if (got.id !== clients[0].id()) throw new Error("take missing sender id");
+  let self = null;
+  clients[0].setHandler((ev, data) => { if (ev === "take") self = data; });
+  clients[0].take({ sid: 4, typ: "BEAR", wave: { type: "BEAR", kind: "BEAR", dir: -1, amp: 0.1, resid: 0.05, t0: 5 } });
+  env.clock.advance(200 + lagOf(env));
+  if (self) throw new Error("sender should ignore its own take echo");
+  return { sid: got.sid };
+});
+
+scenario("go-includes-race-n", () => {
+  const env = fresh({ seedBase: 21000 });
+  const clients = lobby(env, 2);
+  const rules = Object.assign({}, RULES.race, { raceN: 5, bestOf: 1 });
+  begin(env, clients, rules);
+  const got = clients.map((c) => c.rules());
+  if (got.some((r) => r.mode !== "race" || (r.raceN | 0) !== 5)) {
+    throw new Error("go did not carry raceN=5 " + JSON.stringify(got));
+  }
+  return { raceN: got[1].raceN };
+});
+
 function writeReport() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const failed = report.scenarios.filter((s) => !s.ok);
