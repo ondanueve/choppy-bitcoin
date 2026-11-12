@@ -259,6 +259,7 @@
       trendDown: "TREND ↓",
       trendOff: "TREND OFF",
       share: "Share",
+      copyResult: "Copy result",
       shareCopied: "Copied",
       shareSaved: "Image saved",
       shareChart: "Price path",
@@ -567,6 +568,7 @@
       trendDown: "TENDENCIA ↓",
       trendOff: "TENDENCIA APAGADA",
       share: "Compartir",
+      copyResult: "Copiar resultado",
       shareCopied: "Copiado",
       shareSaved: "Imagen guardada",
       shareChart: "Recorrido del precio",
@@ -653,7 +655,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp224";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp226";
     document.head.appendChild(s);
   }
 
