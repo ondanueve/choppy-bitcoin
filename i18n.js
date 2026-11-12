@@ -156,12 +156,17 @@
       mpNeed: "Need 2+ players",
       mpCode: "ROOM",
       mpYouWin: "LAST ONE STANDING",
+      mpYouWinWhale: "TOP WHALE",
+      mpYouWinRace: "RACE WON",
       mpWins: "WINS",
       mpDead: "ELIMINATED",
       mpNote: "Same candles. Last standing, whale, or race. Does not count for the board.",
       mpAlive: "ALIVE",
-      mpCopy: "COPY CODE",
+      mpCopy: "COPY LINK",
       mpCopied: "COPIED",
+      mpHostRole: "host",
+      mpGuest: "guest",
+      mpView: "view",
       mpReady: "I'M READY",
       mpUnready: "NOT READY",
       mpNeedReady: "Players must be ready",
@@ -464,12 +469,17 @@
       mpNeed: "Hacen falta 2 o más",
       mpCode: "SALA",
       mpYouWin: "EL ÚLTIMO EN PIE",
+      mpYouWinWhale: "LA MAYOR BALLENA",
+      mpYouWinRace: "CARRERA GANADA",
       mpWins: "GANA",
       mpDead: "ELIMINADO",
       mpNote: "Mismas velas. Último en pie, ballena o carrera. No cuenta para el ranking.",
       mpAlive: "VIVOS",
-      mpCopy: "COPIAR CÓDIGO",
+      mpCopy: "COPIAR ENLACE",
       mpCopied: "COPIADO",
+      mpHostRole: "anfitrión",
+      mpGuest: "invitado",
+      mpView: "solo ver",
       mpReady: "ESTOY LISTO",
       mpUnready: "NO LISTO",
       mpNeedReady: "Los jugadores tienen que estar listos",
@@ -500,7 +510,7 @@
       tryAgain: "Otra vez",
       playAgain: "Jugar de nuevo",
       keepPlaying: "Seguir jugando",
-      runStats: "STATS",
+      runStats: "ESTADÍSTICAS",
       runChart: "CHART",
       runRecap: "CINTA DE LA RUN",
       rekt: "Rekt · patrimonio",
@@ -653,7 +663,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp225";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp227";
     document.head.appendChild(s);
   }
 

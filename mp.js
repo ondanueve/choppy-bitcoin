@@ -422,6 +422,50 @@
     if (MP.ws && MP.ws.readyState === 1) joinBoard();
     else joinSocket();
   }
+  function bindGame(api) { MP.game = api || null; }
+  function takeSid(S, sid) {
+    S.mpTaken = S.mpTaken || Object.create(null);
+    return !sid || (!S.mpTaken[sid] && (S.mpTaken[sid] = 1));
+  }
+  function lastWaveBag() {
+    const S = MP.game && MP.game.S;
+    const w = S && S.waves && S.waves[S.waves.length - 1];
+    return w && { type: w.type, kind: w.kind, dir: w.dir, amp: w.amp, resid: w.resid, t0: w.t0 };
+  }
+  function youWinText() {
+    const S = MP.game && MP.game.S;
+    const tt = (MP.game && MP.game.t) || (function (k) { return k; });
+    const m = (S && S.mpRules && S.mpRules.mode) || "last";
+    return tt(m === "whale" ? "mpYouWinWhale" : m === "race" ? "mpYouWinRace" : "mpYouWin");
+  }
+  function joinUrl(c) { return "https://bitcoinizate.com/choppy-bitcoin/?room=" + c; }
+  function shareTake(it, waveOn) {
+    const S = MP.game && MP.game.S;
+    if (!S || !S.mp || S.mpCatch || !it || !takeSid(S, it.sid)) return;
+    const wave = waveOn && waveOn !== true ? waveOn : (waveOn ? lastWaveBag() : null);
+    take({ sid: it.sid | 0, typ: it.type || "", wave: wave || null });
+  }
+  function applyTake(data) {
+    const g = MP.game, S = g && g.S;
+    if (!S || !S.mp || !data || data.id === MP.id || !takeSid(S, data.sid)) return;
+    if (S.items) for (let i = S.items.length - 1; i >= 0; i--) if (S.items[i].sid === data.sid) S.items.splice(i, 1);
+    const w = data.wave;
+    if (!w || !w.type) return;
+    if ((w.kind || w.type) === "HALVE") {
+      if (S.waves && S.waves.length) g.endCycle();
+      for (const o of S.items) if (o.type === "BULL" || o.type === "BEAR" || o.type === "SWAN") { o.pipe = null; o.freeX = true; o.x = -100; }
+    }
+    g.beginCycle(w.type, w.kind, w);
+  }
+  function take(info) {
+    if (!MP.started || !info) return;
+    const w = info.wave;
+    send("take", ident({
+      sid: info.sid | 0,
+      typ: String(info.typ || "").slice(0, 8),
+      wave: w && w.type ? { type: w.type, kind: w.kind || w.type, dir: w.dir, amp: Number(w.amp), resid: Number(w.resid), t0: Number(w.t0) } : null
+    }));
+  }
   function react(id) {
     if (!MP.code || !MP.started) return false;
     const now = Date.now();
@@ -585,6 +629,11 @@
     if (ev === "react") {
       if (!pl || !pl.id || pl.id === MP.id) return;
       showReact(pl.id, pl.g, 0);
+      return;
+    }
+    if (ev === "take") {
+      if (!pl || !pl.id || pl.id === MP.id) return;
+      emit("take", pl);
       return;
     }
     if (ev === "sync") {
@@ -1062,7 +1111,7 @@
 
   window.ChoppyMP = {
     host, join, start, pulse, dead, finish, leave, setReady, setRematch, setRules,
-    resetLobby, nextRound, react, browse, resumeRoom,
+    resetLobby, nextRound, react, take, shareTake, applyTake, bindGame, lastWaveBag, youWinText, joinUrl, browse, resumeRoom,
     rooms: roomList,
     link: () => MP.link,
     REACTS,

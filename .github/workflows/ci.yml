@@ -54,6 +54,9 @@ jobs:
       - name: Versus live stepping vs catch-up
         run: node tests/mp-catch.js
 
+      - name: Versus lobby, startAt, and shared waves
+        run: node tests/mp-sync.js
+
       - name: Award ids
         run: node tests/award-ids.js
 
