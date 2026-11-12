@@ -1,0 +1,55 @@
+# Generates the English "Today's candle" pack at 00:10 UTC. Does not post anywhere.
+# Writes to the daily-pack branch so main does not get a commit every day.
+# After this workflow is on main, the stable URLs are:
+#   https://github.com/ondanueve/choppy-bitcoin/raw/daily-pack/latest.json
+#   and, once a later Pages assemble includes the folder,
+#   https://bitcoinizate.com/choppy-bitcoin/daily-pack/latest.json
+name: Daily pack
+
+on:
+  schedule:
+    - cron: "10 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main (script + game)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: src
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate pack
+        run: node tools/daily-pack.mjs --out "$GITHUB_WORKSPACE/out"
+        working-directory: src
+
+      - name: Publish to daily-pack branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          day=$(node -e "const d=new Date(); const p=n=>String(n).padStart(2,'0'); process.stdout.write(d.getUTCFullYear()+'-'+p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate()))")
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git clone --depth 1 --branch daily-pack "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pack-branch \
+            || (git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pack-branch && cd pack-branch && git checkout --orphan daily-pack && git rm -rf . >/dev/null 2>&1 || true)
+          mkdir -p pack-branch
+          cp -a "$GITHUB_WORKSPACE/out/." pack-branch/
+          cd pack-branch
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No pack changes"
+            exit 0
+          fi
+          git commit -m "Daily pack ${day} (do not post)"
+          git push -u origin daily-pack

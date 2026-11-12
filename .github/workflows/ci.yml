@@ -48,6 +48,9 @@ jobs:
       - name: Daily candle and challenge links
         run: node tests/daily.js
 
+      - name: Daily pack
+        run: node tests/daily-pack.js
+
       - name: Versus simulation
         run: node tests/mp-sim.js
 
