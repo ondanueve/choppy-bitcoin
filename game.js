@@ -11819,7 +11819,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp224";
+      s.src = "halving.js?v=mp225";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12978,9 +12978,9 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp224";
+    return "share-card.js?v=mp225";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp224"; }
+  function dailyScriptSrc() { return "daily.js?v=mp225"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -14424,7 +14424,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp224";
+      s.src = "mp.js?v=mp225";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -15139,16 +15139,27 @@
   }
 
   let last = performance.now(), acc = 0, hudAcc = 0, mpReactUntil = 0;
+  // Live versus play stays locked to wall-clock time via this stepper.
+  // Only a large gap (tab hide, reconnect) uses catch-up: skip grants/sfx,
+  // hold invulnerability, then leave 2.5s of it. Ordinary frames must let
+  // invuln decay and must grant candle cash, or nobody can die.
+  const MP_CATCH_GAP = 0.5;
+  function mpShouldCatch(target, lifeT) {
+    return (target - lifeT) > MP_CATCH_GAP;
+  }
   function mpCatchUp() {
     if (!S.mp || S.phase !== "play" || !S.mpPlayAt) return;
     const target = Math.max(0, (Date.now() - S.mpPlayAt) / 1000);
     if (S.lifeT + 1 / 60 > target) return;
-    S.mpCatch = true;
-    S.invuln = 10000;
+    const catching = mpShouldCatch(target, S.lifeT);
+    if (catching) {
+      S.mpCatch = true;
+      S.invuln = 10000;
+    }
     let guard = 0;
     while (S.lifeT + 1 / 60 <= target && guard++ < 1800) step(1 / 60);
     S.mpCatch = false;
-    S.invuln = 2.5;
+    if (catching) S.invuln = 2.5;
   }
   function mpTickClock() {
     if (S.phase === "count" && S.mp && S.mpPlayAt) {
