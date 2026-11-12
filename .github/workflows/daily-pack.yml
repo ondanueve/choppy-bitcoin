@@ -35,7 +35,9 @@ jobs:
 
       - name: Publish to daily-pack branch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{
+            secrets.GITHUB_TOKEN
+          }}
         run: |
           set -euo pipefail
           day=$(node -e "const d=new Date(); const p=n=>String(n).padStart(2,'0'); process.stdout.write(d.getUTCFullYear()+'-'+p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate()))")
