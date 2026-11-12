@@ -698,6 +698,18 @@ scenario("take-broadcasts-shared-wave", () => {
   return { sid: got.sid };
 });
 
+scenario("go-includes-race-n", () => {
+  const env = fresh({ seedBase: 21000 });
+  const clients = lobby(env, 2);
+  const rules = Object.assign({}, RULES.race, { raceN: 5, bestOf: 1 });
+  begin(env, clients, rules);
+  const got = clients.map((c) => c.rules());
+  if (got.some((r) => r.mode !== "race" || (r.raceN | 0) !== 5)) {
+    throw new Error("go did not carry raceN=5 " + JSON.stringify(got));
+  }
+  return { raceN: got[1].raceN };
+});
+
 function writeReport() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const failed = report.scenarios.filter((s) => !s.ok);

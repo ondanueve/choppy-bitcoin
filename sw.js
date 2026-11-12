@@ -42,6 +42,7 @@ that survives a shell bump. Supabase, tokens, versus, and video are never stored
     "halving-surfer.png",
     "nft-preview.js",
     "share-card.js",
+    "copy-result.js",
     "daily.js"
   ];
   // Code files the pages request with ?v=CACHE_VERSION. The cache key keeps that tag,

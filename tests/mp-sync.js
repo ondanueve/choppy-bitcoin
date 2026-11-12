@@ -25,13 +25,15 @@ function slice(src, startTok, endTok) {
 assert.ok(/ensureMp\(\)\.then\(\(mp\) => \{[\s\S]*mp\.browse\(true\)/.test(game), "openMpLobby browses after ensureMp");
 assert.ok(/S\.mpAutoJoin = true/.test(game) && /if \(S\.mpAutoJoin\)/.test(game), "join link sets auto-join once");
 assert.ok(/sessionStorage\.getItem\("choppy-mp-room"\)/.test(game) && /tryResumeMp\(\)/.test(game), "reload resume waits for mp.js");
-assert.ok(/ChoppyMP\.joinUrl\(c\)/.test(game) && /https:\/\/bitcoinizate\.com\/choppy-bitcoin\/\?room=/.test(mp), "copy uses the full join URL");
-assert.ok(/t\("mpHostRole"\)/.test(game) && /t\("mpGuest"\)/.test(game) && /t\("mpView"\)/.test(game), "leftover English roster/rules strings are translated");
+assert.ok(/joinUrl\(c\)/.test(game + mp) && /https:\/\/bitcoinizate\.com\/choppy-bitcoin\/\?room=/.test(mp), "copy uses the full join URL");
+assert.ok(/t\("mpHostRole"\)/.test(game + mp) && /t\("mpGuest"\)/.test(game + mp) && /t\("mpView"\)/.test(game + mp), "leftover English roster/rules strings are translated");
 assert.ok(/youWinText/.test(mp) && /mpYouWinWhale/.test(mp) && /mpYouWinRace/.test(mp), "win text is mode-specific");
 assert.ok(/function take\(info\)/.test(mp) && /ev === "take"/.test(mp) && /function shareTake/.test(mp) && /function applyTake/.test(mp), "pickup take is on the wire");
 assert.ok(/beginCycle\(w\.type, w\.kind, w\)/.test(mp) && /bindGame/.test(game), "peers apply the shared wave bag");
 assert.ok(/sid: S\.spawnedPipes/.test(game), "items get a stable spawn id");
 assert.ok(/if \(!watching && !S\.mpCatch/.test(game), "reconnect catch-up does not collect items");
+assert.ok(/S\.mpRules && S\.mpRules.mode === "race"/.test(game) && /S\.mpRules.raceN/.test(game) && /spawnedPipes === raceN/.test(game), "finish pipe uses the room raceN");
+assert.ok(/last && win\.id === mine \? "<p class=\\"k\\">" \+ mpYouWinText\(\)/.test(mp), "series-over screen includes mode-specific win text");
 
 function hasKey(lang, key, value) {
   const blockStart = i18n.indexOf(lang + ": {");
