@@ -653,7 +653,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp224";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp225";
     document.head.appendChild(s);
   }
 

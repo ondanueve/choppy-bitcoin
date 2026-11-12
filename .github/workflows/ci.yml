@@ -51,6 +51,9 @@ jobs:
       - name: Versus simulation
         run: node tests/mp-sim.js
 
+      - name: Versus live stepping vs catch-up
+        run: node tests/mp-catch.js
+
       - name: Award ids
         run: node tests/award-ids.js
 
