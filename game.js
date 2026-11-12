@@ -15205,16 +15205,24 @@
   }
 
   let last = performance.now(), acc = 0, hudAcc = 0, mpReactUntil = 0;
+  // Versus catch-up only for gaps above MP_CATCH_GAP (reconnect / tab hide).
+  const MP_CATCH_GAP = 0.5;
+  function mpShouldCatch(target, lifeT) {
+    return (target - lifeT) > MP_CATCH_GAP;
+  }
   function mpCatchUp() {
     if (!S.mp || S.phase !== "play" || !S.mpPlayAt) return;
     const target = Math.max(0, (Date.now() - S.mpPlayAt) / 1000);
     if (S.lifeT + 1 / 60 > target) return;
-    S.mpCatch = true;
-    S.invuln = 10000;
+    const catching = mpShouldCatch(target, S.lifeT);
+    if (catching) {
+      S.mpCatch = true;
+      S.invuln = 10000;
+    }
     let guard = 0;
     while (S.lifeT + 1 / 60 <= target && guard++ < 1800) step(1 / 60);
     S.mpCatch = false;
-    S.invuln = 2.5;
+    if (catching) S.invuln = 2.5;
   }
   function mpTickClock() {
     if (S.phase === "count" && S.mp && S.mpPlayAt) {
