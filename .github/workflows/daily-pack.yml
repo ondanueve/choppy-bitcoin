@@ -34,20 +34,20 @@ jobs:
         working-directory: src
 
       - name: Publish to daily-pack branch
-        env:
-          GH_TOKEN: ${{
-            secrets.GITHUB_TOKEN
-          }}
+        working-directory: src
         run: |
           set -euo pipefail
           day=$(node -e "const d=new Date(); const p=n=>String(n).padStart(2,'0'); process.stdout.write(d.getUTCFullYear()+'-'+p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate()))")
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git clone --depth 1 --branch daily-pack "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pack-branch \
-            || (git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pack-branch && cd pack-branch && git checkout --orphan daily-pack && git rm -rf . >/dev/null 2>&1 || true)
-          mkdir -p pack-branch
-          cp -a "$GITHUB_WORKSPACE/out/." pack-branch/
-          cd pack-branch
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin daily-pack >/dev/null; then
+            git fetch origin daily-pack
+            git checkout -B daily-pack origin/daily-pack
+          else
+            git checkout --orphan daily-pack
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          cp -a "$GITHUB_WORKSPACE/out/." .
           git add -A
           if git diff --cached --quiet; then
             echo "No pack changes"
