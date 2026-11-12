@@ -522,6 +522,7 @@
     dailyReset: "Resets in {n}", boardLegacy: "All-time (legacy)",
     practice: "PRACTICE", practiceNote: "Same rules as ranked, a random chart, no score on the board.",
     shareDaily: "Candle of the day · {n}", shareRank: "Rank #{n}",
+    copyResult: "Copy result",
     beatBag: "Beat {n}",
     beatBagNote: "Same chart as the challenger.", beatPlay: "Play this chart",
     beatYes: "You beat the bag.", beatNo: "The bag still stands.",
@@ -11819,7 +11820,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp224";
+      s.src = "halving.js?v=mp226";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12978,9 +12979,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp224";
+    return "share-card.js?v=mp226";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp224"; }
+  function copyResultSrc() {
+    return "copy-result.js?v=mp226";
+  }
+  function dailyScriptSrc() { return "daily.js?v=mp226"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13059,6 +13063,66 @@
     s.onload = function () { cb(typeof choppyRenderShareCard === "function" ? choppyRenderShareCard : null); };
     s.onerror = function () { cb(null); };
     document.head.appendChild(s);
+  }
+  function loadCopyResult(cb) {
+    if (typeof window.choppyBuildCopyText === "function") { if (cb) cb(); return; }
+    if (!window.__choppyCopyLoad) window.__choppyCopyLoad = [];
+    if (cb) window.__choppyCopyLoad.push(cb);
+    if (window.__choppyCopyLoading) return;
+    window.__choppyCopyLoading = true;
+    const s = document.createElement("script");
+    s.src = copyResultSrc();
+    s.onload = function () {
+      window.__choppyCopyLoading = false;
+      const q = window.__choppyCopyLoad || [];
+      window.__choppyCopyLoad = [];
+      q.forEach(function (fn) { try { fn(); } catch (e) {} });
+    };
+    s.onerror = function () { window.__choppyCopyLoading = false; window.__choppyCopyLoad = []; };
+    document.head.appendChild(s);
+  }
+  function noteDailyCopyStreak() {
+    if (!S.daily || S.practice) return;
+    loadCopyResult(function () {
+      if (typeof window.choppyNoteDailyStreak !== "function") return;
+      const day = S.dailyDay || utcDayKey();
+      const local = window.choppyNoteDailyStreak(day) || 0;
+      if (typeof window.choppyFetchDailyStreak === "function") {
+        window.choppyFetchDailyStreak(function (n) {
+          if (n && n > local && typeof window.choppyWriteDailyStreak === "function") {
+            window.choppyWriteDailyStreak(day, n);
+          }
+        });
+      }
+    });
+  }
+  function bindCopyResult() {
+    const btn = $("copy-result");
+    if (!btn) return;
+    noteDailyCopyStreak();
+    btn.onclick = function (e) {
+      if (e) e.stopPropagation();
+      loadCopyResult(function () {
+        const bag = netBtc();
+        const streak = typeof window.choppyReadDailyStreak === "function" ? window.choppyReadDailyStreak() : 0;
+        const text = window.choppyBuildCopyText({
+          daily: !!(S.daily && !S.practice),
+          date: (S.daily && !S.practice) ? (S.dailyDay || utcDayKey()) : "",
+          bag: bag,
+          rank: S.dailyRank || 0,
+          streak: streak,
+          bars: S.ohlcBars || [],
+          url: challengeUrl(S.worldSeed, bag)
+        });
+        const done = function (ok) {
+          btn.textContent = t(ok ? "shareCopied" : "copyResult");
+          setTimeout(function () { if (btn) btn.textContent = t("copyResult"); }, 1600);
+        };
+        const p = window.choppyCopyResultText(text);
+        if (p && typeof p.then === "function") p.then(done).catch(function () { done(false); });
+        else done(!!p);
+      });
+    };
   }
   function markShareBtn(key) {
     const btn = $("share-run");
@@ -14424,7 +14488,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp224";
+      s.src = "mp.js?v=mp226";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -15106,7 +15170,7 @@
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
       } else {
-        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.practice ? " · " + t("practice") : (S.ranked ? (S.daily ? " · " + t("daily") : "") : " · " + t("trainCamp"))) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.practice ? t("practiceNote") : (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote"))) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
+        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.practice ? " · " + t("practice") : (S.ranked ? (S.daily ? " · " + t("daily") : "") : " · " + t("trainCamp"))) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.practice ? t("practiceNote") : (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote"))) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"copy-result\">" + t("copyResult") + "</button></div>"
           + donateBlock();
         if ($("go")) {
           $("go").onclick = replay;
@@ -15114,6 +15178,7 @@
         }
         if ($("run-stats")) $("run-stats").onclick = (e) => { e.stopPropagation(); S.runTab = "stats"; renderOverlay(); };
         if ($("share-run")) $("share-run").onclick = () => shareRun("over");
+        bindCopyResult();
       }
     } else if (p === "win" && S.stats) {
       endRunAwards();
@@ -15128,12 +15193,13 @@
             + "<p>" + (esW ? "Tu partida queda registrada como una victoria. Puedes seguir operando como nación libre o empezar de nuevo." : "Your run is recorded as a victory. Keep trading as a free nation, or start over.") + "</p>"
           : "<p class=\"k\">TWENTY ONE MILLION</p><h1>" + t("congrats") + "</h1>"
             + "<p>" + t("stacked") + "</p>")
-          + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("keepPlaying") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"go-again\">" + t("playAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button></div>"
+          + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("keepPlaying") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"go-again\">" + t("playAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"copy-result\">" + t("copyResult") + "</button></div>"
           + donateBlock();
         if ($("go")) $("go").onclick = keepPlaying;
         if ($("run-stats")) $("run-stats").onclick = (e) => { e.stopPropagation(); S.runTab = "stats"; renderOverlay(); };
         if ($("go-again")) $("go-again").onclick = replay;
         if ($("share-run")) $("share-run").onclick = () => shareRun(indep ? "indep" : "win");
+        bindCopyResult();
       }
     }
   }

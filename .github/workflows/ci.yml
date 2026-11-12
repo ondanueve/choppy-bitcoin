@@ -42,6 +42,9 @@ jobs:
       - name: Share card
         run: node tests/share-card.js
 
+      - name: Copy result text
+        run: node tests/copy-result.js
+
       - name: Seeded market
         run: node tests/seeded-market.js
 
