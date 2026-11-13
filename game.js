@@ -3413,7 +3413,7 @@
   // Cache tags per post image: bump only the files that change (default post3).
   const POST_ART_VER = {
     "honeymoon-a":"post5", "citadelQuestion-a":"post4", "islandInspection-a":"post5", "phish-a":"post4", "phish-b":"post4",
-    "anOffer-b":"post5", "anOffer-a":"post5", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
+    "anOffer-b":"post9", "anOffer-a":"post5", "protectIsland-a":"post4", "protectIsland-b":"post4", "protectIsland-c":"post4", "theQuestion-a":"post4",
     "wedding-a":"post4", "wedding-b":"post5", "wedding-c":"post4",
     "unclemike-a":"post6", "unclemike-b":"post6", "unclemike-c":"post6", "casino-win":"post6",
     "casino-lose":"post6", "casino-c":"post6", "poker-win":"post6", "poker-bust":"post6",
@@ -11820,7 +11820,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp228";
+      s.src = "halving.js?v=mp229";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12979,12 +12979,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp228";
+    return "share-card.js?v=mp229";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp228";
+    return "copy-result.js?v=mp229";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp228"; }
+  function dailyScriptSrc() { return "daily.js?v=mp229"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -14488,7 +14488,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp228";
+      s.src = "mp.js?v=mp229";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
