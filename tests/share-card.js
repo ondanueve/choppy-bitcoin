@@ -11,7 +11,7 @@ const src = fs.readFileSync(path.join(ROOT, "share-card.js"), "utf8");
 const game = fs.readFileSync(path.join(ROOT, "game.js"), "utf8");
 const i18n = fs.readFileSync(path.join(ROOT, "i18n.js"), "utf8");
 
-assert.ok(game.indexOf("share-card.js?v=mp229") !== -1, "game lazy-loads share-card.js");
+assert.ok(game.indexOf("share-card.js?v=mp230") !== -1, "game lazy-loads share-card.js");
 assert.ok(/function loadShareCard\(cb\)/.test(game));
 assert.ok(/function fallbackShare\(blob, text, url\)/.test(game));
 assert.ok(game.indexOf("share-icon.png") < 0, "generic share icon is no longer the card");
@@ -83,14 +83,14 @@ ctx.document.createElement = function (name) { assert.strictEqual(name, "canvas"
 const daily = ctx.choppyDrawShareCard({
   bag: "1.00 BTC",
   headline: "Rekt",
-  kicker: "Candle of the day",
-  subline: "Candle of the day · 2026-11-11 · Rank #3",
+  kicker: "Ranked",
+  subline: "Ranked · 2026-11-11 · Rank #3",
   tone: "rekt",
   tape: [100, 110],
   url: "bitcoinizate.com/choppy-bitcoin/"
 }, dailyCanvas);
 assert.strictEqual(daily, dailyCanvas);
-assert.ok(dailyCanvas.ctx.ops.some((o) => o === "fillText:Candle of the day"));
-assert.ok(dailyCanvas.ctx.ops.some((o) => o === "fillText:Candle of the day · 2026-11-11 · Rank #3"));
+assert.ok(dailyCanvas.ctx.ops.some((o) => o === "fillText:Ranked"));
+assert.ok(dailyCanvas.ctx.ops.some((o) => o === "fillText:Ranked · 2026-11-11 · Rank #3"));
 
 console.log("share-card tests ok");

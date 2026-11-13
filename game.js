@@ -517,11 +517,11 @@
     sound: "SOUND", jukebox: "JUKEBOX", tutorial: "TUTORIAL", feedback: "FEEDBACK",
     language: "LANGUAGE", aiLog: "A.I. BUD LOG", signIn: "SIGN IN",
     ranked: "RANKED", training: "TRAINING", versus: "VERSUS",
-    daily: "CANDLE OF THE DAY", dailyNote: "The same chart for everyone today.",
+    dailyNote: "The same chart for everyone today.",
     dailyBoard: "Today's bags", dailyYesterday: "Yesterday",
     dailyReset: "Resets in {n}", boardLegacy: "All-time (legacy)",
-    practice: "PRACTICE", practiceNote: "Same rules as ranked, a random chart, no score on the board.",
-    shareDaily: "Candle of the day · {n}", shareRank: "Rank #{n}",
+    shareDaily: "Ranked · {n}", shareRank: "Rank #{n}",
+    tutSkip: "Skip", tutNext: "Next", tutDone: "Got it", tutMore: "More info",
     copyResult: "Copy result",
     beatBag: "Beat {n}",
     beatBagNote: "Same chart as the challenger.", beatPlay: "Play this chart",
@@ -607,12 +607,6 @@
     priceDyn: "DYNAMIC",
     priceUsd: "USD",
     priceBtc: "BTC",
-    tut1: "You are the ₿. Tap or press space to flap through the candle gaps. A wick liquidates you.",
-    tut2: "Candles pay cash. Buy BTC on the dip, sell on the rip. Your score is your net worth in BTC.",
-    tut3a: "Bull pumps the price.",
-    tut3b: "Bear dumps it.",
-    tut4a: "A black swan is a brutal crash.",
-    tut4b: "A halving is a big bull that rides between the candles.",
     halveTipUp: "Halving. Look up!",
     halveTipDown: "Halving. Look down!",
     aidTitle: "San Arnaldo",
@@ -620,15 +614,7 @@
     aidPay: "Accept help",
     aidShort: "Not enough BTC and cash. Together they cover {have}.",
     aidDecline: "Refuse",
-    tut5: "Cold storage absorbs a hit. Ten colds become one multisig life.",
-    tut6: "Laser eyes eat a bear and unlock a perk.",
     tutBattle: "Battle tutorial",
-    tutB1: "On land you drive a tank; at sea, a ship. The stick moves you and the right side of the screen fires.",
-    tutB2: "You have 3 hearts and the citadel has its own shield. Lose either and the battle is lost. Your 12 shots reload on their own, and kills give some back.",
-    tutB3: "Brick breaks. Metal, rock and the lighthouse do not. Tanks stay on land, ships on water.",
-    tutB4: "Pickups appear now and then: + heals, S upgrades your shot, the star makes you invulnerable, F freezes enemies, X blows them all up, W armors the citadel.",
-    tutB5: "Fury, the missile above the stick: hold until the ring fills, aim the red circle with the stick, tap to fire. It recharges between shots and also reaches helicopters.",
-    tutB6: "Some enemies come for you, others go for the citadel. Each battle sends more troops than the last. KIA is how many you destroyed out of those sent.",
     pwaOpt: "OFFLINE APP", pwaOn: "ON", pwaOff: "OFF",
     pwaUpdate: "A new version is ready.", pwaReload: "Reload", pwaLater: "Not now",
     pwaReloadOn: "Reload once to store the game on this device.",
@@ -659,20 +645,18 @@
   function battleIcos(kinds){
     return "<span class=\"help-icos\">" + kinds.map(badgeIco).join("") + "</span>";
   }
-  function battleTutInner(){
+  function battleTutInner(more){
     const line = (icos, key) => "<p>" + icos + "<span>" + t(key) + "</span></p>";
-    return line(badgeIco("tank") + badgeIco("ship"), "tutB1")
+    let h = line(badgeIco("tank") + badgeIco("ship"), "tutB1")
       + line(badgeIco("heart"), "tutB2")
-      + line(battleIcos(["sand", "grass", "dirt", "brick", "metal", "tree", "rock", "lh", "water"]), "tutB3")
-      + line(battleIcos(["heal", "shot", "star", "freeze", "bomb", "wall"]), "tutB4")
-      + line(badgeIco("heli") + badgeIco("aa"), "tutB5")
-      + line(battleIcos(["tank", "fast", "heavy", "elite", "ship"]), "tutB6");
+      + line(battleIcos(["tank", "fast", "heavy", "elite", "ship"]), "tutB3");
+    if (more) {
+      h += line(battleIcos(["heal", "shot", "star", "freeze", "bomb", "wall"]), "tutB4")
+        + line(badgeIco("heli") + badgeIco("aa"), "tutB5")
+        + line(battleIcos(["sand", "grass", "dirt", "brick", "metal", "tree", "rock", "lh", "water"]), "tutB6");
+    }
+    return h;
   }
-  function battleTutHtml(){ return "<div class=\"help battle-help\">" + battleTutInner() + "</div>"; }
-  function battleTutParas() {
-    return [t("tutB1"), t("tutB2"), t("tutB3"), t("tutB4"), t("tutB5"), t("tutB6")];
-  }
-  function battleTutPlain() { return battleTutParas().join("\n\n"); }
   function markBattleTut() {
     S.bcBattleTut = true;
     try { localStorage.setItem("choppy-battle-tut", "1"); } catch (e) {}
@@ -683,19 +667,55 @@
     try { if (localStorage.getItem("choppy-battle-tut") === "1") { S.bcBattleTut = true; return true; } } catch (e) {}
     return false;
   }
-  function tutorialBody() {
-    return "<div class=\"help\">"
+  function tutorialBody(more) {
+    let h = "<div class=\"help\">"
       + "<p>" + badgeIco("hero") + " " + t("tut1") + "</p>"
       + "<p>" + badgeIco("cash") + " " + t("tut2") + "</p>"
-      + "<p>" + badgeIco("bull") + " " + t("tut3a") + " " + badgeIco("bear") + " " + t("tut3b") + "</p>"
-      + "<p>" + badgeIco("swan") + " " + t("tut4a") + " " + badgeIco("halve") + " " + t("tut4b") + "</p>"
-      + "<p>" + badgeIco("cold") + " " + t("tut5") + "</p>"
-      + "<p>" + badgeIco("laser") + " " + t("tut6") + "</p>"
-      + (battleTutSeen()
-        ? "<p class=\"k\">" + t("tutBattle") + "</p>" + battleTutInner()
-        : "")
-      + "</div>";
+      + "<p>" + badgeIco("bull") + " " + t("tut3a") + " " + badgeIco("bear") + " " + t("tut3b") + "</p>";
+    if (more) {
+      h += "<p>" + badgeIco("swan") + " " + t("tut4a") + " " + badgeIco("halve") + " " + t("tut4b") + "</p>"
+        + "<p>" + badgeIco("cold") + " " + t("tut5") + "</p>"
+        + "<p>" + badgeIco("laser") + " " + t("tut6") + "</p>"
+        + (battleTutSeen() ? "<p class=\"k\">" + t("tutBattle") + "</p>" + battleTutInner(true) : "");
+    }
+    return h + "</div>";
   }
+  function lsOn(k, write) {
+    try { if (write) localStorage.setItem(k, "1"); return localStorage.getItem(k) === "1"; } catch (e) { return !write; }
+  }
+  function stepCard(n, inner, skipId, nextId) {
+    return "<p class=\"k\">" + n + "/3</p><p>" + inner + "</p><div class=\"overlay-actions\">"
+      + "<button type=\"button\" class=\"cta play-alt\" id=\"" + skipId + "\">" + t("tutSkip") + "</button>"
+      + "<button type=\"button\" class=\"cta\" id=\"" + nextId + "\">" + t(n === 3 ? "tutDone" : "tutNext") + "</button></div>";
+  }
+  function bindSteps(skipId, nextId, prop, done) {
+    const skip = $(skipId), next = $(nextId);
+    if (skip) skip.onclick = (e) => { e.stopPropagation(); done(); renderOverlay(); };
+    if (next) next.onclick = (e) => {
+      e.stopPropagation();
+      if ((S[prop] || 1) >= 3) done(); else S[prop] = (S[prop] || 1) + 1;
+      renderOverlay();
+    };
+  }
+  function onboardSeen() { return lsOn("choppy-onboard"); }
+  function markOnboard() { lsOn("choppy-onboard", 1); S.onboard = 0; }
+  function shouldShowOnboard() { return !onboardSeen() && !S.pendingChallenge && !S.mpJoinCode; }
+  function onboardHtml() {
+    const pack = [["hero","tut1"],["cash","tut2"],["bull","tut3a","bear","tut3b"]][Math.max(0, Math.min(2, (S.onboard || 1) - 1))];
+    const ico = badgeIco(pack[0]) + (pack[2] ? badgeIco(pack[2]) : "");
+    const text = pack[3] ? t(pack[1]) + " " + t(pack[3]) : t(pack[1]);
+    return stepCard(S.onboard || 1, ico + " " + text, "tut-skip", "tut-next");
+  }
+  function bindOnboard() { bindSteps("tut-skip", "tut-next", "onboard", markOnboard); }
+  function battleOnboardSeen() { return lsOn("choppy-battle-onboard"); }
+  function markBattleOnboard() { lsOn("choppy-battle-onboard", 1); markBattleTut(); S.battleTutStep = 0; S.battleTutOpen = false; }
+  function battleOnboardHtml() {
+    const n = Math.max(1, Math.min(3, S.battleTutStep || 1));
+    const ico = [badgeIco("tank") + badgeIco("ship"), badgeIco("heart"), battleIcos(["tank", "ship"])][n - 1];
+    return stepCard(n, ico + "<span>" + t("tutB" + n) + "</span>", "btut-skip", "btut-next");
+  }
+  function bindBattleOnboard() { bindSteps("btut-skip", "btut-next", "battleTutStep", markBattleOnboard); }
+
   const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
   const PERK_NAME = { dca: "DCA", ff: "FastForward", adopt: "Adoption", manip: "Manipulation", candy: "Candle candy", juke: "Jukebox", aibud: "A.I. bud", job: "Employment", market: "Marketplace", chance: "Arc", opsec: "Opsec" };
   const PERK_NAME_ES = { dca: "DCA", ff: "FastForward", adopt: "Adopción", manip: "Manipulación", candy: "Caramelo de vela", juke: "Jukebox", aibud: "A.I. bud", job: "Empleo", market: "Mercado", chance: "Arco", opsec: "Opsec" };
@@ -855,7 +875,7 @@
   // to allow only one ranked submit per signed-in user per UTC day.
   const DAILY_ONE_ATTEMPT = false;
   function saveBest(n) {
-    if (!S.ranked || S.testCheat || S.practice) return S.best || 0;
+    if (!S.ranked || S.testCheat) return S.best || 0;
     if (S.daily) {
       try { queueDailySubmit(n); } catch (e) {}
       return Math.max(S.best || 0, n);
@@ -864,7 +884,7 @@
     return Math.max(S.best || 0, n);
   }
   function noteIndependence() {
-    if (S.indepNoted || S.mp || !S.ranked || S.practice || !S.daily || S.testCheat || S.humanInput === false) return;
+    if (S.indepNoted || S.mp || !S.ranked || !S.daily || S.testCheat || S.humanInput === false) return;
     const life = Number(S.lifeT) || 0;
     const candles = S.candles || 0;
     if (life < 12 || candles < 3) return;
@@ -1130,7 +1150,7 @@
     startCash: 0, startPrice: 0, peakNet: 0, candles: 0, shownCandles: 0, buys: 0, sells: 0, swans: 0, lasers: 0,
     halvings: 0, halveLeft: HALVE_GAP, halveBull: false, halveFloor: 0, spawnedPipes: 0, halveSide: "up",
     swanBear: false, halveSpeechUntil: 0,
-    stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true, practice: false, daily: false,
+    stats: null, welcomed: false, introCounted: false, speechUntil: 0, speechRank: 0, humanInput: false, ranked: true, daily: false,
     mp: false, worldSeed: 0, worldRand: null, mpOver: false, mpErr: "", mpJoinCode: "",
     mpRules: null, mpPlayAt: 0, mpSlot: 0, btcColdAt: 0, spectate: false, finished: false,
     mpRoundOver: false, mpSeriesOver: false, mpSeriesWins: {}, mpGameN: 1, mpNextAt: 0, mpRematchOn: false, mpSeriesT0: 0, mpEloTry: 0, mpLog: [], mpCatch: false,
@@ -3855,6 +3875,10 @@
           {k:"go", label:"Defend the beach", labelEs:"Defender la playa"},
           {k:"tut", label:"Battle tutorial", labelEs:"Tutorial de batalla"}
         ];
+        if(!battleOnboardSeen() && !S.battleTutOpen){
+          S.battleTutOpen=true;
+          S.battleTutStep=1;
+        }
       }else{
         card.kind="report";
         card.opts=[];
@@ -4305,10 +4329,7 @@
     if (card.id==="blocAssault" && opt==="tut") {
       markBattleTut();
       S.battleTutOpen=true;
-      S.chanceBody=battleTutPlain();
-      S.chanceTitle={en:"Battle tutorial", es:"Tutorial de batalla"};
-      card.kind="choice";
-      card.opts=[{k:"go", label:"Begin the defense", labelEs:"Iniciar la defensa"}];
+      S.battleTutStep=1;
       S.chanceNote="";
       renderOverlay();
       return;
@@ -10068,7 +10089,6 @@
     if (!S.mp) {
       S.mpOver = false; S.mpPlayAt = 0;
       if (ranked !== false && (mode == null || mode === "" || mode === "ranked")) mode = "daily";
-      S.practice = mode === "practice";
       if (mode === "daily") {
         S.daily = true; S.dailyDay = utcDayKey();
         if (S.dailySubmittedDay !== S.dailyDay) { S.dailySubmitted = false; S.dailyRank = 0; }
@@ -10197,7 +10217,6 @@
     if (!S.mp) {
       if (S.daily) rollWorldSeed(S.worldSeed);
       else if (S.challengeSeed) rollWorldSeed(S.challengeSeed);
-      else if (S.practice) rollWorldSeed();
       else rollWorldSeed();
     }
     try { bumpUsage("start"); } catch (e) {}
@@ -11820,7 +11839,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp229";
+      s.src = "halving.js?v=mp230";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12748,7 +12767,7 @@
     return !!(window.choppySignedIn === true && window.choppyUid && window.choppyUserId && window.choppyUid === window.choppyUserId);
   }
   function awardsLive() {
-    return isRegistered() && !!S.ranked && !!S.daily && !S.practice && !S.testCheat && !S.mp;
+    return isRegistered() && !!S.ranked && !!S.daily && !S.testCheat && !S.mp;
   }
   const AWARD_TOAST_MS = 3000;
   const awardToastQ = [];
@@ -12979,12 +12998,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp229";
+    return "share-card.js?v=mp230";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp229";
+    return "copy-result.js?v=mp230";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp229"; }
+  function dailyScriptSrc() { return "daily.js?v=mp230"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13082,7 +13101,7 @@
     document.head.appendChild(s);
   }
   function noteDailyCopyStreak() {
-    if (!S.daily || S.practice) return;
+    if (!S.daily) return;
     loadCopyResult(function () {
       if (typeof window.choppyNoteDailyStreak !== "function") return;
       const day = S.dailyDay || utcDayKey();
@@ -13106,8 +13125,8 @@
         const bag = netBtc();
         const streak = typeof window.choppyReadDailyStreak === "function" ? window.choppyReadDailyStreak() : 0;
         const text = window.choppyBuildCopyText({
-          daily: !!(S.daily && !S.practice),
-          date: (S.daily && !S.practice) ? (S.dailyDay || utcDayKey()) : "",
+          daily: !!S.daily,
+          date: S.daily ? (S.dailyDay || utcDayKey()) : "",
           bag: bag,
           rank: S.dailyRank || 0,
           streak: streak,
@@ -13176,8 +13195,8 @@
         ? tag + "juntó 21M en Choppy Bitcoin. Bag " + btc + (names ? " Premios: " + names : "")
         : tag + "stacked 21M on Choppy Bitcoin. Bag " + btc + (names ? " Awards: " + names : ""))
       : (es
-        ? tag + "quedó rekt en Choppy Bitcoin" + (S.daily ? " (vela del día " + (S.dailyDay || utcDayKey()) + ")" : "") + ". Bag " + btc + ". Juega gratis en Bitcoinizate."
-        : tag + "got rekt on Choppy Bitcoin" + (S.daily ? " (candle of the day " + (S.dailyDay || utcDayKey()) + ")" : "") + ". Bag " + btc + ". Play free on Bitcoinizate.");
+        ? tag + "quedó rekt en Choppy Bitcoin" + (S.daily ? " (Ranked " + (S.dailyDay || utcDayKey()) + ")" : "") + ". Bag " + btc + ". Juega gratis en Bitcoinizate."
+        : tag + "got rekt on Choppy Bitcoin" + (S.daily ? " (Ranked " + (S.dailyDay || utcDayKey()) + ")" : "") + ". Bag " + btc + ". Play free on Bitcoinizate.");
     const url = challengeUrl(S.worldSeed, netBtc());
     const headline = kind === "indep"
       ? (es ? "Independencia" : "Independence")
@@ -13185,7 +13204,7 @@
       ? (es ? "21 millones" : "Twenty one million")
       : (es ? "Liquidado" : "Rekt");
     const kicker = S.daily
-      ? t("daily")
+      ? t("ranked")
       : kind === "indep" || kind === "win"
       ? (es ? "Victoria" : "Victory")
       : (es ? "Fin de la partida" : "Run over");
@@ -13626,10 +13645,10 @@
   function pauseMarkup() {
     const panel = S.optPanel || "";
     if (panel === "help") {
-      return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody() + kbHelpHtml();
+      return "<div class=\"opt-head\">" + optHead(t("howPlay")) + "</div>" + tutorialBody(!!S.tutMore) + (S.tutMore ? kbHelpHtml() : ("<button type=\"button\" class=\"cta play-alt\" id=\"tut-more\">" + t("tutMore") + "</button>"));
     }
     if (panel === "btut") {
-      return "<div class=\"opt-head\">" + optHead(t("tutBattle")) + "</div>" + battleTutHtml();
+      return "<div class=\"opt-head\">" + optHead(t("tutBattle")) + "</div>" + "<div class=\"help battle-help\">" + battleTutInner(true) + "</div>";
     }
     if (panel === "market") {
       const mul = S.ranked ? 10 : 1;
@@ -13877,7 +13896,9 @@
       renderOverlay();
     };
     const optHelp = $("opt-help");
-    if (optHelp) optHelp.onclick = (e) => { e.stopPropagation(); S.optPanel = "help"; renderOverlay(); };
+    if (optHelp) optHelp.onclick = (e) => { e.stopPropagation(); S.optPanel = "help"; S.tutMore = false; renderOverlay(); };
+    const tutMore = $("tut-more");
+    if (tutMore) tutMore.onclick = (e) => { e.stopPropagation(); S.tutMore = true; renderOverlay(); };
     const optBtut = $("opt-btut");
     if (optBtut) optBtut.onclick = (e) => { e.stopPropagation(); S.optPanel = "btut"; renderOverlay(); };
     const optFeed = $("opt-feed");
@@ -14488,7 +14509,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp229";
+      s.src = "mp.js?v=mp230";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14952,19 +14973,22 @@
         overlay.innerHTML = pauseMarkup();
         bindPauseUi();
       } else {
+        if (!S.optPanel && shouldShowOnboard()) {
+          if (!S.onboard) S.onboard = 1;
+          overlay.innerHTML = "<h1>Choppy Bitcoin</h1>" + onboardHtml();
+          bindOnboard();
+          return;
+        }
         overlay.innerHTML = "<h1>Choppy Bitcoin</h1>"
-          + "<button class=\"cta\" id=\"go\">" + t("daily") + "</button>"
+          + "<button class=\"cta\" id=\"go\">" + t("ranked") + "</button>"
           + "<p class=\"k\">" + t("playSub") + "</p>"
           + "<p class=\"k\" id=\"daily-reset\">" + fmtResetLeft() + "</p>"
-          + "<button type=\"button\" class=\"cta play-alt\" id=\"go-practice\">" + t("practice") + "</button>"
-          + "<p class=\"k\">" + t("practiceNote") + "</p>"
           + "<button type=\"button\" class=\"cta play-alt\" id=\"go-train\">" + t("training") + "</button>"
           + "<p class=\"k\">" + t("trainNote") + "</p>"
           + (S.pendingChallenge ? ("<p class=\"k\">" + t("beatBag").replace("{n}", fmtBtc(S.pendingChallenge.bag || 0)) + "</p><p class=\"k\">" + t("beatBagNote") + "</p><button type=\"button\" class=\"cta play-alt\" id=\"go-challenge\">" + t("beatPlay") + "</button>") : "")
           + "<button type=\"button\" class=\"cta play-alt\" id=\"go-mp\">" + t("versus") + "<small class=\"alpha-tag\">" + t("mpAlpha") + "</small></button>"
           + "<p class=\"k\">" + t("mpAlphaNote") + " <a href=\"mailto:versus@bitcoinizate.com\">versus@bitcoinizate.com</a></p>"
           + (window.choppySignedIn ? "" : "<button type=\"button\" class=\"cta play-alt\" id=\"overlay-auth\">" + t("signIn") + "</button>")
-          + tutorialBody()
           + awardListHtml(loadAwards(), "full")
           + "<div id=\"daily-board-wrap\" hidden>"
           + "<div class=\"overlay-actions\" id=\"daily-tabs\">"
@@ -14979,10 +15003,6 @@
           + "<h3 class=\"k\">" + t("boardInd") + "</h3><pre id=\"ready-indep\" class=\"board\">—</pre>";
         $("go").onclick = () => startGame(true, null, "daily");
         $("go").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "daily"); };
-        if ($("go-practice")) {
-          $("go-practice").onclick = () => startGame(true, null, "practice");
-          $("go-practice").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "practice"); };
-        }
         if ($("go-train")) {
           $("go-train").onclick = () => startGame(false);
           $("go-train").onpointerdown = (e) => { e.stopPropagation(); startGame(false); };
@@ -15061,17 +15081,21 @@
       overlay.classList.remove("chance-options");
       const card = S.chanceCard;
       if (!card) { finishArcHold(); return; }
+      if (S.battleTutOpen) {
+        if (!S.battleTutStep) S.battleTutStep = 1;
+        overlay.innerHTML = "<h1>" + t("tutBattle") + "</h1>" + battleOnboardHtml();
+        bindBattleOnboard();
+        return;
+      }
       const es = chanceLang();
       let title = es ? (card.titleEs || card.title) : card.title;
       if (S.chanceTitle) title = es ? (S.chanceTitle.es || S.chanceTitle.en || title) : (S.chanceTitle.en || title);
-      if (S.battleTutOpen) title = t("tutBattle");
       if (card.job) title = fillJob(title, card.jobTier);
       title = stampNation(title);
       const snapBody = card.job || card.id === "anOffer" || card.id === "ambassador"
         || card.id === "firstBloc" || card.id === "rearmament" || card.id === "threeColors"
         || card.id === "blocReplies" || card.id === "blocAssault" || card.id === "battleWon" || card.id === "blocTriumph";
-      const rawBody = S.battleTutOpen ? battleTutPlain()
-        : (!snapBody ? weaveCast(es ? (card.bodyEs || card.body) : card.body) : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body)));
+      const rawBody = !snapBody ? weaveCast(es ? (card.bodyEs || card.body) : card.body) : (S.chanceBody || (es ? (card.bodyEs || card.body) : card.body));
       const body = stampNation(rawBody);
       const pic = (S.chanceNote && S.chanceOpt) ? postArtHtml(card.id, S.chanceOpt, S.chanceVar) : blocArtHtml(card);
       let btns = "";
@@ -15088,12 +15112,12 @@
         }).join("");
         const ack = !btns;
         if (ack) btns = "<button class=\"cta\" data-ch=\"ok\">" + t("chanceAck") + "</button>";
-        const settled = (S.chanceSettled && S.chanceReadyNote && !S.battleTutOpen)
+        const settled = (S.chanceSettled && S.chanceReadyNote)
           ? arcMoneyHtml(ARC_TLDR ? (punchline(stripOutcomeMoney(S.chanceReadyNote)) || S.chanceReadyNote) : S.chanceReadyNote)
           : "";
         overlay.innerHTML = "<div class=\"arc-head\"><h1>" + t("chanceHead") + "</h1>" + arcTldrBtn() + "</div>"
           + pic + "<p class=\"arc-title\" role=\"heading\" aria-level=\"2\">" + title + "</p>"
-          + (S.battleTutOpen ? battleTutHtml() : arcStoryHtml(card, body))
+          + arcStoryHtml(card, body)
           + settled
           + "<div class=\"arc-actions\">" + btns + "</div>";
       }
@@ -15170,7 +15194,7 @@
         overlay.innerHTML = runRecapHtml();
         bindRunRecap();
       } else {
-        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.practice ? " · " + t("practice") : (S.ranked ? (S.daily ? " · " + t("daily") : "") : " · " + t("trainCamp"))) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.practice ? t("practiceNote") : (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote"))) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"copy-result\">" + t("copyResult") + "</button></div>"
+        overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? (S.daily ? " · " + t("ranked") : "") : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"copy-result\">" + t("copyResult") + "</button></div>"
           + donateBlock();
         if ($("go")) {
           $("go").onclick = replay;

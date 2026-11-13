@@ -71,7 +71,7 @@
   function buildCopyText(data) {
     var d = data || {};
     var lines = ["Choppy Bitcoin"];
-    if (d.daily && d.date) lines[0] += "  " + String(d.date);
+    if (d.daily && d.date) lines[0] += "  Ranked  " + String(d.date);
     var bagLine = d.bagText ? String(d.bagText) : fmtBag(d.bag);
     if (d.rank) bagLine += "  #" + String(d.rank);
     var streak = Number(d.streak) || 0;
