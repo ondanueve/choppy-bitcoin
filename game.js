@@ -2543,70 +2543,69 @@
     closeArc(card);
   }
   function weaveCast(text) { return text; }
-  const CHANCE_TLDR = {
-    justInCase: { en: "A new emergency law widens government power whenever the economy looks unstable. They call it temporary. The definition seems to cover most years.", es: "Una nueva ley de emergencia amplía las facultades del Estado ante la inestabilidad económica. La llaman temporal, aunque la definición parece abarcar casi todos los años." },
-    nothingToHide: { en: "An optional digital ID spreads to airports, banks, and public services. A TV host asks what the problem is.", es: "Un documento digital opcional se extiende a aeropuertos, bancos y servicios públicos. Un presentador pregunta cuál es el problema." },
-    somethingBetter: { en: "On a walk with Marek and Paco you say that, with enough money, you could build something better than a company or a charity. You do not yet know what.", es: "Mientras caminas con Marek y Paco, dices que con suficiente dinero podrías construir algo mejor que una empresa o una organización benéfica. Aún no sabes qué sería." },
-    timeTraveler: { en: "An old post claims to be from a future of citadels. A search turns up a self-published book, THE BITCOIN STATE, for $666.", es: "Una publicación antigua describe un futuro de ciudadelas y gobiernos debilitados. La búsqueda te lleva a un libro autoeditado, THE BITCOIN STATE, por $666." },
-    temporaryMeasures: { en: "A financial emergency brings transfer limits and payment apps that stop working. Officials promise ninety days; the previous temporary measures are entering their fourth year.", es: "Una emergencia financiera impone límites a las transferencias y al efectivo, y varias aplicaciones de pago dejan de funcionar. Las autoridades prometen noventa días; las medidas temporales anteriores están por cumplir cuatro años." },
-    citadelProblem: { en: "You tell Marek you want to build a country. He laughs, then asks how much land, and adds a flag to your list.", es: "Le dices a Marek que quieres construir un país. Se ríe, pero luego pregunta cuánta tierra y agrega una bandera a tu lista." },
-    pieceWorld: { en: "Nico finds a listing for an isolated island that calls itself a sovereign opportunity. It is not sovereign.", es: "Nico encuentra el anuncio de una isla aislada que se presenta como una oportunidad para una vida soberana. La isla no es soberana." },
-    islandInspection: { en: "At sunrise the island is more beautiful than the listing. At sunset the seller's offer arrives.", es: "Al amanecer, la isla resulta más hermosa que en el anuncio. Después de recorrerla, al atardecer llega la oferta del vendedor." },
-    paperwork: { en: "Lawyers turn the purchase into something that looks serious. Nico signs in the wrong place. Paco eats a corner of the last page.", es: "Los abogados formalizan la compra. Nico firma donde no corresponde y Paco se come una esquina del documento final." },
-    nobodyKnows: { en: "You have land and paperwork, and almost no reason for anyone to care. The only name you are given is Madame Luck.", es: "Tienes tierra y documentos, pero aún no tienes ciudadanos, reconocimiento ni atención. La única pista es Madame Luck." },
-    theOg: { en: "Madame Luck asks very good questions, says she will tell some people, and your phone starts vibrating.", es: "Madame Luck hace preguntas muy acertadas, dice que hablará del proyecto con algunas personas y tu teléfono empieza a vibrar." },
-    peopleAsking: { en: "People ask if they can move in. Nico makes a spreadsheet. There are no houses.", es: "Desarrolladores, mineros y familias quieren mudarse a la isla. Nico organiza los nombres, pero Marek señala que no hay viviendas." },
-    extensionCord: { en: "The new residents bring more machines than the island can feed. The lights go out. Someone asks who was mining.", es: "Los nuevos residentes conectan más equipos de los que la isla puede abastecer. La energía se corta y alguien pregunta quién estaba minando." },
-    obviously: { en: "The grid works. Nico says you should mine Bitcoin. The proposal is four words: cheap power, we mine.", es: "La red eléctrica funciona y Nico propone minar Bitcoin. Su propuesta se resume en cuatro palabras: energía barata, minamos Bitcoin." },
+    const CHANCE_TLDR = {
+    justInCase: { en: "A new “temporary” emergency law widens government power whenever the economy looks unstable.", es: "Una nueva ley de emergencia «temporal» amplía las facultades del Estado cuando la economía se ve inestable." },
+    nothingToHide: { en: "An optional digital ID spreads everywhere, and a TV host asks what the problem is.", es: "Un documento digital opcional se extiende a todas partes, y un presentador pregunta cuál es el problema." },
+    somethingBetter: { en: "You tell Marek you could build something better than a company or a charity; you do not yet know what.", es: "Le dices a Marek que podrías construir algo mejor que una empresa o una organización benéfica; aún no sabes qué sería." },
+    timeTraveler: { en: "An old post about a future of citadels leads to a self-published book, THE BITCOIN STATE, for $666.", es: "Una publicación antigua sobre un futuro de ciudadelas te lleva a un libro autoeditado, THE BITCOIN STATE, por $666." },
+    temporaryMeasures: { en: "A financial emergency brings transfer limits, promised for ninety days; the last temporary measures are entering their fourth year.", es: "Una emergencia financiera impone límites a las transferencias, prometidos por noventa días; las últimas medidas temporales van por su cuarto año." },
+    citadelProblem: { en: "You tell Marek you want to build a country; he laughs, then asks how much land and adds a flag.", es: "Le dices a Marek que quieres construir un país; se ríe, pero luego pregunta cuánta tierra y agrega una bandera." },
+    pieceWorld: { en: "Nico finds an island listed as a sovereign opportunity; it is not.", es: "Nico encuentra una isla anunciada como oportunidad soberana; no lo es." },
+    islandInspection: { en: "The island is more beautiful than the listing; at sunset, the seller's offer arrives.", es: "La isla es más hermosa que en el anuncio; al atardecer llega la oferta del vendedor." },
+    paperwork: { en: "Lawyers formalize the purchase; Nico signs in the wrong place, and Paco eats a corner of the last page.", es: "Los abogados formalizan la compra; Nico firma donde no corresponde y Paco se come una esquina de la última página." },
+    nobodyKnows: { en: "You have land and paperwork, but almost no one has a reason to care; the only name you get is Madame Luck.", es: "Tienes tierra y documentos, pero casi nadie tiene motivo para interesarse; el único nombre que te dan es Madame Luck." },
+    theOg: { en: "Madame Luck asks sharp questions, says she will tell some people, and your phone starts vibrating.", es: "Madame Luck hace preguntas agudas, dice que hablará con algunas personas y tu teléfono empieza a vibrar." },
+    peopleAsking: { en: "People want to move in; Nico makes a list, but there are no houses.", es: "La gente quiere mudarse, pero mientras Nico arma una lista, Marek señala que no hay viviendas." },
+    extensionCord: { en: "New residents overload the island's power, the lights go out, and someone asks who was mining.", es: "Los nuevos residentes sobrecargan la energía de la isla, se corta la luz y alguien pregunta quién estaba minando." },
+    obviously: { en: "With the grid working, Nico's proposal is four words: cheap power, we mine.", es: "Con la red ya funcionando, la propuesta de Nico es de cuatro palabras: energía barata, minamos." },
     principality: { en: "A micro-state of 614 claimed citizens writes to propose diplomatic relations.", es: "Un microestado de 614 ciudadanos declarados te escribe para proponer relaciones diplomáticas." },
-    stateVisit: { en: "San Arnaldo, whose government sits in a former restaurant, asks for a Bitcoin node; you could gain your first ally.", es: "San Arnaldo, cuyo gobierno funciona en un antiguo restaurante, pide un nodo de Bitcoin; podrías ganar tu primer aliado." },
-    firstBloc: { en: "Germany, France, Italy, Spain, the Netherlands, Belgium, and Austria form the Meridian Stability Pact. Its language is administrative; its restrictions are not optional.", es: "Alemania, Francia, Italia, España, los Países Bajos, Bélgica y Austria forman el Pacto de Estabilidad Meridiano. Su lenguaje es administrativo, pero sus restricciones no son opcionales." },
-    protectIsland: { en: "A boat disappears from the dock overnight. One camera caught nothing, and Paco slept through it. The island now needs a security plan.", es: "Un bote desaparece del muelle durante la noche. La única cámara no registró nada y Paco no despertó. La isla necesita un plan de seguridad." },
-    placeNow: { en: "At fifty nodes, the island gains a coffee shop, a bakery, a bar, and a newspaper. Its first editorial criticizes you. Nico calls that progress.", es: "Al alcanzar cincuenta nodos, la isla ya tiene cafetería, panadería, bar y periódico. Su primer editorial te critica. Nico considera que eso es progreso." },
-    citadelQuestion: { en: "Marek proposes a citadel with protected power, walls, and a hardened center. It could defend the community, but it would also turn their home into a fortress.", es: "Marek propone una ciudadela con energía protegida, muros y un centro reforzado. Podría defender a la comunidad, pero también convertiría su hogar en una fortaleza." },
-    rearmament: { en: "The Meridian Pact announces a frigate program and calls it maintenance. Russia, Belarus, China, North Korea, and Cuba answer by forming the Red Ledger Compact. Both blocs begin building warships.", es: "El Pacto Meridiano anuncia un programa de fragatas y lo llama mantenimiento. Rusia, Bielorrusia, China, Corea del Norte y Cuba responden con el Compacto del Libro Rojo. Ambos bloques comienzan a construir buques de guerra." },
-    anOffer: { en: "A private consortium offers {offer} for the island and everything built on it. Selling would secure the profit and end Bitcoin Country. Madame Luck asks why you began.", es: "Un consorcio privado ofrece {offer} por la isla y todo lo construido en ella. Vender aseguraría la ganancia y pondría fin a Bitcoin Country. Madame Luck pregunta por qué comenzaste." },
-    ambassador: { en: "An ambassador makes an unofficial visit, inspects the island, and leaves a direct number. If Bitcoin Country becomes more than a project, she wants the first call.", es: "Una embajadora realiza una visita extraoficial, recorre la isla y deja un número directo. Si Bitcoin Country se convierte en algo más que un proyecto, quiere recibir la primera llamada." },
-    threeColors: { en: "Saudi Arabia, Jordan, Morocco, Thailand, and Brunei form the Crown Lattice, the third bloc surrounding Bitcoin Country. To High Warden Soren Pell, a people who will not kneel is an administrative error.", es: "Arabia Saudita, Jordania, Marruecos, Tailandia y Brunéi forman la Celosía de la Corona, el tercer bloque que rodea a Bitcoin Country. Para el Alto Guardián Soren Pell, un pueblo que no se arrodilla es un error administrativo." },
-    ortegaCalls: { en: "Mr Ortega & Gambette has a ninety-three-page diplomatic package covering recognition, treaties, fisheries, and protocol. He offers the complete service, or a shorter review that may still help.", es: "El señor Ortega & Gambette ofrece un paquete diplomático de 93 páginas sobre reconocimiento, tratados, pesca y protocolo. Ofrece el servicio completo, aunque una revisión más breve también podría ayudar." },
-    theQuestion: { en: "Land, power, water, people, money, rules, security, and recognition are checked off, or close enough. Only one line remains: independence. Declaring it will turn the project into a country—and make the three blocs respond.", es: "Tierra, energía, agua, población, dinero, normas, seguridad y reconocimiento ya están marcados, o casi. Solo queda una línea: independencia. Declararla convertirá el proyecto en un país y obligará a los tres bloques a responder." },
-    cabinet: { en: "Bitcoin Country forms its first cabinet: you become Head of State, Marek takes Finance, Nico takes Commerce, and Paco becomes Minister of Defense. Madame Luck declines a ministry.", es: "Bitcoin Country forma su primer gabinete: asumes la jefatura de Estado, Marek asume Finanzas, Nico se encarga de Comercio y Paco se convierte en ministro de Defensa. Madame Luck rechaza un ministerio." },
-    declaration: { en: "The declaration is signed and published. San Arnaldo recognizes Bitcoin Country thirty-seven seconds later. Ortega replies with a thumbs-up and a fourteen-page protocol memo.", es: "La declaración queda firmada y publicada. San Arnaldo reconoce a Bitcoin Country 37 segundos después. Ortega responde con un pulgar arriba y un memorando de protocolo de 14 páginas." },
-    theAnswer: { en: "The blocs use different words, but their answer is the same: Bitcoin Country will not be allowed to stand outside their map. Their fleets are already moving.", es: "Los bloques usan palabras distintas, pero su respuesta es la misma: no permitirán que Bitcoin Country permanezca fuera de su mapa. Sus flotas ya están en movimiento." },
-    fourthColor: { en: "All three blocs attacked and failed. The island still stands: Bitcoin Country is independent.", es: "Los tres bloques atacaron y fracasaron. La isla sigue en pie: Bitcoin Country es independiente." },
+    stateVisit: { en: "San Arnaldo, run from a former restaurant, asks for a Bitcoin node and could become your first ally.", es: "San Arnaldo, cuyo gobierno funciona en un antiguo restaurante, pide un nodo de Bitcoin y podría ser tu primer aliado." },
+    firstBloc: { en: "The Meridian Pact is formed; its restrictions are not optional.", es: "Se forma el Pacto Meridiano; sus restricciones no son opcionales." },
+    protectIsland: { en: "A boat vanishes overnight while Paco sleeps, and the island now needs a security plan.", es: "Un bote desaparece durante la noche mientras Paco duerme, y la isla necesita un plan de seguridad." },
+    placeNow: { en: "At fifty nodes the island has shops and a newspaper whose first editorial criticizes you; Nico calls that progress.", es: "Al llegar a cincuenta nodos, la isla tiene comercios y un periódico que te critica; Nico lo llama progreso." },
+    citadelQuestion: { en: "Marek proposes a citadel that could defend the community—or turn its home into a fortress.", es: "Marek propone una ciudadela que podría defender a la comunidad, o convertir su hogar en una fortaleza." },
+    rearmament: { en: "The Meridian Pact announces a frigate program and calls it maintenance. The Red Ledger answers, and both start building warships.", es: "El Pacto Meridiano anuncia un programa de fragatas y lo llama mantenimiento. El Libro Rojo responde, y ambos empiezan a construir buques de guerra." },
+    anOffer: { en: "A consortium offers {offer} for the island; selling would end Bitcoin Country, and Madame Luck asks why you began.", es: "Un consorcio ofrece {offer} por la isla; vender pondría fin a Bitcoin Country, y Madame Luck pregunta por qué comenzaste." },
+    ambassador: { en: "An ambassador inspects the island unofficially and leaves a number: call her first if this becomes more than a project.", es: "Una embajadora recorre la isla de forma extraoficial y deja un número: llámala primero si esto llega a ser más que un proyecto." },
+    threeColors: { en: "The Crown Lattice becomes the third bloc surrounding Bitcoin Country.", es: "La Celosía de la Corona se convierte en el tercer bloque que rodea a Bitcoin Country." },
+    ortegaCalls: { en: "Ortega & Gambette offers a 93-page diplomatic package, or a shorter review that may still help.", es: "Ortega & Gambette ofrece un paquete diplomático de 93 páginas, o una revisión más breve que aún podría ayudar." },
+    theQuestion: { en: "The checklist is complete enough; only independence remains, and declaring it will force the three blocs to respond.", es: "La lista está lo bastante completa; solo queda la independencia, y declararla obligará a los tres bloques a responder." },
+    cabinet: { en: "Bitcoin Country names you Head of State, Marek Finance, Nico Commerce, and Paco Defense; Madame Luck declines a ministry.", es: "Bitcoin Country te nombra jefe de Estado, a Marek Finanzas, a Nico Comercio y a Paco Defensa; Madame Luck rechaza un ministerio." },
+    declaration: { en: "You publish the declaration; San Arnaldo recognizes you in 37 seconds, and Ortega sends a thumbs-up plus a 14-page memo.", es: "Publicas la declaración; San Arnaldo te reconoce en 37 segundos, y Ortega envía un pulgar arriba y un memorando de 14 páginas." },
+    theAnswer: { en: "Whatever words they use, the blocs will not let Bitcoin Country stand, and their fleets are already moving.", es: "Usen las palabras que usen, los bloques no dejarán en pie a Bitcoin Country, y sus flotas ya están en movimiento." },
+    fourthColor: { en: "All three blocs failed; the island still stands, and Bitcoin Country is independent.", es: "Los tres bloques fracasaron; la isla sigue en pie, y Bitcoin Country es independiente." },
     notYet: { en: "The defense collapses, Bitcoin Country loses the island, and the run ends.", es: "La defensa colapsa, Bitcoin Country pierde la isla y la partida termina." },
-    landfill: { en: "At 1:14 a.m., Nico wants a partner to dig up a hard drive that supposedly holds 8,000 BTC. Lena threatens to call you Fartface if you fund it.", es: "A la 1:14 a. m., Nico busca un socio para desenterrar un disco duro que supuestamente guarda 8000 BTC. Lena amenaza con llamarte Cara de Pedo si lo financias." },
-    taxbill: { en: "The quarterly tax bill arrives. You check the total twice in case it was blurry. It was not.", es: "Llega la factura trimestral de impuestos. Revisas el total dos veces por si estaba borroso. No lo estaba." },
-    nicoWedding: { en: "At Nico's 400-guest wedding, you recognize twelve people. Lena warns you about his schemes before you choose a gift.", es: "En la boda de Nico hay 400 invitados y solo reconoces a doce. Lena te advierte sobre sus planes antes de que elijas un regalo." },
-    mexico: { en: "Lena wants five days in Tulum; you would settle for three. Paco has already voted.", es: "Lena quiere cinco días en Tulum; a ti te alcanzan tres. Paco ya votó." },
-    flu: { en: "Lena wakes with the flu. You spend the day bringing her water, medicine, and soup; Paco quietly eats half the soup.", es: "Lena despierta con gripe. Pasas el día llevándole agua, medicinas y sopa; Paco se come la mitad de la sopa sin que ella lo note." },
-    phish: { en: "Support emails you about a problem with your account. To verify your identity, it asks you to enter your seed phrase.", es: "Soporte te escribe por un problema con tu cuenta. Para verificar tu identidad, te pide ingresar tu frase semilla." },
-    crash: { en: "A delivery rider bumps your car at a red light and apologizes six times. You apologize twice without knowing why.", es: "Un repartidor en moto te choca el auto en un semáforo y se disculpa seis veces. Tú te disculpas dos, sin saber por qué." },
-    wine: { en: "Friday at Marek's is wine and 12 Monkeys on pause. The talk turns to A.I., as usual. Neither of you wins.", es: "Una noche de vino y 12 Monkeys en casa de Marek termina en otra discusión sobre la IA y el futuro. Ninguno convence al otro." },
-    casino: { en: "Nico calls late. He found a table at a casino and has already decided the game is interesting.", es: "Nico llama tarde desde un casino y ya eligió un juego. Deberías hacer más preguntas, pero vas igual." },
-    poker: { en: "Marek invites you to a late poker game with people he knows. It is not a casino. He nods at the empty chair: are you playing?", es: "Marek te invita a una partida de póker de madrugada con gente conocida. No es un casino. Señala la silla vacía: ¿juegas?" },
+    landfill: { en: "Nico wants a partner to dig up 8,000 BTC; Lena threatens to call you Fartface if you fund it.", es: "Nico busca un socio para desenterrar 8000 BTC; Lena amenaza con llamarte Cara de Pedo si lo financias." },
+    taxbill: { en: "The quarterly tax bill is no smaller on a second look.", es: "La factura trimestral de impuestos no se reduce al mirarla otra vez." },
+    nicoWedding: { en: "At Nico's packed wedding, Lena warns you about his schemes before you choose a gift.", es: "En la boda masiva de Nico, Lena te advierte sobre sus planes antes de que elijas un regalo." },
+    mexico: { en: "Lena wants five days in Tulum; you would take three, and Paco has already voted.", es: "Lena quiere cinco días en Tulum; a ti te alcanzan tres. Paco ya votó." },
+    flu: { en: "You spend the day nursing Lena's flu; Paco quietly eats half the soup.", es: "Pasas el día cuidando la gripe de Lena; Paco se come la mitad de la sopa sin que lo note." },
+    phish: { en: "A support email asks you to enter your seed phrase to verify your account.", es: "Un correo de soporte te pide ingresar tu frase semilla para verificar tu cuenta." },
+    crash: { en: "A delivery rider bumps your car and apologizes six times; you apologize twice.", es: "Un repartidor te choca el auto y se disculpa seis veces; tú te disculpas dos." },
+    wine: { en: "Friday wine at Marek's turns, as usual, into an argument about A.I. that neither of you wins.", es: "El vino del viernes en casa de Marek termina, como siempre, en una discusión sobre la IA que nadie gana." },
+    casino: { en: "Nico calls late from a casino; he has already picked a game, and you go anyway.", es: "Nico llama tarde desde un casino; ya eligió un juego, y tú vas igual." },
+    poker: { en: "Marek invites you to a late private poker game and nods at the empty chair.", es: "Marek te invita a un póker privado de madrugada y señala la silla vacía." },
     uncle: { en: "Uncle Héctor wires you money and refuses to say why.", es: "El tío Héctor te transfiere dinero y se niega a decir por qué." },
-    school: { en: "Nico's daughter Sofi has a school trip to the Mint Museum, and money is tight at home. Lena wants you to chip in.", es: "Sofi, la hija de Nico, tiene una excursión al museo de la Casa de Moneda y en su casa no alcanza. Lena quiere que ayudes." },
-    roof: { en: "Paco finds the leak and sits under it. When the workers arrive, he finds another place to sit.", es: "Paco encuentra la gotera y se sienta debajo. Cuando llegan los reparadores, busca otro lugar donde sentarse." },
-    hospital: { en: "You need stitches. Lena drives you to the hospital and, on the way home, tells you not to bleed on anything.", es: "Necesitas puntos de sutura. Lena te lleva al hospital y, de regreso, te pide que no sangres sobre nada." },
-    startup: { en: "Nico has a long deck for an app that mixes subscriptions, A.I., and something he calls community ownership. He says the upside is enormous.", es: "Nico preparó una presentación para una app que combina suscripciones, IA y propiedad comunitaria. Dice que el potencial de ganancias es enorme." },
-    tow: { en: "A nine-minute coffee stop in a no-parking zone ends with a ticket and a tow truck idling behind your car.", es: "Una parada de nueve minutos por un café en zona prohibida termina en multa, con una grúa esperando detrás." },
-    courage: { en: "At Marek's, with 12 Monkeys paused, you mention Lena. He says you may be waiting for certainty, then presses play.", es: "En casa de Marek, con 12 Monkeys en pausa, mencionas a Lena. Dice que tal vez esperas certeza absoluta y reanuda la película." },
-    ring: { en: "You are in the jewelry store, and you know why. You do not know which diamond looks responsible.", es: "Estás en la joyería y sabes por qué. No sabes qué diamante te hace ver responsable." },
-    date: { en: "The ring is in your pocket and Lena is waiting by the door. Dinner first, then the lake at sunset. Even Paco is behaving, which feels suspicious.", es: "El anillo está en tu bolsillo y Lena espera junto a la puerta. Primero la cena, después el lago al atardecer. Hasta Paco se porta bien, lo cual resulta sospechoso." },
-    proposal: { en: "The lake is getting dark and the ring is in your pocket. You have not asked yet.", es: "El lago se oscurece y el anillo está en tu bolsillo. Todavía no hiciste la pregunta." },
+    school: { en: "Nico's daughter Sofi needs help paying for a school trip, and Lena wants you to chip in.", es: "Sofi, la hija de Nico, necesita ayuda para una excursión escolar, y Lena quiere que aportes." },
+    roof: { en: "Paco sits under the leak, then finds a new spot when the workers arrive.", es: "Paco se sienta bajo la gotera y, cuando llegan los reparadores, busca otro lugar." },
+    hospital: { en: "Lena takes you for stitches and, on the way home, tells you not to bleed on anything.", es: "Lena te lleva a que te den puntos y, de regreso, te pide que no sangres sobre nada." },
+    startup: { en: "Nico pitches an app of subscriptions, A.I., and “community ownership,” and promises a huge upside.", es: "Nico presenta una app de suscripciones, IA y «propiedad comunitaria», y promete una ganancia enorme." },
+    tow: { en: "A quick coffee in a no-parking zone leaves you a ticket and a waiting tow truck.", es: "Un café rápido en zona prohibida te deja una multa y una grúa esperando." },
+    courage: { en: "When you mention Lena, Marek says you may be waiting for certainty, then presses play.", es: "Cuando mencionas a Lena, Marek dice que tal vez esperas certeza absoluta y reanuda la película." },
+    ring: { en: "You are in the jewelry store, unsure which diamond looks responsible.", es: "Estás en la joyería, sin saber qué diamante te hace ver responsable." },
+    date: { en: "The ring is in your pocket: dinner, then the lake at sunset. Even Paco is behaving, which feels suspicious.", es: "El anillo está en tu bolsillo: cena y luego el lago al atardecer. Hasta Paco se porta bien, lo cual resulta sospechoso." },
+    proposal: { en: "The ring is still in your pocket by the lake, and you have not asked yet.", es: "El anillo sigue en tu bolsillo junto al lago, y todavía no has hecho la pregunta." },
     wedding: { en: "You and Lena are getting married, and every detail turns into a negotiation she wins.", es: "Lena y tú se van a casar, y cada detalle se vuelve una negociación que gana ella." },
-    honeymoon: { en: "You and Lena leave with one rule: no checking the portfolio. She takes your phone. There are three possible trips.", es: "Se van de viaje con una sola regla: no revisar el portafolio. Ella te quita el teléfono. Hay tres viajes posibles." },
-    pregnancy: { en: "Two lines on a test: you and Lena are having a baby. Paco yawns. You look at him and say, “Four.”", es: "Dos líneas en una prueba: Lena y tú van a tener un bebé. Paco bosteza. Lo miras y dices: “Cuatro”." },
-    baby: { en: "The baby arrives. Everyone is tired, including Paco. You start thinking about the future you want.", es: "Llega el bebé. Todos están cansados, incluido Paco. Empiezas a pensar en el futuro que quieres." },
-    cousin: { en: "Nico found FridayCoin ($FRY) and swears it will multiply by Friday. What it does is not the important part, he says.", es: "Nico encontró FridayCoin ($FRY) y jura que multiplicará su valor para el viernes. Según él, lo que hace no es lo importante." },
-    speeding: { en: "Six miles per hour over the limit, on the same corner, with the same officer. He recognizes you before you lower the window.", es: "Diez kilómetros por hora por encima del límite, en la misma esquina y con el mismo oficial. Te reconoce antes de que bajes la ventanilla." },
+    honeymoon: { en: "Lena takes your phone so you will not check the portfolio; there are three possible trips.", es: "Lena te quita el teléfono para que no revises el portafolio; hay tres viajes posibles." },
+    pregnancy: { en: "You and Lena are having a baby. You look at Paco and say, “Four.”", es: "Lena y tú van a tener un bebé. Miras a Paco y dices: “Cuatro”." },
+    baby: { en: "The baby arrives, everyone is exhausted, and you start thinking about the future.", es: "Llega el bebé, todos están agotados, y empiezas a pensar en el futuro." },
+    cousin: { en: "Nico swears FridayCoin ($FRY) will multiply by Friday; what it does, he says, is not the point.", es: "Nico jura que FridayCoin ($FRY) multiplicará su valor para el viernes; lo que hace, dice, no importa." },
+    speeding: { en: "The same officer stops you again, barely over the limit on the same corner.", es: "El mismo oficial te detiene otra vez, apenas por encima del límite, en la misma esquina." },
     wallet: { en: "You forget your wallet on the bus and get it back at the terminal, minus the cash.", es: "Olvidas la billetera en el autobús y la recuperas en la terminal, sin el efectivo." },
-    potluck: { en: "Lena signs you and Paco up for the neighborhood potluck. He eats half of what you brought before you arrive.", es: "Lena los anota a ti y a Paco en la comida comunitaria del vecindario. Paco se come la mitad de lo que prepararon antes de llegar." },
-    usedcar: { en: "Nico has found a 2009 Honda Fit. He looks under the hood, sees Sharpie, and calls it basically new.", es: "Nico encontró un Honda Fit 2009. Mira debajo del capó, ve una marca de Sharpie y lo considera básicamente nuevo." },
-    tetris: { en: "Marek takes you to a bar with a Tetris cabinet nobody uses. He plays, then says it is your turn.", es: "Marek te lleva a un bar con una máquina de Tetris que nadie usa. Juega un rato y luego te cede el turno." },
-    unclemike: { en: "Dinner with Uncle Mike is excellent until the check. He will not tip, because he thinks the restaurant should pay its staff. The waiter is still standing there.", es: "La cena con el tío Mike es excelente hasta que llega la cuenta. Se niega a dejar propina porque cree que el restaurante debería pagarle sueldos dignos a los empleados. El mesero sigue esperando de pie." },
-
+    potluck: { en: "Lena signs you and Paco up for a potluck; he eats half the food before you arrive.", es: "Lena los anota a ti y a Paco en una comida vecinal; él se come la mitad antes de llegar." },
+    usedcar: { en: "Nico finds a 2009 Honda Fit, sees Sharpie under the hood, and calls it basically new.", es: "Nico encuentra un Honda Fit 2009, ve una marca de Sharpie bajo el capó y lo llama básicamente nuevo." },
+    tetris: { en: "Marek takes you to a bar with a neglected Tetris cabinet and then gives you a turn.", es: "Marek te lleva a un bar con una máquina de Tetris que nadie usa y después te cede el turno." },
+    unclemike: { en: "Uncle Mike refuses to tip after dinner, arguing the restaurant should pay its staff, while the waiter waits.", es: "El tío Mike se niega a dejar propina, argumentando que el restaurante debería pagar a su personal, mientras el mesero espera." },
   };
   function cardTldr(card) {
     if (!card) return "";
@@ -3559,28 +3558,28 @@
       leader:"Chancellor Ivo Voss", leaderEs:"el canciller Ivo Voss", paint:"#4a5340", mix:"heavy", art:"firstBloc",
       members:"Germany, France, Italy, Spain, the Netherlands, Belgium, and Austria", membersEs:"Alemania, Francia, Italia, España, los Países Bajos, Bélgica y Austria",
       verb:"files a form", verbEs:"presenta formularios",
-      tag:"Its language is administrative; its restrictions are not optional.", tagEs:"Su lenguaje es administrativo, pero sus restricciones no son opcionales.",
+      tag:"Its language is administrative; its restrictions are not optional.", tagEs:"Su lenguaje es administrativo, pero sus restricciones no son opcionales.", tldrTag:"its restrictions are not optional", tldrTagEs:"sus restricciones no son opcionales",
       core:"Seven capitals announce the Meridian Stability Pact on the same morning. The treaty is brief. Its annexes are not.\n\nGermany, France, Italy, Spain, the Netherlands, Belgium, and Austria coordinate trade, energy, a shared payment network, and a defense clause nobody reads aloud.\n\nChancellor Ivo Voss chairs the first session. He never raises his voice. After thanking the cameras for their patience, he calls instability a form of violence and lists what now requires permission: large transfers, foreign accounts, unsanctioned ports, and newspapers that refuse to cooperate.\n\nThe Pact does not look like a boot. It looks like a form. The form is mandatory.",
       coreEs:"Siete capitales anuncian el Pacto de Estabilidad Meridiano la misma mañana. El tratado es breve. Sus anexos no.\n\nAlemania, Francia, Italia, España, los Países Bajos, Bélgica y Austria coordinan el comercio, la energía, una red de pagos compartida y una cláusula de defensa que nadie lee en voz alta.\n\nEl canciller Ivo Voss preside la primera sesión. Nunca alza la voz. Tras agradecer la paciencia de las cámaras, define la inestabilidad como una forma de violencia y enumera lo que ahora requiere autorización: grandes transferencias, cuentas en el extranjero, puertos no autorizados y periódicos que se nieguen a cooperar.\n\nEl Pacto no parece una bota. Parece un formulario. El formulario es obligatorio." },
     { key:"ledger", en:"Red Ledger Compact", es:"Compacto del Libro Rojo", esFull:"el Compacto del Libro Rojo", enThe:"the Red Ledger", esThe:"el Libro Rojo", short:"LEDGER", shortEs:"LIBRO",
       leader:"Marshal Amina Kade", leaderEs:"la mariscal Amina Kade", paint:"#6a3834", mix:"fast", art:"rearmament",
       members:"Russia, Belarus, China, North Korea, and Cuba", membersEs:"Rusia, Bielorrusia, China, Corea del Norte y Cuba",
       verb:"prints a poster", verbEs:"imprime carteles",
-      tag:"It speaks of purity, and its posters arrive before the bread.", tagEs:"Habla de pureza, y sus carteles llegan antes que el pan.",
+      tag:"It speaks of purity, and its posters arrive before the bread.", tagEs:"Habla de pureza, y sus carteles llegan antes que el pan.", tldrTag:"its posters arrive before the bread", tldrTagEs:"sus carteles llegan antes que el pan",
       core:"Russia, Belarus, China, North Korea, and Cuba sign the Red Ledger Compact in a hall lit too brightly. Marshal Amina Kade reads the preamble herself. She was a dock officer, then a prosecutor, and now decides which shortages count as patriotic.\n\nThe Compact does not speak of stability. It speaks of purity. Hoarding is treason. Private mines are unfinished revolutions. Posters appear before bread does. Police notebooks grow thicker. The speeches are beautiful. The queues are not.",
       coreEs:"Rusia, Bielorrusia, China, Corea del Norte y Cuba firman el Compacto del Libro Rojo en un salón iluminado en exceso. La mariscal Amina Kade lee personalmente el preámbulo. Primero fue oficial de muelle, después fiscal y ahora decide qué escasez cuenta como patriótica.\n\nEl Compacto no habla de estabilidad, sino de pureza. Acaparar es traición. Las minas privadas son revoluciones inconclusas. Los carteles aparecen antes que el pan. Los cuadernos de la policía se vuelven más gruesos. Los discursos son hermosos. Las filas no." },
     { key:"lattice", en:"Crown Lattice", es:"Celosía de la Corona", esFull:"la Celosía de la Corona", enThe:"the Crown Lattice", esThe:"la Celosía de la Corona", short:"LATTICE", shortEs:"CORONA",
       leader:"High Warden Soren Pell", leaderEs:"el Alto Guardián Soren Pell", paint:"#5c4936", mix:"elite", art:"threeColors",
       members:"Saudi Arabia, Jordan, Morocco, Thailand, and Brunei", membersEs:"Arabia Saudita, Jordania, Marruecos, Tailandia y Brunéi",
       verb:"holds a parade and then imposes silence", verbEs:"organiza un desfile y después impone silencio",
-      tag:"To High Warden Soren Pell, a people who will not kneel is an administrative error.", tagEs:"Para el Alto Guardián Soren Pell, un pueblo que no se arrodilla es un error administrativo.",
+      tag:"To High Warden Soren Pell, a people who will not kneel is an administrative error.", tagEs:"Para el Alto Guardián Soren Pell, un pueblo que no se arrodilla es un error administrativo.", tldrTag:"those who will not kneel are treated as an error", tldrTagEs:"quien no se arrodilla es tratado como un error",
       core:"Saudi Arabia, Jordan, Morocco, Thailand, and Brunei form the Crown Lattice around dynastic authority, port agreements, and the belief that borders are inherited rather than negotiated. High Warden Soren Pell walks at the front of the procession and does not wave. To him, a people who will not kneel are an administrative error.\n\nDissent is not debated. It is omitted.",
       coreEs:"Arabia Saudita, Jordania, Marruecos, Tailandia y Brunéi forman la Celosía de la Corona en torno a la autoridad dinástica, los acuerdos portuarios y la idea de que las fronteras se heredan en lugar de negociarse. El Alto Guardián Soren Pell camina al frente del cortejo y no saluda. Para él, un pueblo que no se arrodilla es un error administrativo.\n\nLa disidencia no se debate: se omite." },
     { key:"trust", en:"Open Hemisphere Trust", es:"Fideicomiso del Hemisferio Abierto", esFull:"el Fideicomiso del Hemisferio Abierto", enThe:"the Hemisphere Trust", esThe:"el Fideicomiso del Hemisferio", short:"TRUST", shortEs:"FIDEICOMISO",
       leader:"Chief Compliance Officer Dana Holt", leaderEs:"la directora de cumplimiento Dana Holt", paint:"#34485e", mix:"snipe", art:"blocTrust",
       members:"the United States, Canada, Mexico, Brazil, Chile, Argentina, Peru, Colombia, and Australia", membersEs:"Estados Unidos, Canadá, México, Brasil, Chile, Argentina, Perú, Colombia y Australia",
       verb:"updates its terms of service", verbEs:"actualiza sus términos de servicio",
-      tag:"Membership is free; declining its terms is not an option.", tagEs:"La membresía es gratuita; rechazar sus términos no es una opción.",
+      tag:"Membership is free; declining its terms is not an option.", tagEs:"La membresía es gratuita; rechazar sus términos no es una opción.", tldrTag:"declining its terms is not an option", tldrTagEs:"rechazar sus términos no es una opción",
       core:"The United States, Canada, Mexico, Brazil, Chile, Argentina, Peru, Colombia, and Australia launch the Open Hemisphere Trust from a stage with very good lighting. Membership is free. The terms of service run four hundred pages, and accepting them is the only way to keep a bank account.\n\nChief Compliance Officer Dana Holt presents it in sneakers. She smiles while explaining that every payment now carries a trust score, that low scores simply see fewer options, and that nobody is being banned, only deprioritized.\n\nThe Trust does not confiscate anything. It recommends. The recommendations cannot be declined.",
       coreEs:"Estados Unidos, Canadá, México, Brasil, Chile, Argentina, Perú, Colombia y Australia lanzan el Fideicomiso del Hemisferio Abierto desde un escenario muy bien iluminado. La membresía es gratuita. Los términos de servicio tienen cuatrocientas páginas, y aceptarlos es la única forma de conservar una cuenta bancaria.\n\nLa directora de cumplimiento Dana Holt lo presenta en zapatillas. Sonríe mientras explica que cada pago llevará un puntaje de confianza, que los puntajes bajos simplemente verán menos opciones y que a nadie se le prohíbe nada: solo se le resta prioridad.\n\nEl Fideicomiso no confisca nada. Recomienda. Las recomendaciones no se pueden rechazar." }
   ];
@@ -3613,13 +3612,15 @@
   function blocIntroTldr(id, es){
     const B=activeBlocs();
     const cap=(t)=>t.charAt(0).toUpperCase()+t.slice(1);
-    if(id==="firstBloc") return es ? cap(B[0].membersEs)+" forman "+B[0].esFull+". "+B[0].tagEs : cap(B[0].members)+" form the "+B[0].en+". "+B[0].tag;
+    if(id==="firstBloc") return es
+      ? "Se forma "+B[0].esThe+"; "+(B[0].tldrTagEs||B[0].tagEs)
+      : cap(B[0].enThe)+" is formed; "+(B[0].tldrTag||B[0].tag);
     if(id==="rearmament") return es
-      ? cap(B[0].esThe)+" anuncia un programa de fragatas y lo llama mantenimiento. "+cap(B[1].membersEs)+" responden con "+B[1].esFull+". Ambos bloques comienzan a construir buques de guerra."
-      : cap(B[0].enThe)+" announces a frigate program and calls it maintenance. "+cap(B[1].members)+" answer by forming the "+B[1].en+". Both blocs begin building warships.";
+      ? cap(B[0].esThe)+" anuncia un programa de fragatas y lo llama mantenimiento. "+cap(B[1].esThe)+" responde, y ambos empiezan a construir buques de guerra."
+      : cap(B[0].enThe)+" announces a frigate program and calls it maintenance. "+cap(B[1].enThe)+" answers, and both start building warships.";
     if(id==="threeColors") return es
-      ? cap(B[2].membersEs)+" forman "+B[2].esFull+", el tercer bloque que rodea a Bitcoin Country. "+B[2].tagEs
-      : cap(B[2].members)+" form the "+B[2].en+", the third bloc surrounding Bitcoin Country. "+B[2].tag;
+      ? cap(B[2].esThe)+" se convierte en el tercer bloque que rodea a Bitcoin Country."
+      : cap(B[2].enThe)+" becomes the third bloc surrounding Bitcoin Country.";
     return "";
   }
   function blocArtId(card){
@@ -3840,8 +3841,8 @@
     const es=chanceLang();
     const n=(S.bcBattlesWon||0);
     if(id==="blocReplies") return es
-      ? "Los tres bloques responden de forma distinta: reconocimiento, rechazo, demora o una exigencia de pago. Al final de la semana, los tres están movilizando sus flotas."
-      : "The three blocs answer differently: recognition, rejection, delay, or a demand for payment. By the end of the week, all three are mobilizing their fleets.";
+      ? "Los tres bloques responden de forma distinta, pero al final de la semana los tres movilizan sus flotas."
+      : "The three blocs answer differently, but all three end the week mobilizing their fleets.";
     if(id==="blocAssault"){ const r=assaultRow(); return es?r.tEs:r.tEn; }
     if(id==="battleWon"){ const r=reportRow(); return es?r.tEs:r.tEn; }
     if(id==="blocTriumph"){
@@ -11839,7 +11840,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp230";
+      s.src = "halving.js?v=mp231";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -12998,12 +12999,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp230";
+    return "share-card.js?v=mp231";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp230";
+    return "copy-result.js?v=mp231";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp230"; }
+  function dailyScriptSrc() { return "daily.js?v=mp231"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -14509,7 +14510,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp230";
+      s.src = "mp.js?v=mp231";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);

@@ -22,7 +22,7 @@ assert.ok(!/startGame\(true, null, "practice"\)/.test(game), "practice mode is g
 assert.ok(!/id=\\"go-daily\\"/.test(game), "separate daily button is gone");
 assert.ok(/id=\\"go-challenge\\"/.test(game), "title screen can show a challenge button");
 assert.ok(/kbClickFirst\("#go-challenge"\)/.test(game), "Enter can confirm a challenge");
-assert.ok(/daily\.js\?v=mp230/.test(game), "daily.js is lazy-loaded");
+assert.ok(/daily\.js\?v=mp231/.test(game), "daily.js is lazy-loaded");
 assert.ok(!/daily\.js/.test(index), "daily.js is not on the game startup path");
 assert.ok(/data-i18n="ranked"/.test(index), "index #go is labeled Ranked");
 assert.ok(/const DAILY_ONE_ATTEMPT = false/.test(game), "one-attempt rule lives in one constant");
@@ -32,7 +32,7 @@ assert.ok(/queueDailySubmit/.test(game.match(/function saveBest\(n\) \{[\s\S]*?\
 assert.ok(/data-daily-tab=\\"legacy\\"/.test(game), "all-time board is a read-only legacy tab");
 assert.ok(/boardLegacy/.test(game) && /dailyYesterday/.test(game));
 assert.ok(/aboutDaily/.test(about) && /aboutDaily/.test(extra), "about page explains the new ranked rule");
-assert.ok(/daily\.js\?v=mp230/.test(about), "about page loads the daily board client");
+assert.ok(/daily\.js\?v=mp231/.test(about), "about page loads the daily board client");
 
 const keys = [
   "ranked", "dailyNote", "dailyBoard", "dailyYesterday", "dailyReset", "boardLegacy",
