@@ -17,36 +17,35 @@ const about = fs.readFileSync(path.join(ROOT, "about/index.html"), "utf8");
 
 assert.ok(/id=\\"go\\"/.test(game), "title screen keeps #go as the ranked/daily entry");
 assert.ok(/startGame\(true, null, "daily"\)/.test(game), "ranked entry launches the daily seed");
-assert.ok(/id=\\"go-practice\\"/.test(game), "title screen has a practice button");
-assert.ok(/startGame\(true, null, "practice"\)/.test(game), "practice launches with ranked rules and a random seed");
+assert.ok(!/id=\\"go-practice\\"/.test(game), "title screen has no practice button");
+assert.ok(!/startGame\(true, null, "practice"\)/.test(game), "practice mode is gone");
 assert.ok(!/id=\\"go-daily\\"/.test(game), "separate daily button is gone");
 assert.ok(/id=\\"go-challenge\\"/.test(game), "title screen can show a challenge button");
 assert.ok(/kbClickFirst\("#go-challenge"\)/.test(game), "Enter can confirm a challenge");
-assert.ok(/daily\.js\?v=mp229/.test(game), "daily.js is lazy-loaded");
+assert.ok(/daily\.js\?v=mp230/.test(game), "daily.js is lazy-loaded");
 assert.ok(!/daily\.js/.test(index), "daily.js is not on the game startup path");
-assert.ok(/data-i18n="daily"/.test(index), "index #go is labeled candle of the day");
+assert.ok(/data-i18n="ranked"/.test(index), "index #go is labeled Ranked");
 assert.ok(/const DAILY_ONE_ATTEMPT = false/.test(game), "one-attempt rule lives in one constant");
 assert.ok(/function public\.daily_one_attempt\(\)/.test(sql) && /select false;/.test(sql), "SQL has a matching one-attempt switch, off");
 assert.ok(!/submitNewHighScore/.test(game.match(/function saveBest\(n\) \{[\s\S]*?\n  \}/)[0]), "saveBest no longer writes the all-time board");
-assert.ok(/S\.practice/.test(game.match(/function saveBest\(n\) \{[\s\S]*?\n  \}/)[0]), "practice runs do not submit");
 assert.ok(/queueDailySubmit/.test(game.match(/function saveBest\(n\) \{[\s\S]*?\n  \}/)[0]), "daily ranked submits through the queue");
 assert.ok(/data-daily-tab=\\"legacy\\"/.test(game), "all-time board is a read-only legacy tab");
 assert.ok(/boardLegacy/.test(game) && /dailyYesterday/.test(game));
 assert.ok(/aboutDaily/.test(about) && /aboutDaily/.test(extra), "about page explains the new ranked rule");
-assert.ok(/daily\.js\?v=mp229/.test(about), "about page loads the daily board client");
+assert.ok(/daily\.js\?v=mp230/.test(about), "about page loads the daily board client");
 
 const keys = [
-  "daily", "dailyNote", "dailyBoard", "dailyYesterday", "dailyReset", "boardLegacy",
-  "practice", "practiceNote", "shareDaily", "shareRank",
+  "ranked", "dailyNote", "dailyBoard", "dailyYesterday", "dailyReset", "boardLegacy",
+  "shareDaily", "shareRank",
   "beatBag", "beatBagNote", "beatPlay", "beatYes", "beatNo"
 ];
 for (const key of keys) {
   assert.ok(i18n.indexOf(key + ":") !== -1, "i18n has " + key);
 }
-assert.ok(i18n.indexOf('daily: "Vela del día"') !== -1);
+assert.ok(i18n.indexOf('ranked: "Ranked"') !== -1);
 assert.ok(i18n.indexOf("intentos ilimitados") !== -1);
 assert.ok(i18n.indexOf("00:00 UTC") !== -1);
-assert.ok(i18n.indexOf('practice: "Práctica"') !== -1);
+assert.ok(i18n.indexOf("practice:") === -1, "practice strings are gone");
 assert.ok(i18n.indexOf("Superaste la bolsa") !== -1);
 
 assert.ok(/create table if not exists public\.daily_scores/.test(sql));

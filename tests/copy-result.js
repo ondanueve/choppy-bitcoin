@@ -12,7 +12,7 @@ const game = fs.readFileSync(path.join(ROOT, "game.js"), "utf8");
 const i18n = fs.readFileSync(path.join(ROOT, "i18n.js"), "utf8");
 const sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
 
-assert.ok(game.indexOf("copy-result.js?v=mp229") !== -1, "game lazy-loads copy-result.js");
+assert.ok(game.indexOf("copy-result.js?v=mp230") !== -1, "game lazy-loads copy-result.js");
 assert.ok(/id=\\"copy-result\\"/.test(game), "end screen has copy-result button");
 assert.ok(game.indexOf('t("copyResult")') !== -1, "button uses bilingual copyResult key");
 assert.ok(/copyResult:\s*"Copy result"/.test(i18n) && /copyResult:\s*"Copiar resultado"/.test(i18n), "EN/ES button labels");
@@ -49,7 +49,7 @@ const text = ctx.choppyBuildCopyText({
   bars: bars,
   url: "https://bitcoinizate.com/choppy-bitcoin/?seed=42&bag=2.1"
 });
-assert.ok(text.indexOf("Choppy Bitcoin  2026-11-11") === 0, "english header with date");
+assert.ok(text.indexOf("Choppy Bitcoin  Ranked  2026-11-11") === 0, "english header with Ranked and date");
 assert.ok(text.indexOf("2.1 BTC") !== -1, "bag in text");
 assert.ok(text.indexOf("#4") !== -1, "rank in text");
 assert.ok(text.indexOf("🔥3") !== -1, "streak in text");
@@ -59,10 +59,10 @@ assert.ok(!/[\u00A0\u200B]/.test(text), "plain ascii/emoji only, no nbsp");
 // Must paste as plain text: no HTML
 assert.ok(text.indexOf("<") === -1 && text.indexOf(">") === -1, "no HTML in copied text");
 
-// Practice / non-daily omits date, rank, streak
-const practice = ctx.choppyBuildCopyText({ daily: false, bag: 1, bars: [{ o: 1, c: 2 }], url: "https://bitcoinizate.com/choppy-bitcoin/?seed=1" });
-assert.ok(practice.indexOf("Choppy Bitcoin\n1 BTC") === 0, "practice header has no date");
-assert.ok(practice.indexOf("🔥") === -1 && practice.indexOf("#") === -1, "practice omits rank and streak");
+// Training / non-ranked omits date, rank, streak
+const train = ctx.choppyBuildCopyText({ daily: false, bag: 1, bars: [{ o: 1, c: 2 }], url: "https://bitcoinizate.com/choppy-bitcoin/?seed=1" });
+assert.ok(train.indexOf("Choppy Bitcoin\n1 BTC") === 0, "training header has no date");
+assert.ok(train.indexOf("🔥") === -1 && train.indexOf("#") === -1, "training omits rank and streak");
 
 // Wrap at 20, cap at 5 rows; bucket when longer
 const many = [];
