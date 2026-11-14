@@ -11,7 +11,7 @@ const src = fs.readFileSync(path.join(ROOT, "share-card.js"), "utf8");
 const game = fs.readFileSync(path.join(ROOT, "game.js"), "utf8");
 const i18n = fs.readFileSync(path.join(ROOT, "i18n.js"), "utf8");
 
-assert.ok(game.indexOf("share-card.js?v=mp231") !== -1, "game lazy-loads share-card.js");
+assert.ok(game.indexOf("share-card.js?v=mp232") !== -1, "game lazy-loads share-card.js");
 assert.ok(/function loadShareCard\(cb\)/.test(game));
 assert.ok(/function fallbackShare\(blob, text, url\)/.test(game));
 assert.ok(game.indexOf("share-icon.png") < 0, "generic share icon is no longer the card");

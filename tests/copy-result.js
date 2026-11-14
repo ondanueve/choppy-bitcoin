@@ -12,7 +12,7 @@ const game = fs.readFileSync(path.join(ROOT, "game.js"), "utf8");
 const i18n = fs.readFileSync(path.join(ROOT, "i18n.js"), "utf8");
 const sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
 
-assert.ok(game.indexOf("copy-result.js?v=mp231") !== -1, "game lazy-loads copy-result.js");
+assert.ok(game.indexOf("copy-result.js?v=mp232") !== -1, "game lazy-loads copy-result.js");
 assert.ok(/id=\\"copy-result\\"/.test(game), "end screen has copy-result button");
 assert.ok(game.indexOf('t("copyResult")') !== -1, "button uses bilingual copyResult key");
 assert.ok(/copyResult:\s*"Copy result"/.test(i18n) && /copyResult:\s*"Copiar resultado"/.test(i18n), "EN/ES button labels");
