@@ -74,6 +74,7 @@ const EXCEPT = new Map([
   ["Perk", "Loanword kept for the perk system"],
   ["TLDR", "Label abbreviation, same in both languages"],
   ["Ranked", "Mode name kept in Spanish copy"],
+  ["Ranked · {n}", "Share line keeps the Ranked mode name"],
   ["VERSUS", "Mode name kept in Spanish copy"],
   ["ALPHA", "Build tag"],
   ["Bull", "Glossary term for the bull power-up"],

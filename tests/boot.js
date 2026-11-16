@@ -119,7 +119,7 @@ function menuExpression() {
   return "(function () {"
     + "var h = document.querySelector('#overlay h1');"
     + "return {"
-    + "menu: !!(h && /Choppy Bitcoin/.test(h.textContent || '') && document.querySelector('#go')),"
+    + "menu: !!(h && /Choppy Bitcoin/.test(h.textContent || '') && (document.querySelector('#go') || document.querySelector('#tut-next'))),"
     + "started: typeof window.startChoppy === 'function'"
     + "};"
     + "})()";

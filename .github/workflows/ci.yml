@@ -48,11 +48,11 @@ jobs:
       - name: Seeded market
         run: node tests/seeded-market.js
 
-      - name: Daily candle and challenge links
+      - name: Daily ranked and challenge links
         run: node tests/daily.js
 
-      - name: Daily pack
-        run: node tests/daily-pack.js
+      - name: Onboard and battle tutorial
+        run: node tests/onboard.js
 
       - name: Versus simulation
         run: node tests/mp-sim.js

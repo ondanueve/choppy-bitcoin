@@ -49,15 +49,17 @@ function check(label, got, want) {
 const ls = mockStore();
 const a = mk({ bcBattleTut: false }, ls);
 check("locked by default", a.battleTutSeen(), false);
-check("locked body has no battle heading", a.tutorialBody().indexOf("tutBattle") < 0, true);
-check("locked body has no tutB1", a.tutorialBody().indexOf("tutB1") < 0, true);
+check("locked compact body has no battle heading", a.tutorialBody().indexOf("tutBattle") < 0, true);
+check("locked more-info body has no battle heading", a.tutorialBody(true).indexOf("tutBattle") < 0, true);
+check("locked body has no tutB1 in compact", a.tutorialBody().indexOf("tutB1") < 0, true);
 check("locked ls empty", ls.getItem("choppy-battle-tut"), null);
 
 a.unlockBattleTut();
 check("unlocked after unlockBattleTut", a.battleTutSeen(), true);
 check("ls flag set", ls.getItem("choppy-battle-tut"), "1");
-check("unlocked body has battle heading", a.tutorialBody().indexOf("tutBattle") >= 0, true);
-check("unlocked body has tutB1", a.tutorialBody().indexOf("tutB1") >= 0, true);
+check("unlocked more-info body has battle heading", a.tutorialBody(true).indexOf("tutBattle") >= 0, true);
+check("unlocked more-info body has tutB1", a.tutorialBody(true).indexOf("tutB1") >= 0, true);
+check("compact body still hides battle", a.tutorialBody().indexOf("tutBattle") < 0, true);
 
 const b = mk({}, ls);
 check("fresh S still unlocked via ls", b.battleTutSeen(), true);
@@ -69,7 +71,7 @@ check("idempotent ls flag", ls.getItem("choppy-battle-tut"), "1");
 check("applyWarCard calls unlock", /if\(card\.id==="blocAssault"\)\{\s*unlockBattleTut\(\);/.test(src), true);
 check("startDefense calls unlock", /function startDefense\(\)\{\s*unlockBattleTut\(\);/.test(src), true);
 check("opt-btut gated on seen", /battleTutSeen\(\) \? "<button type=\\"button\\" class=\\"cta opt-item\\" id=\\"opt-btut\\">" \+ t\("tutBattle"\)/.test(src), true);
-check("btut panel in pauseMarkup", /if \(panel === "btut"\) \{\s*return "<div class=\\"opt-head\\">" \+ optHead\(t\("tutBattle"\)\) \+ "<\/div>" \+ battleTutHtml\(\);/.test(src), true);
+check("btut panel in pauseMarkup", /if \(panel === "btut"\) \{/.test(src) && /t\("tutBattle"\)/.test(src) && /battleTutInner\(true\)/.test(src), true);
 check("opt-btut bound", /S\.optPanel = "btut"/.test(src), true);
 check("tut option EN label", /\{k:"tut", label:"Battle tutorial", labelEs:"Tutorial de batalla"\}/.test(src), true);
 check("unused tut7 gone from game.js", !/\btut7\b/.test(src), true);
