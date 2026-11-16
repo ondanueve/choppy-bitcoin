@@ -10366,10 +10366,12 @@
     }
 
     const pw = m.pipeW * S.widthMul;
+    const raceCap = S.mp ? ((S.mpRules && S.mpRules.mode === "race") ? (S.mpRules.raceN | 0) : 0) : 0;
     let guard = 0;
     while (guard++ < 8) {
       const last = S.pipes[S.pipes.length - 1];
       if (last && last.x > S.W - 8) break;
+      if (raceCap && (S.spawnedPipes || 0) >= raceCap) break;
       const nx = last ? last.x + m.spacing : S.W + 40;
       spawnPipe(nx);
     }
@@ -11846,7 +11848,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp234";
+      s.src = "halving.js?v=mp235";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13005,12 +13007,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp234";
+    return "share-card.js?v=mp235";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp234";
+    return "copy-result.js?v=mp235";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp234"; }
+  function dailyScriptSrc() { return "daily.js?v=mp235"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -14154,7 +14156,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp234";
+      s.src = "mp.js?v=mp235";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);

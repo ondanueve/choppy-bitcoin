@@ -33,7 +33,8 @@ assert.ok(/beginCycle\(w\.type, w\.kind, w\)/.test(mp) && /bindGame/.test(game),
 assert.ok(/sid: S\.spawnedPipes/.test(game), "items get a stable spawn id");
 assert.ok(/if \(!watching && !S\.mpCatch/.test(game), "reconnect catch-up does not collect items");
 assert.ok(/S\.mpRules && S\.mpRules.mode === "race"/.test(game) && /S\.mpRules.raceN/.test(game) && /spawnedPipes === raceN/.test(game), "finish pipe uses the room raceN");
-assert.ok(/last && win\.id === mine \? "<p class=\\"k\\">" \+ mpYouWinText\(\)/.test(mp), "series-over screen includes mode-specific win text");
+assert.ok(/raceCap && \(S\.spawnedPipes \|\| 0\) >= raceCap/.test(game), "race stops spawning pipes past the finish");
+assert.ok(/last \? "<p class=\\"k\\">" \+ mpYouWinText\(\)/.test(mp), "series-over screen includes mode-specific win text for every player");
 
 function hasKey(lang, key, value) {
   const blockStart = i18n.indexOf(lang + ": {");

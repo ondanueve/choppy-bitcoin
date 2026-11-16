@@ -502,6 +502,7 @@
         .sort((a, b) => (Number(a.finishT) || 1e15) - (Number(b.finishT) || 1e15));
       if (fins[0]) winner = fins[0];
       allDone = MP.players.every((p) => p.alive === false || p.finished);
+      if (allDone && !winner) winner = bestBy("candles", "lifeT");
     } else {
       const live = aliveList();
       if (live.length === 1) { winner = winner || live[0]; allDone = true; }
@@ -1441,7 +1442,7 @@
       ? "<p class=\"k\">" + (last ? t("mpRematch") + (voteN ? " " + votes + "/" + voteN : "") : t("mpNext")) + " · " + left + "s</p>"
       : "";
     const recap = last ? (mpRoundLines() + mpEloLines() + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-share\">" + t("mpShare") + "</button>") : "";
-    return "<p class=\"k\">" + title + "</p>" + (last && win.id === mine ? "<p class=\"k\">" + mpYouWinText() + "</p>" : "") + series + timer + recap
+    return "<p class=\"k\">" + title + "</p>" + (last ? "<p class=\"k\">" + mpYouWinText() + "</p>" : "") + series + timer + recap
       + "<div class=\"overlay-actions\">"
       + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-quit\">" + t("mpQuit") + "</button>"
       + "<button type=\"button\" class=\"cta play-alt\" id=\"mp-stats\">" + t("runStats") + "</button>"
@@ -1466,10 +1467,9 @@
   }
   function mpWinHtml() {
     const w = S.mpWinner || {};
-    const mine = window.ChoppyMP && w.id === window.ChoppyMP.id();
     const host = window.ChoppyMP && window.ChoppyMP.get().host;
     return "<p class=\"k\">" + t("versus") + "</p><h1>" + ((w.name || "?") + " " + t("mpSeriesWin")) + "</h1>"
-      + (mine ? "<p class=\"k\">" + mpYouWinText() + "</p>" : "")
+      + "<p class=\"k\">" + mpYouWinText() + "</p>"
       + (S.mpEloNote ? "<p class=\"k\">" + S.mpEloNote + "</p>" : "")
       + mpRoundLines()
       + mpEloLines()

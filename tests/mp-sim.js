@@ -710,6 +710,20 @@ scenario("go-includes-race-n", () => {
   return { raceN: got[1].raceN };
 });
 
+
+scenario("race-ends-when-everyone-dies-short-of-finish", () => {
+  const env = fresh({ seedBase: 22000 });
+  const clients = boot(env, 2, Object.assign({}, RULES.race, { raceN: 5, bestOf: 1 }));
+  clients[0].dead(8, 3, { btc: 1 });
+  clients[1].dead(9, 4, { btc: 2 });
+  env.clock.advance(400);
+  const end = agreeWinners(clients);
+  if (!end.ok) throw new Error("race did not end after both died short of the finish " + JSON.stringify(end));
+  if (end.ids[0] !== clients[1].id()) throw new Error("furthest racer should win when nobody finishes " + JSON.stringify(end.ids));
+  if (!clients[0].get().seriesOver) throw new Error("best-of-1 race should close the series");
+  return { winner: end.ids[0], candles: 4 };
+});
+
 function writeReport() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const failed = report.scenarios.filter((s) => !s.ok);
