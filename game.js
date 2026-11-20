@@ -304,6 +304,15 @@
     return n;
   }
   const KEY = "bitcoinizate-v1";
+  // ?embed=1 (blogs, streams): today's Ranked only, light chrome, link back to the full game. Flag set in index.html.
+  const EMBED = !!window.choppyEmbed;
+  const EMBED_URL = "https://bitcoinizate.com/choppy-bitcoin/?embed=1";
+  function embedSnippet() {
+    return "<iframe src=\"" + EMBED_URL + "\" width=\"400\" height=\"640\" title=\"Choppy Bitcoin · Ranked\" style=\"border:0;max-width:100%\" allow=\"autoplay; clipboard-write; web-share; fullscreen\" loading=\"lazy\"></iframe>";
+  }
+  function embedFullHtml() {
+    return "<p class=\"embed-out\"><a href=\"https://bitcoinizate.com/choppy-bitcoin/\" target=\"_blank\" rel=\"noopener\">" + t("embedFull") + "</a></p>";
+  }
   try {
     if (localStorage.getItem("choppy-reset-420") !== "1") {
       localStorage.removeItem("choppy-awards");
@@ -11884,7 +11893,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp240";
+      s.src = "halving.js?v=mp241";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13044,12 +13053,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp240";
+    return "share-card.js?v=mp241";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp240";
+    return "copy-result.js?v=mp241";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp240"; }
+  function dailyScriptSrc() { return "daily.js?v=mp241"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13107,7 +13116,7 @@
   const GHOST_DT = 0.2;
   const GHOST_CAP = 12000;
   let ghostRun = null;
-  function ghostScriptSrc() { return "ghost.js?v=mp240"; }
+  function ghostScriptSrc() { return "ghost.js?v=mp241"; }
   function ghostLive() {
     return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
   }
@@ -13920,6 +13929,13 @@
       return "<div class=\"opt-head\">" + optHead(chanceLang() ? "TECLAS" : "HOTKEYS") + "</div>" + kbRows();
     }
     if (panel === "test") return testMarkup();
+    if (panel === "embed") {
+      return "<div class=\"opt-head\">" + optHead(t("embedTitle")) + "</div><div class=\"opt-menu embed-sheet\">"
+        + "<p class=\"k\">" + t("embedNote") + "</p>"
+        + "<textarea id=\"embed-code\" class=\"embed-code\" readonly rows=\"5\" spellcheck=\"false\" aria-label=\"" + t("embedTitle") + "\"></textarea>"
+        + "<button type=\"button\" class=\"cta opt-item\" id=\"embed-copy\">" + t("embedCopy") + "</button>"
+        + "</div>";
+    }
     const fromPlay = S.phase === "paused" && (S.optBack === "play" || !S.optBack);
     return "<div class=\"opt-head\">" + optHead(fromPlay ? t("paused") : t("options")) + "</div>"
       + "<div class=\"opt-menu\">"
@@ -13930,10 +13946,12 @@
       + (S.ranked ? "" : "<button type=\"button\" class=\"cta opt-item\" id=\"opt-test\">" + t("testing") + "</button>")
       + "<button type=\"button\" class=\"cta opt-item" + ((S.have.juke || 0) > 0 ? "" : " dim") + "\" id=\"opt-juke\">" + t("jukebox") + "</button>"
       + "<button type=\"button\" class=\"cta opt-item" + ((S.have.aibud || 0) > 0 ? "" : " dim") + "\" id=\"opt-aibud\">" + t("aiLog") + "</button>"
-      + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-pwa\">" + t("pwaOpt") + " · " + (pwaEnabled() ? t("pwaOn") : t("pwaOff")) + "</button>"
+      + (EMBED ? "" : "<button type=\"button\" class=\"cta opt-item\" id=\"opt-pwa\">" + t("pwaOpt") + " · " + (pwaEnabled() ? t("pwaOn") : t("pwaOff")) + "</button>")
       + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-help\">" + t("tutorial") + "</button>"
       + (battleTutSeen() ? "<button type=\"button\" class=\"cta opt-item\" id=\"opt-btut\">" + t("tutBattle") + "</button>" : "")
-      + "<button type=\"button\" class=\"cta opt-item\" id=\"opt-feed\">" + t("feedback") + "</button>"
+      + (EMBED ? "" : "<button type=\"button\" class=\"cta opt-item\" id=\"opt-feed\">" + t("feedback") + "</button>")
+      + (EMBED ? "" : "<button type=\"button\" class=\"cta opt-item\" id=\"opt-embed\">" + t("embedOpt") + "</button>")
+      + (EMBED ? embedFullHtml() : "")
       + "</div>";
   }
   function bindPauseUi() {
@@ -14035,6 +14053,8 @@
     if (tutMore) tutMore.onclick = (e) => { e.stopPropagation(); S.tutMore = true; renderOverlay(); };
     const optBtut = $("opt-btut");
     if (optBtut) optBtut.onclick = (e) => { e.stopPropagation(); S.optPanel = "btut"; renderOverlay(); };
+    const optEmbed = $("opt-embed");
+    if (optEmbed) optEmbed.onclick = (e) => { e.stopPropagation(); S.optPanel = "embed"; renderOverlay(); };
     const optFeed = $("opt-feed");
     if (optFeed) optFeed.onclick = (e) => { e.stopPropagation(); S.optPanel = "feed"; renderOverlay(); };
     const feedSend = $("feed-send");
@@ -14114,6 +14134,28 @@
         testLogHold = true;
       };
     }
+    const embedCode = $("embed-code");
+    if (embedCode) {
+      embedCode.value = embedSnippet();
+      embedCode.onpointerdown = (e) => e.stopPropagation();
+      embedCode.onkeydown = (e) => e.stopPropagation();
+      embedCode.onclick = (e) => { e.stopPropagation(); embedCode.select(); };
+    }
+    const embedCopy = $("embed-copy");
+    if (embedCopy) embedCopy.onclick = (e) => {
+      e.stopPropagation();
+      const text = embedSnippet();
+      const done = () => {
+        embedCopy.textContent = t("shareCopied");
+        setTimeout(() => { if ($("embed-copy")) $("embed-copy").textContent = t("embedCopy"); }, 1400);
+      };
+      const fallback = () => {
+        try { if (embedCode) { embedCode.focus(); embedCode.select(); document.execCommand("copy"); } } catch (err) {}
+        done();
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fallback);
+      else fallback();
+    };
     const testCopy = $("test-copy-log");
     if (testCopy) testCopy.onclick = (e) => {
       e.stopPropagation();
@@ -14281,7 +14323,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp240";
+      s.src = "mp.js?v=mp241";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -14760,6 +14802,22 @@
           bindOnboard();
           return;
         }
+        if (EMBED) {
+          overlay.innerHTML = "<h1>Choppy Bitcoin</h1>"
+            + "<button class=\"cta\" id=\"go\">" + t("ranked") + "</button>"
+            + "<p class=\"k\">" + t("playSub") + "</p>"
+            + "<p class=\"k\" id=\"daily-reset\">" + fmtResetLeft() + "</p>"
+            + (window.choppySignedIn ? "" : "<p class=\"k\">" + t("embedGuest") + "</p><button type=\"button\" class=\"cta play-alt\" id=\"overlay-auth\">" + t("signIn") + "</button>")
+            + "<div id=\"daily-board-wrap\" hidden><h3 class=\"k\">" + t("dailyBoard") + "</h3><div id=\"daily-today-wrap\"><pre id=\"ready-daily\" class=\"board\">—</pre></div></div>"
+            + embedFullHtml();
+          $("go").onclick = () => startGame(true, null, "daily");
+          $("go").onpointerdown = (e) => { e.stopPropagation(); startGame(true, null, "daily"); };
+          const ea = $("overlay-auth");
+          if (ea) ea.onclick = (e) => { e.stopPropagation(); if (window.openAuth) window.openAuth(); };
+          fillDailyBoard();
+          startDailyResetClock();
+          return;
+        }
         overlay.innerHTML = "<h1>Choppy Bitcoin</h1>"
           + "<button class=\"cta\" id=\"go\">" + t("ranked") + "</button>"
           + "<p class=\"k\">" + t("playSub") + "</p>"
@@ -14976,7 +15034,7 @@
         bindRunRecap();
       } else {
         overlay.innerHTML = "<p class=\"k\">" + t("rekt") + (S.ranked ? (S.daily ? " · " + t("ranked") : "") : " · " + t("trainCamp")) + "</p><h1>" + fmtBtc(netBtc()) + "</h1>" + (S.challengeBag > 0 ? ("<p class=\"k\">" + (netBtc() > S.challengeBag ? t("beatYes") : t("beatNo")) + " · " + t("beatBag").replace("{n}", fmtBtc(S.challengeBag)) + "</p>") : "") + "<p>" + money(S.cash) + " + " + fmtBtc(S.btc) + " @ " + money(S.price) + "</p><p class=\"k\">" + (S.ranked ? t("best") + " " + fmtBtc((S.best || 0) / 1e4) : t("trainNote")) + "</p><div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("tryAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"copy-result\">" + t("copyResult") + "</button></div>"
-          + donateBlock();
+          + (EMBED ? embedFullHtml() : donateBlock());
         if ($("go")) {
           $("go").onclick = replay;
           $("go").onpointerdown = (e) => { e.stopPropagation(); replay(); };
@@ -14999,7 +15057,7 @@
           : "<p class=\"k\">TWENTY ONE MILLION</p><h1>" + t("congrats") + "</h1>"
             + "<p>" + t("stacked") + "</p>")
           + "<div class=\"overlay-actions\"><button class=\"cta\" id=\"go\">" + t("keepPlaying") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"run-stats\">" + t("runStats") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"go-again\">" + t("playAgain") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"share-run\">" + t("share") + "</button><button type=\"button\" class=\"cta play-alt\" id=\"copy-result\">" + t("copyResult") + "</button></div>"
-          + donateBlock();
+          + (EMBED ? embedFullHtml() : donateBlock());
         if ($("go")) $("go").onclick = keepPlaying;
         if ($("run-stats")) $("run-stats").onclick = (e) => { e.stopPropagation(); S.runTab = "stats"; renderOverlay(); };
         if ($("go-again")) $("go-again").onclick = replay;
@@ -15915,11 +15973,11 @@
     try {
       const q = new URLSearchParams(location.search || "");
       const ch = parseChallenge(location.search || "");
-      if (ch) S.pendingChallenge = ch;
-      const room = (q.get("room") || q.get("mp") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      if (ch && !EMBED) S.pendingChallenge = ch;
+      const room = EMBED ? "" : (q.get("room") || q.get("mp") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
       if (room.length >= 4) { S.mpJoinCode = room; S.mpAutoJoin = true; openMpLobby(); }
-      else if (q.get("versus") === "1") openMpLobby();
-      else {
+      else if (!EMBED && q.get("versus") === "1") openMpLobby();
+      else if (!EMBED) {
         try { if (sessionStorage.getItem("choppy-mp-room")) ensureMp().then(() => { if (S.phase === "ready") tryResumeMp(); }); } catch (err) {}
       }
     } catch (e) {}
@@ -16086,7 +16144,8 @@
     }
   }
   async function startPwa() {
-    if (!("serviceWorker" in navigator)) return;
+    // Embedded: never register or remove the site's worker from inside someone else's page.
+    if (EMBED || !("serviceWorker" in navigator)) return;
     if (pwaQuery("pwa") === "0") {
       hookPwa();
       await stopPwa();

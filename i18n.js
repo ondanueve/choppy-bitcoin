@@ -130,6 +130,12 @@
       selected: "Selected. Tap ▶ to keep playing.",
       play: "Play Choppy Bitcoin",
       ranked: "Ranked",
+      embedFull: "Play the full game ↗",
+      embedOpt: "Embed",
+      embedTitle: "Embed today's Ranked",
+      embedNote: "Paste this code into a blog post or a stream overlay. It plays today's Ranked at 400 px wide, with a link back to the full game.",
+      embedCopy: "Copy code",
+      embedGuest: "Guest runs stay on this device. Sign in to put your score on today's board.",
       training: "Training",
       dailyNote: "The same chart for everyone today.",
       dailyBoard: "Today's bags",
@@ -447,6 +453,12 @@
       selected: "Elegido. Toca ▶ para seguir.",
       play: "Jugar Choppy Bitcoin",
       ranked: "Ranked",
+      embedFull: "Juega el juego completo ↗",
+      embedOpt: "Insertar",
+      embedTitle: "Inserta el Ranked de hoy",
+      embedNote: "Pega este código en una entrada de blog o en un overlay de stream. Muestra el Ranked de hoy con 400 px de ancho y un enlace al juego completo.",
+      embedCopy: "Copiar código",
+      embedGuest: "Las partidas como invitado quedan en este dispositivo. Inicia sesión para que tu puntaje entre en el ranking de hoy.",
       training: "Entrenamiento",
       dailyNote: "El mismo gráfico para todos hoy.",
       dailyBoard: "Bolsas de hoy",
@@ -639,6 +651,10 @@
 
   function detect() {
     try {
+      const q = new URLSearchParams(location.search || "").get("lang");
+      if (q === "es" || q === "en") return q;
+    } catch (e) {}
+    try {
       const saved = localStorage.getItem(KEY);
       if (saved === "es" || saved === "en") return saved;
     } catch (e) {}
@@ -671,7 +687,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp240";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp241";
     document.head.appendChild(s);
   }
 

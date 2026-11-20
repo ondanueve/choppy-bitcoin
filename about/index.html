@@ -110,6 +110,7 @@
     .chip { border: 1px solid #2a2a2e; background: rgba(10,10,12,0.55); padding: 12px; }
     .chip b { display: block; color: var(--gold); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
     .chip span { color: #c4c0b8; font-size: 13px; line-height: 1.4; }
+    .embed-code { display: block; width: 100%; box-sizing: border-box; margin: 0 0 12px; padding: 8px; font: 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; color: #f3efe6; background: #0a0a0c; border: 1px solid #c8960a; resize: none; word-break: break-all; }
     .how, .faq { margin: 28px 0 0; padding: 18px; border: 1px solid #2a2a2e; background: rgba(10,10,12,0.55); }
     .how h3, .faq h3 { margin: 0 0 12px; color: var(--gold); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; }
     .help { text-align: left; font-size: 13px; line-height: 1.45; color: #d4d0c8; }
@@ -184,7 +185,7 @@
     }
     @media (min-width: 640px) { .chips { grid-template-columns: repeat(4, 1fr); } }
   </style>
-  <script src="/choppy-bitcoin/nozoom.js?v=mp240"></script>
+  <script src="/choppy-bitcoin/nozoom.js?v=mp241"></script>
 </head>
 <body>
   <main class="wrap">
@@ -255,6 +256,12 @@
       <p data-i18n="discordBody">The game chat is here. Questions, bugs, and the people who already play.</p>
       <a class="play play-alt" href="https://discord.gg/HkS8epr8mE" target="_blank" rel="noopener noreferrer"><span data-i18n="discordJoin">Join the server</span></a>
     </section>
+    <section class="how" id="embed">
+      <h3 data-i18n="embedTitle">Embed today's Ranked</h3>
+      <p data-i18n="embedNote">Paste this code into a blog post or a stream overlay. It plays today's Ranked at 400 px wide, with a link back to the full game.</p>
+      <textarea id="embed-code" class="embed-code" readonly rows="5" spellcheck="false" data-i18n-aria="embedTitle" aria-label="Embed today's Ranked">&lt;iframe src="https://bitcoinizate.com/choppy-bitcoin/?embed=1" width="400" height="640" title="Choppy Bitcoin · Ranked" style="border:0;max-width:100%" allow="autoplay; clipboard-write; web-share; fullscreen" loading="lazy"&gt;&lt;/iframe&gt;</textarea>
+      <button type="button" class="play play-alt" id="embed-copy"><span data-i18n="embedCopy">Copy code</span></button>
+    </section>
     <section class="faq">
       <h3 data-i18n="faq">FAQ</h3>
       <details>
@@ -303,12 +310,12 @@
       <button type="button" class="text-btn" id="btn-close-profile" data-i18n="close">Close</button>
     </div>
   </div>
-  <script src="/choppy-bitcoin/i18n.js?v=mp240"></script>
-  <script src="/choppy-bitcoin/i18n-extra.js?v=mp240"></script>
-  <script src="/choppy-bitcoin/supabase-lib.js?v=mp240"></script>
-  <script src="/choppy-bitcoin/auth.js?v=mp240"></script>
-  <script src="/choppy-bitcoin/donate-config.js?v=mp240"></script>
-  <script src="/choppy-bitcoin/daily.js?v=mp240"></script>
+  <script src="/choppy-bitcoin/i18n.js?v=mp241"></script>
+  <script src="/choppy-bitcoin/i18n-extra.js?v=mp241"></script>
+  <script src="/choppy-bitcoin/supabase-lib.js?v=mp241"></script>
+  <script src="/choppy-bitcoin/auth.js?v=mp241"></script>
+  <script src="/choppy-bitcoin/donate-config.js?v=mp241"></script>
+  <script src="/choppy-bitcoin/daily.js?v=mp241"></script>
   <script>if (window.choppyFillDonateLinks) choppyFillDonateLinks(document.getElementById("donate-links"));</script>
   <script>
     (function () {
@@ -339,6 +346,28 @@
       else if (window.choppyFillDailyBoard) {
         window.choppyFillDailyBoard(document.getElementById("daily-board-wrap"), document.getElementById("site-daily"), dayKey());
       }
+    })();
+  </script>
+  <script>
+    (function () {
+      var ta = document.getElementById("embed-code");
+      var btn = document.getElementById("embed-copy");
+      if (!ta || !btn) return;
+      var label = btn.querySelector("span");
+      function done() {
+        var keep = label.textContent;
+        label.textContent = (window.BZ && BZ.t && BZ.t("shareCopied")) || "Copied";
+        setTimeout(function () { label.textContent = (window.BZ && BZ.t && BZ.t("embedCopy")) || keep; }, 1400);
+      }
+      function fallback() {
+        try { ta.focus(); ta.select(); document.execCommand("copy"); } catch (e) {}
+        done();
+      }
+      ta.addEventListener("click", function () { ta.select(); });
+      btn.addEventListener("click", function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done).catch(fallback);
+        else fallback();
+      });
     })();
   </script>
   <script src="/choppy-bitcoin/run-stats.js"></script>
