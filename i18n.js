@@ -138,6 +138,8 @@
       boardLegacy: "All-time (legacy)",
       shareDaily: "Ranked · {n}",
       shareRank: "Rank #{n}",
+      ghostTop: "Today's #{n}",
+      ghostMine: "Your best today",
       beatBag: "Beat {n}",
       beatBagNote: "Same chart as the challenger.",
       beatPlay: "Play this chart",
@@ -453,6 +455,8 @@
       boardLegacy: "Histórico (legado)",
       shareDaily: "Ranked · {n}",
       shareRank: "Puesto #{n}",
+      ghostTop: "N.º {n} de hoy",
+      ghostMine: "Tu mejor de hoy",
       beatBag: "Supera {n}",
       beatBagNote: "El mismo gráfico que quien te desafía.",
       beatPlay: "Jugar este gráfico",
@@ -667,7 +671,7 @@
     const s = document.createElement("script");
     s.id = "bz-i18n-extra";
     s.async = true;
-    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp239";
+    s.src = "/choppy-bitcoin/i18n-extra.js?v=mp240";
     document.head.appendChild(s);
   }
 
