@@ -3281,7 +3281,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin23", anOffer: "cin24", protectIsland: "cin25" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin23", anOffer: "cin24", protectIsland: "cin25", baby: "cin26" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3439,7 +3439,7 @@
     "poker-c":"post6", "startup-win":"post7", "startup-lose":"post7", "cousin-win":"post7",
     "cousin-lose":"post7", "usedcar-works":"post6", "usedcar-lemon":"post6", "stateVisit-a":"post8",
     "stateVisit-b":"post8", "extensionCord-a":"post6", "extensionCord-b":"post6", "landfill-nokia":"post6",
-    "landfill-nothing":"post6", "landfill-c":"post6", "baby-a":"post6", "baby-c":"post6",
+    "landfill-nothing":"post6", "landfill-c":"post6", "baby-a":"post7", "baby-c":"post7",
     "nicoWedding-a":"post7", "nicoWedding-c":"post7"
   };
   const POST_ART_MISS = new Set();
@@ -11848,7 +11848,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp236";
+      s.src = "halving.js?v=mp237";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13007,12 +13007,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp236";
+    return "share-card.js?v=mp237";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp236";
+    return "copy-result.js?v=mp237";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp236"; }
+  function dailyScriptSrc() { return "daily.js?v=mp237"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -14156,7 +14156,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp236";
+      s.src = "mp.js?v=mp237";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
