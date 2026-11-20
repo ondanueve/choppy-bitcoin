@@ -51,6 +51,9 @@ jobs:
       - name: Daily ranked and challenge links
         run: node tests/daily.js
 
+      - name: Ranked ghost of the day
+        run: node tests/ghost.js
+
       - name: Onboard and battle tutorial
         run: node tests/onboard.js
 

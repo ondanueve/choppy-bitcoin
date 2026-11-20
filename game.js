@@ -526,6 +526,7 @@
     beatBag: "Beat {n}",
     beatBagNote: "Same chart as the challenger.", beatPlay: "Play this chart",
     beatYes: "You beat the bag.", beatNo: "The bag still stands.",
+    ghostTop: "Today's #{n}", ghostMine: "Your best today",
     comingSoon: "COMING SOON",
     mpAlpha: "ALPHA",
     mpAlphaNote: "Alpha. Testers welcome. Send feedback to",
@@ -1726,6 +1727,7 @@
     S.cycleStart = S.price; S.cycleDur = POWER_S; S.cycleElapsed = 0;
     S.cycleAmp = 0;
     S.cycleMax = S.price; S.cycleMin = S.price; S.cycleMaxI = 0; S.cycleMinI = 0;
+    if (!keepWallet) { S.ghRec = null; S.ghT = 0; S.ghD = 0; S.ghAcc = 0; }
     S.lifeT = 0; S.sampleAcc = 0; S.tape = []; S.tapeVt = []; S.tapeCash = []; S.tapeBtcBag = []; S.tapeNet = []; S.tapeLo = null; S.tapeHi = null;
     S._tapeVis = null; S._tvN = -1; S._tvStart = -1; S._tapeT = 0;
     S.tapeMarks = []; S.tapeTrades = []; S.eventPeaks = []; S.eventBottoms = []; S.tapeLive = null;
@@ -10129,6 +10131,7 @@
     }
     resetWorld(false);
     applyTestLoadout();
+    ghostBegin();
     S.dead = false;
     S.trainBattleLose = false;
     S.phase = "play";
@@ -10224,6 +10227,7 @@
     wipeShotKeep();
     resetWorld(false);
     applyTestLoadout();
+    ghostBegin();
     setPhase("play");
   }
 
@@ -10309,6 +10313,7 @@
       S.marketAcc -= MARKET_DT;
     }
     S.lifeT += dt; S.sampleAcc += dt;
+    if (S.ghRec) ghostTick(dt, speed);
     if (!S.mpCatch) {
       try { awardTick(dt); } catch (e) {}
       tickAi(dt);
@@ -11848,7 +11853,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp238";
+      s.src = "halving.js?v=mp240";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -11935,6 +11940,7 @@
     const foc = S.mp ? mpFocusPlayer() : null;
     const mineId = window.ChoppyMP && window.ChoppyMP.id ? window.ChoppyMP.id() : null;
     const selfGhost = !!(S.mp && (S.spectate || S.dead || S.finished) && foc && foc.id !== mineId);
+    if (S.ghRec && ghostRun) drawDayGhost(ctx, wash);
     if (!blink && !selfGhost) drawBirdAt(ctx, S.bird.x, S.bird.y, S.bird.v, S.bird.r, myHero(), wash, 1, S.laserOn, HERO_ANIM, HERO_SKIN);
     if (S.mp && window.ChoppyMP) {
       let reactNow = 0;
@@ -13007,12 +13013,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp238";
+    return "share-card.js?v=mp240";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp238";
+    return "copy-result.js?v=mp240";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp238"; }
+  function dailyScriptSrc() { return "daily.js?v=mp240"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13064,15 +13070,103 @@
     tick();
     dailyResetTick = setInterval(tick, 30000);
   }
+  // Ranked ghost of the day. game.js keeps the tiny recorder and the drawing; ghost.js
+  // (lazy) packs, sends, fetches and samples the path. Only solo Ranked runs on today's
+  // chart record or show a ghost; Training, Versus and other seeds never do.
+  const GHOST_DT = 0.2;
+  const GHOST_CAP = 12000;
+  let ghostRun = null;
+  function ghostScriptSrc() { return "ghost.js?v=mp240"; }
+  function ghostLive() {
+    return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
+  }
+  function loadGhost(cb) {
+    if (window.ChoppyGhost) { cb(window.ChoppyGhost); return; }
+    if (!window.__choppyGhostLoad) window.__choppyGhostLoad = [];
+    window.__choppyGhostLoad.push(cb);
+    if (window.__choppyGhostLoading || !document || !document.head || !document.createElement) return;
+    window.__choppyGhostLoading = true;
+    const s = document.createElement("script");
+    const flush = function () {
+      window.__choppyGhostLoading = false;
+      const q = window.__choppyGhostLoad || [];
+      window.__choppyGhostLoad = [];
+      q.forEach(function (fn) { try { fn(window.ChoppyGhost || null); } catch (e) {} });
+    };
+    s.src = ghostScriptSrc();
+    s.onload = flush;
+    s.onerror = flush;
+    document.head.appendChild(s);
+  }
+  function ghostBegin() {
+    ghostRun = null;
+    if (!ghostLive()) { S.ghRec = null; return; }
+    S.ghRec = { y: [S.bird.y / Math.max(1, S.H)], d: [0] };
+    S.ghT = 0; S.ghD = 0; S.ghAcc = 0;
+    const rec = S.ghRec;
+    const day = S.dailyDay;
+    try {
+      loadGhost(function (G) {
+        if (!G || !G.fetchTop) return;
+        G.fetchTop(day, function (g) { if (S.ghRec === rec && g) ghostRun = g; });
+      });
+    } catch (e) {}
+  }
+  function ghostTick(dt, speed) {
+    const rec = S.ghRec;
+    S.ghT += dt; S.ghD += speed * dt; S.ghAcc += dt;
+    while (S.ghAcc >= GHOST_DT - 1e-9) {
+      S.ghAcc -= GHOST_DT;
+      if (rec.y.length < GHOST_CAP) { rec.y.push(S.bird.y / Math.max(1, S.H)); rec.d.push(S.ghD); }
+    }
+  }
+  function ghostLabel(g) {
+    const who = g.alias && g.alias !== "?" ? " · @" + g.alias : "";
+    return g.mine ? t("ghostMine") : t("ghostTop").replace("{n}", String(g.rank || 1)) + who;
+  }
+  function drawDayGhost(ctx, wash) {
+    const G = window.ChoppyGhost;
+    const g = ghostRun;
+    if (!G || !G.at || S.phase === "ready") return;
+    const p = G.at(g, S.ghT);
+    if (!p) return;
+    let a = 0.4;
+    if (p.done) a *= Math.max(0, 1 - (S.ghT - p.end) / 1.2);
+    if (a <= 0.01) return;
+    const r = S.bird.r;
+    const x = S.bird.x + (p.d - S.ghD);
+    const y = Math.max(r, Math.min(S.H - r, p.y * S.H));
+    const label = ghostLabel(g);
+    ctx.save();
+    ctx.font = "700 11px \"IBM Plex Mono\", monospace";
+    ctx.textBaseline = "middle";
+    ctx.globalAlpha = Math.min(0.85, a * 2.2);
+    ctx.fillStyle = wash || PAL.fg;
+    if (x < -r) {
+      ctx.textAlign = "left";
+      ctx.fillText("◂ " + label, 6, y);
+    } else if (x > S.W + r) {
+      ctx.textAlign = "right";
+      ctx.fillText(label + " ▸", S.W - 6, y);
+    } else {
+      ctx.textAlign = "center";
+      ctx.fillText(label, x, y - r - 12);
+    }
+    ctx.restore();
+    if (x >= -r && x <= S.W + r) drawBirdAt(ctx, x, y, p.v * S.H, r, heroOf(1), wash, a, false, false);
+  }
   function queueDailySubmit(n) {
     const day = S.dailyDay || utcDayKey();
     if (DAILY_ONE_ATTEMPT && S.dailySubmitted && S.dailyDay === day) return;
+    let ghost = "";
+    try { if (S.ghRec && window.ChoppyGhost && window.ChoppyGhost.encode) ghost = window.ChoppyGhost.encode(S.ghRec, GHOST_DT); } catch (e) { ghost = ""; }
     const payload = {
       score: n,
       life: S.lifeT,
       candles: S.candles,
       day: day,
-      bag: netBtc()
+      bag: netBtc(),
+      ghost: ghost
     };
     loadDaily(function () {
       if (typeof choppySubmitDaily === "function") {
@@ -14156,7 +14250,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp238";
+      s.src = "mp.js?v=mp240";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);

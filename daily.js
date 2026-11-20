@@ -137,6 +137,9 @@
     };
     Promise.resolve(sb.rpc("submit_daily_score", args)).then(function (res) {
       if (res && res.error) { if (done) done(null); return; }
+      if (payload.ghost && root.ChoppyGhost && typeof root.ChoppyGhost.submit === "function") {
+        try { root.ChoppyGhost.submit(payload.day, score, payload.ghost); } catch (e) {}
+      }
       fetchMyRank(payload.day, done);
     }).catch(function () { if (done) done(null); });
   }
