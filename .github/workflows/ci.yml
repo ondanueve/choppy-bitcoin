@@ -30,6 +30,9 @@ jobs:
           set -e
           for f in *.js tools/*.js tests/*.js; do node --check "$f"; done
 
+      - name: CSS lint (unclosed blocks, stray braces, accidental nesting)
+        run: node tools/css-lint.js
+
       - name: Smoke test
         run: node tests/smoke.js
 

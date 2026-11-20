@@ -1596,6 +1596,7 @@ html.embed #ready-daily { max-height: 9.5em; overflow: auto; }
 
 .art-miss {
   background: linear-gradient(160deg, #1a1408 0%, #0a0a0c 48%, #3a2a10 100%) !important;
+}
 .a11y-live {
   position: absolute;
   width: 1px;
