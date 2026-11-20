@@ -690,6 +690,11 @@ scenario("take-broadcasts-shared-wave", () => {
     throw new Error("peer missed the shared wave " + JSON.stringify(got));
   }
   if (got.id !== clients[0].id()) throw new Error("take missing sender id");
+  let laser = null;
+  clients[1].setHandler((ev, data) => { if (ev === "take") laser = data; });
+  clients[0].take({ sid: 5, typ: "LASER", wave: null, at: 12.25 });
+  env.clock.advance(200 + lagOf(env));
+  if (!laser || laser.typ !== "LASER" || laser.at !== 12.25 || laser.wave) throw new Error("peer missed the laser pickup time " + JSON.stringify(laser));
   let self = null;
   clients[0].setHandler((ev, data) => { if (ev === "take") self = data; });
   clients[0].take({ sid: 4, typ: "BEAR", wave: { type: "BEAR", kind: "BEAR", dir: -1, amp: 0.1, resid: 0.05, t0: 5 } });

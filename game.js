@@ -1486,7 +1486,7 @@
     const busy = S.lifeT < S.speechUntil - 0.12;
     const m = metrics();
     let speed = m.speed * scrollMul();
-    if (S.power === "BULL" || S.power === "BEAR" || S.laserOn) speed *= 1.28;
+    if (S.power === "BULL" || S.power === "BEAR" || laserScroll()) speed *= 1.28;
     if (S.halveBull) speed *= HALVE_SPEED;
     let soon = false;
     for (const it of S.items) {
@@ -1513,6 +1513,35 @@
     if (on) {
       S.laserT = POWER_S; S.widthT = 0.378; S.heightT = 0.9;
     } else { S.laserT = 0; S.widthT = 1; S.heightT = 1; }
+  }
+
+  // Versus: the laser's 1.28x scroll is room-wide. Every pickup, local or
+  // from a peer's take, extends one shared window measured in lifeT, which
+  // all players share through the host startAt clock.
+  function laserScroll() {
+    return S.mp ? S.lifeT < (S.mpScrollUntil || 0) : !!S.laserOn;
+  }
+  function mpLaserScroll(at) {
+    const t0 = Math.max(0, Number(at) || 0);
+    const prev = S.mpScrollUntil || 0;
+    S.mpScrollUntil = (prev > t0 ? prev : t0) + POWER_S;
+    return prev;
+  }
+  // A peer's laser arrives a few frames late. Move the world by the distance
+  // the boost would have covered since the pickup, so candles stay level.
+  function mpLaserTake(at) {
+    if (!S.mp || S.phase !== "play") return 0;
+    const t0 = Math.max(0, Math.min(S.lifeT, Number(at) || S.lifeT));
+    const prev = mpLaserScroll(t0);
+    const missed = Math.min(1, Math.max(0, S.lifeT - Math.max(t0, Math.min(prev, S.lifeT))));
+    if (missed <= 0 || streakLeft(S.lifeT) > 0) return 0;
+    let base = metrics().speed * scrollMul();
+    if (S.halveBull) base *= HALVE_SPEED;
+    const dx = base * 0.28 * missed;
+    for (const p of S.pipes) p.x -= dx;
+    for (const it of S.items) if (it.freeX) it.x -= dx;
+    for (const f of S.floats) f.x -= dx;
+    return dx;
   }
 
   function pipePw() {
@@ -1721,6 +1750,7 @@
     }
     S.power = "NONE"; S.powerT = 0; S.powerUntil = 0;
     applyLaser(false);
+    S.mpScrollUntil = 0;
     S.widthMul = S.heightMul = 1;
     S.bg = 0; S.ticker = ""; S.tickerT = 0;
     S.lastGapY = S.bird.y; S.dead = false;
@@ -1970,6 +2000,7 @@
     if (it.type === "LASER") {
       S.lasers += 1;
       if (S.laserOn) S.laserT += POWER_S; else applyLaser(true);
+      if (S.mp) mpLaserScroll(S.lifeT);
       const line = drawLine(A.LASER && A.LASER.length ? A.LASER : ["Laser eyes!"], 0.15);
       say(line || "Laser eyes!", true);
       sfx("power");
@@ -4680,7 +4711,7 @@
   function incomingKind(kinds, horizon) {
     const m = metrics();
     let speed = m.speed * scrollMul();
-    if (S.power === "BULL" || S.power === "BEAR" || S.laserOn) speed *= 1.28;
+    if (S.power === "BULL" || S.power === "BEAR" || laserScroll()) speed *= 1.28;
     if (S.halveBull) speed *= HALVE_SPEED;
     for (const it of S.items) {
       if (kinds.indexOf(it.type) < 0) continue;
@@ -10304,7 +10335,7 @@
     if (S.invuln > 0) S.invuln -= dt;
 
     let speed = m.speed * scrollMul();
-    if (S.laserOn || streakLeft(S.lifeT) > 0) speed *= 1.28;
+    if (laserScroll() || streakLeft(S.lifeT) > 0) speed *= 1.28;
     if (S.halveBull) speed *= HALVE_SPEED;
     for (const f of S.floats) f.x -= speed * dt;
     S.marketAcc = (S.marketAcc || 0) + dt;
@@ -14472,7 +14503,7 @@
   }
   function wireMp() {
     if (!window.ChoppyMP) return;
-    if (window.ChoppyMP.bindGame) window.ChoppyMP.bindGame({ S: S, beginCycle: beginCycle, endCycle: endCycle, t: t, $: $, overlay: overlay, rulesNow: mpRulesNow, mixTotal: mpMixTotal, focusPlayer: mpFocusPlayer, applySound: applyMpSound, ensureMp: ensureMp, leave: leaveMp, heroOf: heroOf, renderOverlay: renderOverlay, snapshotRun: snapshotRun });
+    if (window.ChoppyMP.bindGame) window.ChoppyMP.bindGame({ S: S, beginCycle: beginCycle, endCycle: endCycle, laserTake: mpLaserTake, t: t, $: $, overlay: overlay, rulesNow: mpRulesNow, mixTotal: mpMixTotal, focusPlayer: mpFocusPlayer, applySound: applyMpSound, ensureMp: ensureMp, leave: leaveMp, heroOf: heroOf, renderOverlay: renderOverlay, snapshotRun: snapshotRun });
     buildMpReacts();
     window.ChoppyMP.setHandler((ev, data) => {
       const typing = () => {
