@@ -39,7 +39,7 @@ console.log("halving wave: HALVE_UP=" + HU + "s HALVE_BACK=" + HB + "s duration=
 check("halving lasts at least 30 s uninterrupted", HU + HB >= 30, true);
 check("actual duration is 32 s", HU + HB, 32);
 check("speed is 5% over the shared power speed", HS, 1.05);
-check("shared power speed (black swan included) is 1.28", (game.match(/if \(S\.power === "BULL" \|\| S\.power === "BEAR" \|\| S\.laserOn\) speed \*= 1\.28;/g) || []).length >= 2, true);
+check("shared power speed (black swan included) is 1.28", (game.match(/if \(S\.power === "BULL" \|\| S\.power === "BEAR" \|\| laserScroll\(\)\) speed \*= 1\.28;/g) || []).length >= 2, true);
 check("halving multiplies HALVE_SPEED at 3 sites", (game.match(/if \(S\.halveBull\) speed \*= HALVE_SPEED;/g) || []).length, 3);
 const effective = 1.28 * HS;
 console.log("effective speeds: black swan 1.28, halving bull " + effective.toFixed(4) + " (" + ((effective / 1.28 - 1) * 100).toFixed(1) + "% faster)");

@@ -47,6 +47,7 @@ Room channel `realtime:mp-<CODE>`:
 | `lead` | the host | current winner, compact |
 | `over` | the host | winner, wins, gameN, seriesOver, bestOf, waitMs |
 | `sync` | any client that still has the round, in reply to `hello` | full round snapshot |
+| `take` | the client that collects or vaporizes an item | item `sid`, `typ`, pickup `at` (sender lifeT), and the wave bag when a wave starts |
 | `react` | a client, at most once per 1.2s | reaction id `g` |
 | `left` | a client that quits | id, quit true |
 | `dropped` | the host | id to remove |
@@ -60,6 +61,10 @@ Board channel `realtime:mp-board`:
 | `pub` | host of an open room, only while the match has not started, on the same 2s timer | code, mode, bestOf, player count, name |
 
 A repeated `go` with the same seed and game number is ignored. `dead`, `finish`, `lead`, and `over` that arrive before `go` are queued (cap 40) and applied after that `go`.
+
+Laser scroll is room-wide. Any laser pickup opens or extends one shared window, `S.mpScrollUntil = max(until, at) + 5s`, in round lifeT, which every client derives from the host `startAt`. While `lifeT < S.mpScrollUntil` every screen scrolls at 1.28×, same as a bull or bear wave (they do not stack). A peer applies the window from the sender's `at` and moves pipes and free items by the boost distance it missed while the packet was in flight, so candle counts stay level. The laser's other effects (narrow pipes, vaporizing bears and swans, the ghost glow) stay with the collector. A swan ends the collector's laser eyes but not the room window.
+
+Manipulation is not in Versus: perk offers are off, so no player has it and it is not on the wire.
 
 `tryAdoptHost` runs when the host flag is gone. It elects the lowest id among players who are not marked gone. The elected client announces `host` and, if a round is in progress, sends `sync`.
 

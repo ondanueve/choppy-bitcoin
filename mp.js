@@ -443,12 +443,15 @@
     const S = MP.game && MP.game.S;
     if (!S || !S.mp || S.mpCatch || !it || !takeSid(S, it.sid)) return;
     const wave = waveOn && waveOn !== true ? waveOn : (waveOn ? lastWaveBag() : null);
-    take({ sid: it.sid | 0, typ: it.type || "", wave: wave || null });
+    take({ sid: it.sid | 0, typ: it.type || "", wave: wave || null, at: Number(S.lifeT) || 0 });
   }
   function applyTake(data) {
     const g = MP.game, S = g && g.S;
     if (!S || !S.mp || !data || data.id === MP.id || !takeSid(S, data.sid)) return;
     if (S.items) for (let i = S.items.length - 1; i >= 0; i--) if (S.items[i].sid === data.sid) S.items.splice(i, 1);
+    // Laser scroll is room-wide: a peer's pickup speeds up every screen.
+    const sameGame = !data.gameN || !S.mpGameN || (data.gameN | 0) === (S.mpGameN | 0);
+    if (data.typ === "LASER" && sameGame && g.laserTake) g.laserTake(Number(data.at) || 0);
     const w = data.wave;
     if (!w || !w.type) return;
     if ((w.kind || w.type) === "HALVE") {
@@ -463,6 +466,7 @@
     send("take", ident({
       sid: info.sid | 0,
       typ: String(info.typ || "").slice(0, 8),
+      at: Math.max(0, Number(info.at) || 0),
       wave: w && w.type ? { type: w.type, kind: w.kind || w.type, dir: w.dir, amp: Number(w.amp), resid: Number(w.resid), t0: Number(w.t0) } : null
     }));
   }
