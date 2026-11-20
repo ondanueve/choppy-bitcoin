@@ -1581,6 +1581,19 @@ body.kb-sheet-on #overlay{visibility:hidden}
   padding: 8px 10px;
   cursor: pointer;
 }
+/* Embed (?embed=1): light chrome and a link back to the full game. */
+.embed-full { display: none; }
+html.embed .embed-full { display: block; margin: 6px auto 0; padding: 6px 12px; text-align: center; font-size: 14px; font-weight: 700; color: #f2a900; text-decoration: none; }
+html.embed .embed-full:hover, html.embed .embed-full:focus-visible { text-decoration: underline; }
+html.embed #juke-hud, html.embed .seo-copy { display: none; }
+html.embed .hud-grid > .stat-opt { grid-column: span 2; }
+.embed-out { margin: 12px 0 0; text-align: center; }
+.embed-out a { color: #f2a900; font-weight: 700; text-decoration: none; }
+.embed-out a:hover, .embed-out a:focus-visible { text-decoration: underline; }
+html.embed #ready-daily { max-height: 9.5em; overflow: auto; }
+.embed-sheet { gap: 10px; }
+.embed-code { display: block; width: 100%; box-sizing: border-box; min-height: 7em; padding: 8px; font: 12px/1.4 "IBM Plex Mono", ui-monospace, monospace; color: var(--fg); background: #0a0a0c; border: 1px solid #c8960a; border-radius: 6px; resize: none; white-space: pre-wrap; word-break: break-all; }
+
 .art-miss {
   background: linear-gradient(160deg, #1a1408 0%, #0a0a0c 48%, #3a2a10 100%) !important;
 .a11y-live {

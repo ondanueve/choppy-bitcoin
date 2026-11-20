@@ -22,6 +22,10 @@ The hub redeploys on its own schedule (and on demand), so a push here goes live 
 | `supabase/` | SQL for the database (not published) |
 | `docs/` | card copy notes (not published) |
 
+## Embed
+
+Blogs and streams can embed today's Ranked with an iframe. Copy the snippet from Options → Embed in the game or from the about page. Details in [docs/embed.md](docs/embed.md).
+
 ## Local preview
 
 Serve it under the same path it has in production:

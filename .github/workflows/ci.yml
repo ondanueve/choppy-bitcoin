@@ -54,6 +54,9 @@ jobs:
       - name: Ranked ghost of the day
         run: node tests/ghost.js
 
+      - name: Embed mode (iframe, storage fallback, snippet)
+        run: node tests/embed.js
+
       - name: Onboard and battle tutorial
         run: node tests/onboard.js
 
