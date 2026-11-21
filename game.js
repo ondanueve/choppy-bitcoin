@@ -3323,7 +3323,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin23", anOffer: "cin24", protectIsland: "cin25", baby: "cin26" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin23", anOffer: "cin24", protectIsland: "cin25", baby: "cin26", extensionCord: "cin27", landfill: "cin27", poker: "cin27" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3477,11 +3477,11 @@
     "anOffer-b":"post9", "anOffer-a":"post5", "protectIsland-a":"post5", "protectIsland-b":"post5", "protectIsland-c":"post4", "theQuestion-a":"post4",
     "wedding-a":"post4", "wedding-b":"post5", "wedding-c":"post4",
     "unclemike-a":"post6", "unclemike-b":"post6", "unclemike-c":"post6", "casino-win":"post7",
-    "casino-lose":"post7", "casino-c":"post7", "poker-win":"post6", "poker-bust":"post6",
-    "poker-c":"post6", "startup-win":"post7", "startup-lose":"post7", "cousin-win":"post7",
+    "casino-lose":"post7", "casino-c":"post7", "poker-win":"post6", "poker-bust":"post7",
+    "poker-c":"post7", "startup-win":"post7", "startup-lose":"post7", "cousin-win":"post7",
     "cousin-lose":"post7", "usedcar-works":"post6", "usedcar-lemon":"post6", "stateVisit-a":"post8",
-    "stateVisit-b":"post8", "extensionCord-a":"post6", "extensionCord-b":"post6", "landfill-nokia":"post6",
-    "landfill-nothing":"post6", "landfill-c":"post6", "baby-a":"post7", "baby-c":"post7",
+    "stateVisit-b":"post8", "extensionCord-a":"post7", "extensionCord-b":"post7", "landfill-nokia":"post7",
+    "landfill-nothing":"post7", "landfill-c":"post6", "baby-a":"post7", "baby-c":"post7",
     "nicoWedding-a":"post7", "nicoWedding-c":"post7"
   };
   const POST_ART_MISS = new Set();
@@ -11893,7 +11893,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp243";
+      s.src = "halving.js?v=mp244";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13053,12 +13053,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp243";
+    return "share-card.js?v=mp244";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp243";
+    return "copy-result.js?v=mp244";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp243"; }
+  function dailyScriptSrc() { return "daily.js?v=mp244"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13116,7 +13116,7 @@
   const GHOST_DT = 0.2;
   const GHOST_CAP = 12000;
   let ghostRun = null;
-  function ghostScriptSrc() { return "ghost.js?v=mp243"; }
+  function ghostScriptSrc() { return "ghost.js?v=mp244"; }
   function ghostLive() {
     return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
   }
@@ -14323,7 +14323,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp243";
+      s.src = "mp.js?v=mp244";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
