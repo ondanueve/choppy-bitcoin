@@ -3323,7 +3323,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin23", anOffer: "cin24", protectIsland: "cin25", baby: "cin26", extensionCord: "cin27", landfill: "cin27", poker: "cin27", usedcar: "cin28", wedding: "cin28", citadelQuestion: "cin29", honeymoon: "cin29", phish: "cin29", firstBloc: "cin30", principality: "cin30", threeColors: "cin30", rearmament: "cin31", justInCase: "cin31", ortegaCalls: "cin31", pieceWorld: "cin31", tetris: "cin31", cabinet: "cin31", courage: "cin31", declaration: "cin31" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin23", anOffer: "cin24", protectIsland: "cin25", baby: "cin26", extensionCord: "cin27", landfill: "cin27", poker: "cin27", usedcar: "cin28", wedding: "cin28", citadelQuestion: "cin29", honeymoon: "cin29", phish: "cin29", firstBloc: "cin30", principality: "cin30", threeColors: "cin30", rearmament: "cin31", justInCase: "cin31", ortegaCalls: "cin31", pieceWorld: "cin31", tetris: "cin31", cabinet: "cin31", courage: "cin31", declaration: "cin31", date: "cin32", flu: "cin32", peopleAsking: "cin32", placeNow: "cin32", pregnancy: "cin32", ring: "cin32", roof: "cin32" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -11893,7 +11893,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp250";
+      s.src = "halving.js?v=mp251";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13053,12 +13053,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp250";
+    return "share-card.js?v=mp251";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp250";
+    return "copy-result.js?v=mp251";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp250"; }
+  function dailyScriptSrc() { return "daily.js?v=mp251"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13116,7 +13116,7 @@
   const GHOST_DT = 0.2;
   const GHOST_CAP = 12000;
   let ghostRun = null;
-  function ghostScriptSrc() { return "ghost.js?v=mp250"; }
+  function ghostScriptSrc() { return "ghost.js?v=mp251"; }
   function ghostLive() {
     return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
   }
@@ -14323,7 +14323,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp250";
+      s.src = "mp.js?v=mp251";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
