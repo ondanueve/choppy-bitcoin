@@ -72,6 +72,9 @@ jobs:
       - name: Versus lobby, startAt, and shared waves
         run: node tests/mp-sync.js
 
+      - name: Frame pacing (render interpolation restores sim state)
+        run: node tests/frame-lerp.js
+
       - name: Award ids
         run: node tests/award-ids.js
 
