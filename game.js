@@ -228,7 +228,19 @@
   function loadArcTldr() {
     try { ARC_TLDR = localStorage.getItem("choppy-arc-tldr") === "1"; } catch (e) { ARC_TLDR = false; }
   }
+  // draw() asks for the same few colours every frame; parse each hex/alpha pair once.
+  const PAL_RGBA = new Map();
   function palRgba(hex, a) {
+    const key = hex + "|" + a;
+    let v = PAL_RGBA.get(key);
+    if (v === undefined) {
+      if (PAL_RGBA.size > 400) PAL_RGBA.clear();
+      v = palRgbaRaw(hex, a);
+      PAL_RGBA.set(key, v);
+    }
+    return v;
+  }
+  function palRgbaRaw(hex, a) {
     let h = String(hex || "#000").replace("#", "");
     if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
     const n = parseInt(h.slice(0, 6), 16);
@@ -356,6 +368,15 @@
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     for (let n = w.nextNode(); n; n = w.nextNode()) localizeTextNode(n);
   }
+  // en-US digit grouping for a non-negative integer. toLocaleString ran on every float label, every
+  // frame, and its first call (ICU set-up) cost ~35 ms on a throttled phone when a card first used it.
+  function grpInt(r) {
+    if (!(r < 1e21)) return r.toLocaleString("en-US");
+    const s = String(r);
+    let i = s.length, out = "";
+    while (i > 3) { out = "," + s.slice(i - 3, i) + out; i -= 3; }
+    return s.slice(0, i) + out;
+  }
   const fmtUsd = (n) => {
     const x = Number(n) || 0;
     const a = Math.abs(x);
@@ -364,7 +385,7 @@
     if (a >= 1e9) return sign + "$" + (a / 1e9).toFixed(2) + "B";
     if (a >= 1e6) return sign + "$" + (a / 1e6).toFixed(2) + "M";
     if (a >= 10000) return sign + "$" + (a / 1000).toFixed(1) + "k";
-    return (x < 0 ? "-$" : "$") + Math.round(a).toLocaleString("en-US");
+    return (x < 0 ? "-$" : "$") + grpInt(Math.round(a));
   };
   const money = fmtUsd;
   const fmtBtcAmt = (n) => {
@@ -2358,7 +2379,7 @@
   function fmtCostUsd(n) {
     const v = Number(n) || 0;
     const sign = v < 0 ? "-" : "";
-    return sign + "$" + Math.round(Math.abs(v)).toLocaleString("en-US");
+    return sign + "$" + grpInt(Math.round(Math.abs(v)));
   }
   function fmtCostBtc(n) {
     const x = Number(n) || 0;
@@ -11893,7 +11914,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp255";
+      s.src = "halving.js?v=mp256";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13053,12 +13074,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp255";
+    return "share-card.js?v=mp256";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp255";
+    return "copy-result.js?v=mp256";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp255"; }
+  function dailyScriptSrc() { return "daily.js?v=mp256"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13116,7 +13137,7 @@
   const GHOST_DT = 0.2;
   const GHOST_CAP = 12000;
   let ghostRun = null;
-  function ghostScriptSrc() { return "ghost.js?v=mp255"; }
+  function ghostScriptSrc() { return "ghost.js?v=mp256"; }
   function ghostLive() {
     return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
   }
@@ -14323,7 +14344,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp255";
+      s.src = "mp.js?v=mp256";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
@@ -15083,7 +15104,7 @@
       S.invuln = 10000;
     }
     let guard = 0;
-    while (S.lifeT + 1 / 60 <= target && guard++ < 1800) step(1 / 60);
+    while (S.lifeT + 1 / 60 <= target && guard++ < 1800) { lerpSnap(); step(1 / 60); }
     S.mpCatch = false;
     if (catching) S.invuln = 2.5;
   }
@@ -15108,22 +15129,68 @@
       }
     }
   }
+  // Render interpolation. The sim keeps its fixed 1/60 s step, so Ranked, the seeded chart and Versus
+  // stay step-for-step identical. Only draw() sees moving things blended between the last two steps.
+  // Without it a frame that ran 0 or 2 steps (90/120/144 Hz screens, vsync jitter, Versus wall-clock
+  // stepping) showed the pipes and the hero frozen for a frame or jumping ~3 px: the "tirones".
+  const LERP_JUMP = 60;
+  function lerpV(prev, cur, a) {
+    return (prev === undefined || !(Math.abs(cur - prev) <= LERP_JUMP)) ? cur : prev + (cur - prev) * a;
+  }
+  function lerpSnap() {
+    const b = S.bird;
+    if (b) { b._py = b.y; b._pv = b.v; }
+    S._pbg = S.bg; S._pghT = S.ghT; S._pghD = S.ghD;
+    for (const p of S.pipes) p._px = p.x;
+    for (const it of S.items) { it._px = it.x; it._py = it.y; }
+    for (const f of S.floats) { f._px = f.x; f._py = f.y; }
+  }
+  function lerpApply(a) {
+    const b = S.bird;
+    b._cy = b.y; b._cv = b.v; b.y = lerpV(b._py, b.y, a); b.v = lerpV(b._pv, b.v, a);
+    S._cbg = S.bg; S._cghT = S.ghT; S._cghD = S.ghD;
+    S.bg = lerpV(S._pbg, S.bg, a); S.ghT = lerpV(S._pghT, S.ghT, a); S.ghD = lerpV(S._pghD, S.ghD, a);
+    for (const p of S.pipes) { p._cx = p.x; p.x = lerpV(p._px, p.x, a); }
+    for (const it of S.items) { it._cx = it.x; it._cy = it.y; if (it.freeX) it.x = lerpV(it._px, it.x, a); it.y = lerpV(it._py, it.y, a); }
+    for (const f of S.floats) { f._cx = f.x; f._cy = f.y; f.x = lerpV(f._px, f.x, a); f.y = lerpV(f._py, f.y, a); }
+  }
+  function lerpRestore() {
+    const b = S.bird;
+    b.y = b._cy; b.v = b._cv;
+    S.bg = S._cbg; S.ghT = S._cghT; S.ghD = S._cghD;
+    // draw() stores p.wx and the x of items riding a candle; put back what an uninterpolated draw wrote.
+    const pw = pipePw();
+    for (const p of S.pipes) { p.x = p._cx; p.wx = pipeWx(p, pw); }
+    for (const it of S.items) {
+      const p = it.pipe && S.pipes.indexOf(it.pipe) >= 0 ? it.pipe : null;
+      it.x = (p && !it.freeX) ? p.wx : it._cx; it.y = it._cy;
+    }
+    for (const f of S.floats) { f.x = f._cx; f.y = f._cy; }
+  }
   function loop(now) {
     mpTickClock();
+    let alpha = 1;
+    const frameMs = now - last;
     if (S.mp && S.phase === "play") {
       last = now;
       acc = 0;
+      if (S.mpPlayAt) alpha = Math.max(0, Math.min(1, ((Date.now() - S.mpPlayAt) / 1000 - S.lifeT) * 60));
     } else if (!(S.mp && S.phase === "count")) {
-      perfSample(now - last);
-      const dt = Math.min(0.1, (now - last) / 1000);
+      perfSample(frameMs);
+      const dt = Math.min(0.1, frameMs / 1000);
       last = now; acc += dt;
-      while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; }
+      while (acc >= 1 / 60) { lerpSnap(); step(1 / 60); acc -= 1 / 60; }
+      alpha = Math.max(0, Math.min(1, acc * 60));
     } else {
       last = now;
     }
-    hudAcc += 0.016;
+    hudAcc += Math.min(0.1, Math.max(0, frameMs / 1000));
     const ctx = fit();
-    if(S.phase==="defense" || (S.bcDefense && S.bcDefense.frozen && S.phase==="chance")) drawDefense(ctx); else draw(ctx);
+    if(S.phase==="defense" || (S.bcDefense && S.bcDefense.frozen && S.phase==="chance")) drawDefense(ctx);
+    else if (S.phase === "play" && S.bird && alpha < 1) {
+      lerpApply(alpha);
+      try { draw(ctx); } finally { lerpRestore(); }
+    } else draw(ctx);
     if(S.phase!=="defense") paintHeroPreview();
     if (hudAcc > 0.12) { renderHud(); hudAcc = 0; }
     requestAnimationFrame(loop);
