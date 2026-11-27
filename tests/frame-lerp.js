@@ -2,7 +2,7 @@
 "use strict";
 
 /*
- * mp253 render interpolation. draw() may see positions blended between the last two
+ * mp254 render interpolation. draw() may see positions blended between the last two
  * fixed steps, but the sim state must come back exactly as it was, so Ranked replays and
  * Versus stay step-for-step identical. Also checks the loop still uses a fixed 1/60 step.
  */

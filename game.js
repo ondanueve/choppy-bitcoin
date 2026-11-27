@@ -11914,7 +11914,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp253";
+      s.src = "halving.js?v=mp254";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13074,12 +13074,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp253";
+    return "share-card.js?v=mp254";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp253";
+    return "copy-result.js?v=mp254";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp253"; }
+  function dailyScriptSrc() { return "daily.js?v=mp254"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13137,7 +13137,7 @@
   const GHOST_DT = 0.2;
   const GHOST_CAP = 12000;
   let ghostRun = null;
-  function ghostScriptSrc() { return "ghost.js?v=mp253"; }
+  function ghostScriptSrc() { return "ghost.js?v=mp254"; }
   function ghostLive() {
     return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
   }
@@ -14344,7 +14344,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp253";
+      s.src = "mp.js?v=mp254";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);

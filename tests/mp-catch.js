@@ -32,7 +32,7 @@ const box = {
   now: 0,
   steps: [],
   snaps: 0,
-  // mp253: render interpolation records the pre-step positions; the sim itself is unchanged.
+  // mp254: render interpolation records the pre-step positions; the sim itself is unchanged.
   lerpSnap() { box.snaps++; },
   step(dt) {
     box.steps.push({ dt: dt, mpCatch: !!box.S.mpCatch, invuln: box.S.invuln });
