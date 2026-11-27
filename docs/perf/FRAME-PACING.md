@@ -1,6 +1,6 @@
-# Frame pacing (mp254)
+# Frame pacing (mp256)
 
-The owner reported that the game sometimes stutters and does not feel smooth. This note covers what was measured, what caused it, and what changed. Before = `origin/main` at `81402f3` (mp252; mp253 only swapped three card images). After = branch `perf/frame-pacing-mp253`, cache tag mp254.
+The owner reported that the game sometimes stutters and does not feel smooth. This note covers what was measured, what caused it, and what changed. Before = `origin/main` at `81402f3` (mp252; mp253–mp255 only swapped card art). After = branch `perf/frame-pacing-mp253`, cache tag mp256.
 
 ## Cause 1, the main one: fixed step drawn without interpolation
 
@@ -91,4 +91,4 @@ versus      144 Hz    | 1.68/1.68/1.68        41.7  | 0.18/0.18/0.36           0
 
 ## Screens
 
-`shots/mp254/`: Pixel 5, Spanish, CPU ×4, after the change: `qa-play.png`, `qa-swan.png` (black swan shake), `qa-halving.png`, `qa-perk.png`.
+`shots/mp256/`: Pixel 5, Spanish, CPU ×4, after the change: `qa-play.png`, `qa-swan.png` (black swan shake), `qa-halving.png`, `qa-perk.png`.

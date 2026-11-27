@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 // Frame-pacing model of game.js loop(): fixed 1/60 s sim step, drawn either from the latest step
-// (before mp254) or blended between the last two steps (mp254 render interpolation).
+// (before mp256) or blended between the last two steps (mp256 render interpolation).
 // A candle moves left at 173 px/s (base metrics().speed). For each display refresh rate we feed the
 // loop vsync timestamps with a little jitter, like a real phone, and compare the distance the candle
 // moved on screen in each frame with the distance it should have moved in that frame's real time.
