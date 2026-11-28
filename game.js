@@ -3344,7 +3344,7 @@
   };
 
   // Per-card cache bust for redrawn wide art, so one new image does not re-download every card.
-  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin20", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin36", anOffer: "cin24", protectIsland: "cin25", baby: "cin26", extensionCord: "cin27", landfill: "cin27", poker: "cin27", usedcar: "cin36", wedding: "cin28", citadelQuestion: "cin29", honeymoon: "cin36", phish: "cin29", firstBloc: "cin30", principality: "cin30", threeColors: "cin30", rearmament: "cin31", justInCase: "cin31", ortegaCalls: "cin31", pieceWorld: "cin31", tetris: "cin36", cabinet: "cin31", courage: "cin31", declaration: "cin31", date: "cin32", flu: "cin32", peopleAsking: "cin32", placeNow: "cin32", pregnancy: "cin32", ring: "cin32", roof: "cin32", paperwork: "cin33", potluck: "cin33", tow: "cin33", wine: "cin33", speeding: "cin34", uncle: "cin34", wallet: "cin34", casino: "cin35", cousin: "cin35", crash: "cin36", jobCareeraviationTier6: "cin36" };
+  const WIDE_JPG_VER = { unclemike: "cin15", islandInspection: "cin20", citadelProblem: "cin18", somethingBetter: "cin18", theQuestion: "cin18", fourthColor: "cin18", nicoWedding: "cin19", battleWon: "cin19", blocAssault: "cin19", blocReplies: "cin37", blocTriumph: "cin20", notYet: "cin20", nobodyKnows: "cin21", nothingToHide: "cin21", temporaryMeasures: "cin21", theAnswer: "cin21", timeTraveler: "cin22", stateVisit: "cin36", anOffer: "cin24", protectIsland: "cin25", baby: "cin26", extensionCord: "cin27", landfill: "cin27", poker: "cin27", usedcar: "cin36", wedding: "cin28", citadelQuestion: "cin29", honeymoon: "cin36", phish: "cin29", firstBloc: "cin30", principality: "cin30", threeColors: "cin30", rearmament: "cin31", justInCase: "cin31", ortegaCalls: "cin31", pieceWorld: "cin31", tetris: "cin36", cabinet: "cin31", courage: "cin31", declaration: "cin31", date: "cin32", flu: "cin32", peopleAsking: "cin32", placeNow: "cin32", pregnancy: "cin32", ring: "cin32", roof: "cin32", paperwork: "cin33", potluck: "cin33", tow: "cin33", wine: "cin33", speeding: "cin34", uncle: "cin34", wallet: "cin34", casino: "cin35", cousin: "cin35", crash: "cin36", jobCareeraviationTier6: "cin36" };
   const SQ_JPG_VER = { unclemike: "sq2" };
   const PRELOADED_ART = new Map();
   const MOBILE_ART = (() => { try { return matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 820; } catch (e) { return false; } })();
@@ -3500,7 +3500,7 @@
     "unclemike-a":"post8", "unclemike-b":"post10", "unclemike-c":"post10", "casino-win":"post9",
     "casino-lose":"post9", "casino-c":"post9", "poker-win":"post8", "poker-bust":"post7",
     "poker-c":"post7", "startup-win":"post7", "startup-lose":"post7", "cousin-win":"post9",
-    "cousin-lose":"post7", "usedcar-works":"post8", "usedcar-lemon":"post8", "stateVisit-a":"post8",
+    "cousin-lose":"post7", "usedcar-works":"post8", "usedcar-lemon":"post10", "stateVisit-a":"post8",
     "stateVisit-b":"post8", "extensionCord-a":"post7", "extensionCord-b":"post7", "landfill-nokia":"post7",
     "landfill-nothing":"post7", "landfill-c":"post8", "baby-a":"post7", "baby-c":"post7",
     "nicoWedding-a":"post7", "nicoWedding-c":"post7"
@@ -3571,7 +3571,7 @@
     const va = battleArtPick(card);
     if (va && base.indexOf("<img") === 0) {
       const m0 = base.match(/ src="([^"]*)"/);
-      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat15\" data-base=\"" + m0[1] + "\"")
+      if (m0) return base.replace(/ onerror="[^"]*"/, "").replace(m0[0], " src=\"chance/" + va + "-wide.jpg?v=bat16\" data-base=\"" + m0[1] + "\"")
         .replace("<img ", "<img onerror=\"window.__choppyBattleMiss&&window.__choppyBattleMiss('" + va + "');window.__choppyArtMiss&&window.__choppyArtMiss(this)\" ");
     }
     const aid = blocArtId(card);
@@ -11914,7 +11914,7 @@
     hvLoad = 1;
     try {
       const s = document.createElement("script");
-      s.src = "halving.js?v=mp257";
+      s.src = "halving.js?v=mp258";
       s.onload = function () {
         hvLoad = 0;
         try {
@@ -13074,12 +13074,12 @@
     return "<div class=\"awards\"><details class=\"aw-all\"><summary class=\"k\">" + (es ? "Premios" : "Awards") + " (" + n + "/" + shown.length + ")</summary>" + note + groups + "</details></div>";
   }
   function shareCardSrc() {
-    return "share-card.js?v=mp257";
+    return "share-card.js?v=mp258";
   }
   function copyResultSrc() {
-    return "copy-result.js?v=mp257";
+    return "copy-result.js?v=mp258";
   }
-  function dailyScriptSrc() { return "daily.js?v=mp257"; }
+  function dailyScriptSrc() { return "daily.js?v=mp258"; }
   function loadDaily(cb) {
     if (typeof choppyDailyReady === "function") { cb(); return; }
     if (!window.__choppyDailyLoad) window.__choppyDailyLoad = [];
@@ -13137,7 +13137,7 @@
   const GHOST_DT = 0.2;
   const GHOST_CAP = 12000;
   let ghostRun = null;
-  function ghostScriptSrc() { return "ghost.js?v=mp257"; }
+  function ghostScriptSrc() { return "ghost.js?v=mp258"; }
   function ghostLive() {
     return !!(S.ranked && S.daily && !S.mp && !S.testCheat && S.humanInput !== false && S.dailyDay === utcDayKey());
   }
@@ -14344,7 +14344,7 @@
     if (mpScript) return mpScript;
     mpScript = new Promise((resolve) => {
       const s = document.createElement("script");
-      s.src = "mp.js?v=mp257";
+      s.src = "mp.js?v=mp258";
       s.onload = () => {
         try { wireMp(); } catch (e) {}
         resolve(window.ChoppyMP || null);
